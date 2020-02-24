@@ -1,51 +1,56 @@
 <script context="module">
+  import { afterUpdate } from "svelte";
+  import config from "../config";
+  import { CacheKeys, SessionService } from "../services";
+  import Navigation from "../components/Navigation.svelte";
+  import Footer from "../components/Footer.svelte";
+  import User from "../models/user.js";
+
   export async function preload(page, session) {
-    const { data } = session;
-    if (page.path.replace(/\/login/gim, "").length !== 0) {
-      if (!data.user) {
-        return this.redirect(302, "/login");
-      }
+    if (!config.useLogin) {
+      session[CacheKeys.UserInfo] = config.testUser;
     }
+
+    const user = session[CacheKeys.UserInfo];
+    const rex = new RegExp(`\/${config.loginSegment}`, "gim");
+    const isNotLogin = page.path.replace(rex, "").length !== 0;
+
+    if (isNotLogin && config.useLogin && !user) {
+      return this.redirect(302, config.loginSegment);
+    }
+    return new Promise(resolve => resolve({ user }));
   }
 </script>
 
 <script>
-  import { onMount, onDestroy } from "svelte";
-  import Nav from "../components/Nav.svelte";
-  import services from "../services/index.mjs";
-  const sessionService = new services.sessionService();
-
   export let segment;
-  let user;
-  let sessionUnsubscribe;
+  export let user;
+  let userModel;
+  const sessionService = new SessionService();
 
-  onMount(async () => {
-    sessionService.subscribe(s => {
-      user = s.data.user;
-    });
+  afterUpdate(() => {
+    (function(_) {
+      _(function() {
+        _(document).ready(function() {
+          _("input[data-bootstrap-switch]").each(function() {
+            _(this).bootstrapSwitch("state", _(this).prop("checked"));
+          });
+        });
+      });
+    })(window.$);
   });
 
-  onDestroy(async () => {
-    sessionService.unsubscribe();
+  sessionService.subscribe(session => {
+    userModel = null;
+    if (session[CacheKeys.UserInfo]) {
+      user = session[CacheKeys.UserInfo];
+      userModel = new User(user);
+    }
   });
 </script>
 
-<style>
-  main {
-    position: relative;
-    max-width: 56em;
-    background-color: white;
-    padding: 2em;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-</style>
+<Navigation {segment} bind:user={userModel} />
 
-{#if user}
-  <div>User: {user.enc_key}</div>
-  <Nav {segment} />
-{/if}
+<slot />
 
-<main>
-  <slot />
-</main>
+<Footer {segment} bind:user={userModel} />

@@ -3,10 +3,10 @@
   import { responsabile, duration } from "../services/activities.service.js";
   import Activities from "../components/Activities.svelte";
   import {
-    welcomeToIssSpecialists,
-    complianceTopicsSpecialists,
-    iisApsSpecialists,
-    trainingsSpecialists
+    welcomeToIssManagers,
+    complianceTopicsManagers,
+    iisApsManagers,
+    trainingsManagers
   } from "../services/activities.service.js";
 
   const topics = {
@@ -61,12 +61,6 @@
         "Measure 1, Measure 2",
         duration.firstWeek,
         responsabile.ldSpecialist
-      ],
-      [
-        "Topic 3",
-        "Measure 1, Measure 2",
-        duration.firstWeek,
-        responsabile.ldSpecialist
       ]
     ],
     columnVals: [
@@ -79,11 +73,11 @@
 </script>
 
 <Activities
-  pageTitle="Onboarding Form Specialists"
-  mode="Specialists"
-  welcomeToIss={welcomeToIssSpecialists}
-  complianceTopics={complianceTopicsSpecialists}
-  iisAps={iisApsSpecialists}
-  trainings={trainingsSpecialists}
+  pageTitle="Onboarding Form Managers"
+  mode="Managers"
+  welcomeToIss={welcomeToIssManagers}
+  complianceTopics={complianceTopicsManagers}
+  iisAps={iisApsManagers}
+  trainings={trainingsManagers}
   {topics}
   {subjects} />
