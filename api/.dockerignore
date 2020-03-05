@@ -1,0 +1,6 @@
+node_modules
+npm-debug.log
+*.ps1
+Dockerfile
+.vscode
+src

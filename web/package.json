@@ -6,8 +6,8 @@
     "dev": "sapper dev",
     "build": "sapper build --legacy && copy \".\\server.package.json\" \".\\__sapper__\\build\\package.json\" /Y && npm install --cwd __sapper__/build --prefix __sapper__/build",
     "export": "sapper export --legacy",
-    "start": "set PORT=23456 && node __sapper__/build",
-    "build-and-start": "npm run build && npm run start",
+    "start": "set PORT=4123 && node __sapper__/build",
+    "serv": "npm run build && npm run start",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "run-p --race dev cy:run"

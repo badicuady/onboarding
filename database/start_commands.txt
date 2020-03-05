@@ -1,0 +1,24 @@
+#pull latest postgresql image
+docker pull postgres:alpine
+
+#create a volume to store the data; on windows we can't make a volume maped directly to a windows folder
+docker volume create --driver local --name onboarding-volume
+
+#start the container
+docker run --rm  `
+	--name  onboarding-database `
+	-e POSTGRES_PASSWORD=docker `
+	-d `
+	-p 5432:5432 `
+	--mount source=onboarding-volume,target=/var/lib/postgresql/data `
+	postgres
+
+#same as above, single line	
+docker run --rm  --name  onboarding-database -e POSTGRES_PASSWORD=docker -d -p 5432:5432 --mount source=onboarding-volume,target=/var/lib/postgresql/data postgres:alpine
+
+#copy data from volume
+docker container create --name dummy -v onboarding-volume:/root alpine
+#copy from container [dummy] root folder to local path on windows
+docker cp dummy:/root d:\Workspaces\onboarding\database\
+#remove container
+docker rm dummy
