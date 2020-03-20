@@ -5,7 +5,7 @@
   import Review from "../components/Review.svelte";
   import { CacheService, CacheKeys } from "../services";
 
-  let userInfo;
+  let userInfo = {};
   CacheService.subscribe(cache => {
 	userInfo = cache.get(CacheKeys.UserInfo);
   });

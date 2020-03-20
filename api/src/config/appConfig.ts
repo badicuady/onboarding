@@ -1,5 +1,4 @@
-import { app, argv, fastify } from "./index";
-import fastifyCors from 'fastify-cors';
+import { app, argv } from "./index";
 
 class AppConfig {
   static swaggerConfig() {
@@ -26,7 +25,7 @@ class AppConfig {
         securityDefinitions: {
           oauth: {
             type: "oauth2",
-            authorizationUrl: `http://web.onboarding.com:4123/login`,
+            authorizationUrl: app[argv.env].AUTH_LINK,
             flow: "implicit"
           }
         }

@@ -1,7 +1,8 @@
 <script context="module">
   import { afterUpdate } from "svelte";
   import config from "../config";
-  import { CacheKeys, SessionService } from "../services";
+  import { CacheKeys, SessionService, CacheService } from "../services";
+  import Utilities from "../common/utilities.js";
   import Navigation from "../components/Navigation.svelte";
   import Footer from "../components/Footer.svelte";
   import Loading from "../components/Loading.svelte";
@@ -46,6 +47,7 @@
     if (session[CacheKeys.UserInfo]) {
 	  user = session[CacheKeys.UserInfo];
 	  userModel = new User(user);
+	  CacheService.setOrUpdateValue(CacheKeys.UserInfo, user, new Date(Date.now() + 3600 * 1000));
     }
   });
 </script>

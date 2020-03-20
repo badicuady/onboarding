@@ -1,5 +1,5 @@
 import { ServerResponse } from "http";
-import { RouteOptions, FastifyRequest, FastifyReply, FastifyRequestExt, Token } from "fastify";
+import { RouteOptions, FastifyReply, FastifyRequestExt } from "fastify";
 import GenericController from "./genericController";
 
 class TestController extends GenericController {
@@ -48,21 +48,28 @@ const TestControllerRoutes: RouteOptions[] = [
         "200": {
           type: "object",
           properties: {
-            test: { type: "string" }
+            test: { type: "string" },
+            user: {
+              type: "object",
+              minProperties: 1,
+              properties: {
+                employeeID: { type: "number" },
+                mail: { type: "string", format: "email" }
+              },
+              additionalProperties: true
+            }
           }
         },
         "4xx": {
           type: "string"
         }
       },
-      security: [{
-          oauth: []
-        }]
+      security: [{ oauth: [] }]
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const test = await testController.testing();
-      reply.send(test);
+      reply.send({ ...test, user: request.user.payload });
     }
   }
 ];

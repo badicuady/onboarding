@@ -1,5 +1,6 @@
+import { ServerResponse } from "http";
 import ActiveDirectoryAuthentication from "../core/authentication/ad";
-import { FastifyRequestExt } from "fastify";
+import { FastifyRequestExt, FastifyReply } from "fastify";
 
 class GenericController {
   protected test: string;
@@ -21,8 +22,12 @@ class GenericController {
     }
   }
 
-  public static async authentication(request: FastifyRequestExt) {
-    request.user = GenericController.validate(request.headers);
+  public static async authentication(request: FastifyRequestExt, response: FastifyReply<ServerResponse>) {
+	try {
+	  request.user = GenericController.validate(request.headers);
+	} catch (err) {
+	  response.status(401).send(err);
+	}
   }
 }
 

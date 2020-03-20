@@ -27,11 +27,6 @@
     Utilities.debugVariable({ loginParams });
   });
 
-  const createObject = (keyName, value) =>
-    ObjectCreator.createObjectProperty({}, keyName, DefinitionType.A, {
-      ...value
-    });
-
   const adjustUser = user => {
     if (user && user.manager) {
       user.manager = user.manager

@@ -30,9 +30,7 @@ class AuthController extends GenericController {
         error: err
       };
     }
-  }
-
-  
+  }  
 }
 
 const authController = new AuthController();
@@ -43,7 +41,7 @@ const AuthControllerRoutes: RouteOptions[] = [
     method: "POST",
     url: "/token",
     schema: {
-      //hide: true, // hide it from swagger
+      hide: true, // hide it from swagger
       body: {
         type: "object",
         properties: {
@@ -80,7 +78,7 @@ const AuthControllerRoutes: RouteOptions[] = [
     method: "GET",
     url: "/userinfo",
     schema: {
-      //hide: true // hide it from swagger,
+      hide: true, // hide it from swagger
       response: {
         "200": {
           type: "object",

@@ -62,11 +62,7 @@ const UsersControllerRoutes: RouteOptions[] = [
           type: "string"
         }
       },
-      security: [
-        {
-          oauth: []
-        }
-      ]
+      security: [{ oauth: [] }]
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
@@ -92,11 +88,7 @@ const UsersControllerRoutes: RouteOptions[] = [
           type: "string"
         }
       },
-      security: [
-        {
-          oauth: []
-        }
-      ]
+      security: [{ oauth: [] }]
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
@@ -117,11 +109,7 @@ const UsersControllerRoutes: RouteOptions[] = [
           type: "string"
         }
       },
-      security: [
-        {
-          oauth: []
-        }
-      ]
+      security: [{ oauth: [] }]
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {

@@ -58,7 +58,7 @@ export const app: IAppConfig = {
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGOTITHM: "sha512",
     CRYPTO_SECRET: "123456",
-    AUTH_LINK: "http://intranet2.ro.eu.ipsos/adconfirmit/ADService.asmx",
+    AUTH_LINK: "http://web.onboarding.com:4123/login",
     db: {
       DB_SERVER: "localhost",
       DB_PORT: 5432,
@@ -86,7 +86,7 @@ export const app: IAppConfig = {
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGOTITHM: "sha512",
     CRYPTO_SECRET: "123456",
-    AUTH_LINK: "http://intranet2.ro.eu.ipsos/adconfirmit/ADService.asmx",
+    AUTH_LINK: "http://web.onboarding.com:4123/login",
     db: {
       DB_SERVER: "postgres",
       DB_PORT: 5432,

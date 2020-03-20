@@ -8,12 +8,8 @@
   export let user;
   const sessionService = new SessionService();
 
-  const createObject = (keyName, value) =>
-    ObjectCreator.createObjectProperty({}, keyName, DefinitionType.A, {
-      ...value
-    });
   const logout = async () => {
-    const userInfoObj = createObject(CacheKeys.UserInfo, null);
+    const userInfoObj = ObjectCreator.createObjectProperty({}, CacheKeys.UserInfo, DefinitionType.A, null);
     await sessionService.update(userInfoObj);
     goto(config.loginSegment);
   };
