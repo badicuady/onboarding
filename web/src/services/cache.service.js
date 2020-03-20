@@ -83,5 +83,7 @@ export default createCacheStore();
 export const CacheKeys = {
 	Data: "sessionData",
 	UserData: "userData",
-	UserInfo: "userInfo"
+	UserInfo: "userInfo",
+	Token: "token",
+	AdminService: "adminService"
 };

@@ -1,21 +1,38 @@
 import { ServerResponse } from "http";
-import { FastifyReply, FastifyRequest, RouteOptions } from "fastify";
+import { FastifyReply, FastifyRequest, RouteOptions, FastifyRequestExt } from "fastify";
 import axios from "axios";
 
 import ActiveDirectoryAuthentication from "../core/authentication/ad";
 import GenericController from "./genericController";
 import { app, argv } from "../config";
 
+type TokenPasswordFlowResponse = {
+  access_token?: string;
+  expires_in?: number;
+  error?: Error;
+};
+
 class AuthController extends GenericController {
   constructor() {
     super();
   }
 
-  async token(userName: string, password: string, domain: string): Promise<string> {
-    const adAuth = new ActiveDirectoryAuthentication(userName, password, domain);
-    const result = await adAuth.authenticate();
-    return JSON.stringify(result);
+  async token(userName: string, password: string): Promise<TokenPasswordFlowResponse> {
+    const adAuth = new ActiveDirectoryAuthentication(userName, password);
+    try {
+      const result = await adAuth.authenticate();
+      return {
+        access_token: result || "",
+        expires_in: 24 * 3600
+      };
+    } catch (err) {
+      return {
+        error: err
+      };
+    }
   }
+
+  
 }
 
 const authController = new AuthController();
@@ -26,15 +43,24 @@ const AuthControllerRoutes: RouteOptions[] = [
     method: "POST",
     url: "/token",
     schema: {
-      hide: true, // hide it from swagger
+      //hide: true, // hide it from swagger
       body: {
-        userName: { type: "string" },
-        password: { type: "string" },
-        domain: { type: "string" }
+        type: "object",
+        properties: {
+          grant_type: { const: "password" },
+          username: { type: "string", format: "email" },
+          password: { type: "string" },
+          client_id: { type: "string" }
+        }
       },
       response: {
         "200": {
-          type: "string"
+          type: "object",
+          properties: {
+            access_token: { type: "string" },
+            expires_in: { type: "number" },
+            error: { type: "object" }
+          }
         },
         "4xx": {
           type: "string"
@@ -42,32 +68,37 @@ const AuthControllerRoutes: RouteOptions[] = [
       }
     },
     handler: async (request: FastifyRequest, reply: FastifyReply<ServerResponse>) => {
-      const token = await authController.token(request.body.userName, request.body.password, request.body.domain);
+      if (request.body.grant_type !== "password") {
+        throw Error(`Invalid grant type: ${request.body.grant_type}. Must be [password]!`);
+      }
+	  const token = await authController.token(request.body.username, request.body.password);
       reply.send(token);
     }
   },
   // callback
   {
     method: "GET",
-    url: "/callback",
+    url: "/userinfo",
     schema: {
-      hide: true // hide it from swagger
-    },
-    handler: async (request: FastifyRequest, reply: FastifyReply<ServerResponse>) => {
-      const response = await axios.request({
-        baseURL: "https://api.sample.ipsos.com/",
-        method: "get",
-        url: "/admin/UserInfo/a",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${request.query.access_token}`
+      //hide: true // hide it from swagger,
+      response: {
+        "200": {
+          type: "object",
+          minProperties: 1,
+          properties: {
+            employeeID: { type: "number" },
+            mail: { type: "string", format: "email" }
+          },
+          additionalProperties: true
+        },
+        "4xx": {
+          type: "string"
         }
-	  });
-	  const token = ActiveDirectoryAuthentication._jwtService.sign(response.data, ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject());
-	  const redirect:string = `${app[argv.env].SERVER_PROTOCOL}://${app[argv.env].SERVER_HOST}:${app[argv.env].SERVER_PORT.toString()}`+
-	  	"/swagger/static/oauth2-redirect.html" +
-	  	`?access_token=${encodeURIComponent(token)}`
-	  reply.redirect(redirect);
+      }
+	},
+	preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      reply.send(request.user);
     }
   }
 ];

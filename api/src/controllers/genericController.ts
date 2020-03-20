@@ -10,7 +10,7 @@ class GenericController {
 
   public static validate(headers: any) {
     if (!headers || !headers.authorization) {
-      throw new Error("This is call needs authorization. Please provide the «Authorization» header!");
+      throw new Error("This is call needs authorization. Please provide the [Authorization] header!");
     }
     const token = headers.authorization.replace("Bearer ", "");
     try {
@@ -22,7 +22,7 @@ class GenericController {
   }
 
   public static async authentication(request: FastifyRequestExt) {
-    request.token = GenericController.validate(request.headers);
+    request.user = GenericController.validate(request.headers);
   }
 }
 

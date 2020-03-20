@@ -3,27 +3,39 @@ import { Model, DataTypes, CreateOptions, ModelAttributes, InitOptions } from "s
 
 import { app, argv } from "../config";
 import GenericMapping from "./genericMapping";
-import { UserRole } from "../models/userModel";
+import { UserRole, IUserModel } from "../models/userModel";
 
-class User extends Model {
-  id!: number;
-  firstName!: string;
-  lastName!: string;
-  role: UserRole = UserRole.Employee;
-  userName!: string;
-  password!: string;
-  domain!: string;
-  hash!: string;
-
-  generateHash(val: string | NodeJS.ArrayBufferView) {
-    return crypto
-      .createHmac(app[argv.env].CRYPTO_ALGOTITHM, app[argv.env].CRYPTO_SECRET)
-      .update(val)
-      .digest("hex");
-  }
+interface IUser extends Model {
+	id: number;
+    firstName: string;
+    lastName: string;
+    role: UserRole;
+    userName: string;
+    password: string;
+    domain: string;
+    hash: string;
+    generateHash(val: string | NodeJS.ArrayBufferView): string;
 }
 
 class UserMapping extends GenericMapping {
+  private static User = class extends Model implements IUser {
+    id!: number;
+    firstName!: string;
+    lastName!: string;
+    role: UserRole = UserRole.Employee;
+    userName!: string;
+    password!: string;
+    domain!: string;
+    hash!: string;
+
+    generateHash(val: string | NodeJS.ArrayBufferView) {
+      return crypto
+        .createHmac(app[argv.env].CRYPTO_ALGOTITHM, app[argv.env].CRYPTO_SECRET)
+        .update(val)
+        .digest("hex");
+    }
+  };
+
   constructor() {
     super();
   }
@@ -82,25 +94,25 @@ class UserMapping extends GenericMapping {
       }
     };
 
-    User.init(modelAttributes, modelOptions);
+    UserMapping.User.init(modelAttributes, modelOptions);
   }
 
   async sync(force: boolean = true) {
-    return await User.sync({ force });
+    return await UserMapping.User.sync({ force });
   }
 
-  async create(userModel: any) {
+  async create(userModel: IUserModel) {
     const searchUser = await this._findUser(userModel);
     if (searchUser) {
       throw new Error(`User «${userModel.userName}» allready exists!`);
     }
-    return await User.create(userModel);
+    return await UserMapping.User.create(userModel);
   }
 
   async list(offset: number, limit: number) {
     offset = offset || 0;
     limit = limit || 10;
-    return await User.findAll({ offset, limit });
+    return await UserMapping.User.findAll({ offset, limit });
   }
 
   async find(model: any) {
@@ -108,10 +120,10 @@ class UserMapping extends GenericMapping {
   }
 
   private async _findUser(model: any) {
-    return await User.findOne({ where: { userName: model.userName } });
+    return await UserMapping.User.findOne({ where: { userName: model.userName } });
   }
 
-  private _updateHash(attributes: User, _: CreateOptions) {
+  private _updateHash(attributes: IUser, _: CreateOptions) {
     if (attributes.changed("password")) {
       attributes.hash = attributes.generateHash(attributes.password);
     }

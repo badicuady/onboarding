@@ -4,6 +4,7 @@
   import { CacheKeys, SessionService } from "../services";
   import Navigation from "../components/Navigation.svelte";
   import Footer from "../components/Footer.svelte";
+  import Loading from "../components/Loading.svelte";
   import User from "../models/user.js";
 
   export async function preload(page, session) {
@@ -29,11 +30,11 @@
   const sessionService = new SessionService();
 
   afterUpdate(() => {
-    (function(_) {
-      _(function() {
-        _(document).ready(function() {
-          _("input[data-bootstrap-switch]").each(function() {
-            _(this).bootstrapSwitch("state", _(this).prop("checked"));
+    (function($) {
+      $(function() {
+        $(document).ready(function() {
+          $("input[data-bootstrap-switch]").each(function() {
+            $(this).bootstrapSwitch("state", $(this).prop("checked"));
           });
         });
       });
@@ -43,11 +44,13 @@
   sessionService.subscribe(session => {
     userModel = null;
     if (session[CacheKeys.UserInfo]) {
-      user = session[CacheKeys.UserInfo];
-      userModel = new User(user);
+	  user = session[CacheKeys.UserInfo];
+	  userModel = new User(user);
     }
   });
 </script>
+
+<Loading />
 
 <Navigation {segment} bind:user={userModel} />
 

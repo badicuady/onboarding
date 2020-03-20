@@ -4,7 +4,7 @@
   $: seg = segment || "home";
 </script>
 
-{#if user && user.fullName}
+{#if user && user.displayName && segment !== "login"}
   <footer class="main-footer">
     <div class="container">
       <div class="row">

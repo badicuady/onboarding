@@ -1,4 +1,5 @@
-import soap from "soap";
+import { ActiveDirectory } from "node-ad-tools";
+import { SignOptions } from "jsonwebtoken";
 
 import { app, argv } from "../../config";
 import Authentication from "./auth";
@@ -6,31 +7,52 @@ import JwtService from "../services/jwtService";
 import JwtOptionsModel from "../../models/jwt/jwtOptionsModel";
 
 class ActiveDirectoryAuthentication extends Authentication {
-  private _soapClient!: soap.Client;
+  private readonly allowedAttributes: string[] = [
+    "title",
+    "description",
+    "postalCode",
+    "physicalDeliveryOfficeName",
+    "telephoneNumber",
+    "givenName",
+    "displayName",
+    "co",
+    "department",
+    "company",
+    "streetAddress",
+    "directReports",
+    "employeeID",
+    "userPrincipalName",
+    "mail",
+    "manager",
+    "mailNickname"
+  ];
 
-  constructor(userName: string, password: string, domain: string) {
+  private _adClient!: ActiveDirectory;
+
+  constructor(userName: string, password: string, domain?: string) {
     super(userName, password, domain);
-  }
-
-  async generateSoapClient() {
-    if (!this._soapClient) {
-      this._soapClient = await soap.createClientAsync(`${app[argv.env].AUTH_LINK}?WSDL`);
-    }
+    this._adClient = new ActiveDirectory({
+      url: app[argv.env].ad.AD_URL,
+      base: app[argv.env].ad.AD_BASE
+    });
   }
 
   async authenticate() {
-    await this.generateSoapClient();
-    const params = { domain: this.domain, userName: this.userName, password: this.password };
-    const result = await this._soapClient.AuthenticateWindowsUserAsync(params);
-	return result.length > 0 
-		? ActiveDirectoryAuthentication._jwtService.sign(result[0].AuthenticateWindowsUserResult, ActiveDirectoryAuthentication._jwtOptionsModel) 
+	const userResource = await this._adClient.loginUser(this.userName, this.password);
+	const user = ActiveDirectory.createUserObj(userResource.entry);
+	const props = this.allowedAttributes.reduce(
+		(obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }), 
+		{});
+	const userModel = {...user, ...props};
+	return userModel 
+		? ActiveDirectoryAuthentication._jwtService.sign(userModel, ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject())
 		: null;
   }
 
   static _jwtService = new JwtService();
 
   static _jwtOptionsModel = new JwtOptionsModel(
-	app[argv.env].jwt.JWT_ALGORITHM,
+    app[argv.env].jwt.JWT_ALGORITHM,
     app[argv.env].jwt.JWT_ISSUER,
     app[argv.env].jwt.JWT_SUBJECT,
     app[argv.env].jwt.JWT_AUDIENCE,

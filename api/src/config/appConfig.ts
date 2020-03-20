@@ -1,4 +1,5 @@
-import { app, argv } from "./index";
+import { app, argv, fastify } from "./index";
+import fastifyCors from 'fastify-cors';
 
 class AppConfig {
   static swaggerConfig() {
@@ -25,7 +26,7 @@ class AppConfig {
         securityDefinitions: {
           oauth: {
             type: "oauth2",
-            authorizationUrl: `http://${app[argv.env].SERVER_HOST}:${app[argv.env].SERVER_PORT}/login`,
+            authorizationUrl: `http://web.onboarding.com:4123/login`,
             flow: "implicit"
           }
         }
@@ -34,25 +35,11 @@ class AppConfig {
     };
   }
 
-  static oauth2Config(host: string, port: string, protocol: string) {
-    return {
-      name: "ipsosOauth2",
-      credentials: {
-        client: {
-          id: "unique_id_for_app",
-          secret: "unique_secret_for_app"
-        },
-        auth: {
-          authorizeHost: "https://sample.ipsos.com",
-          authorizePath: "/#/login",
-          tokenHost: "https://api.sample.ipsos.com",
-          tokenPath: "/token"
-        }
-      },
-	  startRedirectPath: "/login",
-	  // callbackUri: `${protocol || "http"}://${host || "localhost"}:${port || "3000"}/swagger/static/oauth2-redirect.html`
-	  callbackUri: `${protocol || "http"}://${host || "localhost"}:${port || "3000"}/callback`
-    };
+  static corsConfig() {
+	  return {
+		"origin": "*",
+		"methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+	  }
   }
 }
 

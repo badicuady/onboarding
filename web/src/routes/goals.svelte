@@ -3,6 +3,12 @@
   import { OpenTableItemType } from "../models/enums.js";
   import OpenActivitiesTable from "../components/OpenActivitiesTable.svelte";
   import Review from "../components/Review.svelte";
+  import { CacheService, CacheKeys } from "../services";
+
+  let userInfo;
+  CacheService.subscribe(cache => {
+	userInfo = cache.get(CacheKeys.UserInfo);
+  });
 
   const objectives = {
     columns: [
@@ -96,8 +102,16 @@
 <Layout>
   <div slot="content-header" class="container">
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <h1 class="m-0 text-dark">Probationary period plan</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="#">golas</a>
+          </li>
+          <li class="breadcrumb-item active">Onboarding Form</li>
+        </ol>
       </div>
     </div>
   </div>
@@ -134,7 +148,8 @@
                           name="employee-name"
                           type="text"
                           class="form-control"
-                          readonly />
+                          readonly
+						  value={userInfo.name} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -147,7 +162,8 @@
                           name="job-title"
                           type="text"
                           class="form-control"
-                          readonly />
+                          readonly
+						  value={userInfo.title} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -160,7 +176,8 @@
                           name="line-manager"
                           type="text"
                           class="form-control"
-                          readonly />
+                          readonly
+						  value={userInfo.manager} />
                       </div>
                     </div>
                   </div>
@@ -189,7 +206,8 @@
                           name="department"
                           type="text"
                           class="form-control"
-                          readonly />
+                          readonly
+						  value={userInfo.department} />
                       </div>
                     </div>
                   </div>

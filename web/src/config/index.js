@@ -17,7 +17,7 @@ const milliseconds = {
 };
 
 const config = {
-  useLogin: false,
+  useLogin: true,
   testUser: {
     companyId: "OTX",
     employeeId: "ABadicu",
@@ -72,8 +72,13 @@ const config = {
     ],
     impersonatorUserId: 0
   },
+  clientId: "onboarding-web-app", 
   baseUrl: `http://web.onboarding.com:${port}`,
   sessionSaveUrl: "/utils/session",
+  apiBaseUrl: "http://api.onboarding.com:3123",
+  apiTokenResource: "token",
+  apiUserInfoResource: "userinfo",  
+
   loginSegment: "login",
   loginPage: "https://sampleoneqa.ipsos.com/#/login",
   loginRedirect: "/auth.html",
@@ -82,8 +87,8 @@ const config = {
     realm: "onboarding-realm",
     client_id: "onboarding-web-api-client"
   },
-  adminApiBase: "https://cortexapi5qa.ipsos.com/admin",
-  apiUserInfo: "/UserInfo",
+  defaultEmailDomain: "@ipsos.com",  
+  
   milliseconds,
   timeSpans: {
     sec: () => new Date(Date.now() + milliseconds.sec),

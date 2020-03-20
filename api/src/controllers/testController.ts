@@ -34,7 +34,6 @@ const TestControllerRoutes: RouteOptions[] = [
         }
       }
     },
-	preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const test = await testController.testing();
       reply.send(test);
@@ -56,11 +55,9 @@ const TestControllerRoutes: RouteOptions[] = [
           type: "string"
         }
       },
-      security: [
-        {
+      security: [{
           oauth: []
-        }
-      ]
+        }]
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {

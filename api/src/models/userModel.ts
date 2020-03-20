@@ -8,7 +8,7 @@ export enum UserRole {
 }
 
 export interface IUserModel {
-  firstName: string;
+  firstName?: string;
   lastName?: string;
   userName?: string;
   domain?: string;
@@ -16,7 +16,7 @@ export interface IUserModel {
   role?: UserRole;
 }
 
-export default class UserModel extends GenericModel {
+export default class UserModel extends GenericModel implements IUserModel {
   private _firstName: string = "";
   private _lastName: string = "";
   private _userName: string = "";
@@ -76,7 +76,7 @@ export default class UserModel extends GenericModel {
     if (!this._validate(model)) {
       throw new Error(`The model is not valid: «${model}»`);
     }
-    this._firstName = model.firstName;
+    this._firstName = model.firstName || "";
     this._lastName = model.lastName || "";
     this._userName = model.userName || "";
     this._domain = model.domain || "";

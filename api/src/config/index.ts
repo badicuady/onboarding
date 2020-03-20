@@ -30,6 +30,11 @@ export interface IJWTConfig {
   JWT_ALGORITHM: jwt.Algorithm;
 }
 
+export interface IADConfig {
+	AD_URL:string;
+	AD_BASE: string;
+}
+
 export interface IAppConfigItem {
   SERVER_HOST: string;
   SERVER_PORT: number;
@@ -39,10 +44,11 @@ export interface IAppConfigItem {
   AUTH_LINK: string;
   db: IDBConfig;
   jwt: IJWTConfig;
+  ad: IADConfig;
 }
 
 export interface IAppConfig {
-  [index: string]: IAppConfigItem;
+	[index: string]: IAppConfigItem;
 }
 
 export const app: IAppConfig = {
@@ -68,7 +74,11 @@ export const app: IAppConfig = {
       JWT_AUDIENCE: "HR",
       JWT_EXPIRESIN: "1h",
       JWT_ALGORITHM: "RS256"
-    }
+	},
+	ad: {
+		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
+    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
+	}
   },
   docker: {
     SERVER_HOST: "localhost",
@@ -92,7 +102,11 @@ export const app: IAppConfig = {
       JWT_AUDIENCE: "HR",
       JWT_EXPIRESIN: "1h",
       JWT_ALGORITHM: "RS256"
-    }
+    },
+	ad: {
+		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
+    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
+	}
   }
 };
 

@@ -3,7 +3,7 @@
   "description": "Onboarding Web App",
   "version": "0.0.1",
   "scripts": {
-    "dev": "sapper dev",
+    "dev": "set PORT=4123 && sapper dev",
     "build": "sapper build --legacy && copy \".\\server.package.json\" \".\\__sapper__\\build\\package.json\" /Y && npm install --cwd __sapper__/build --prefix __sapper__/build",
     "export": "sapper export --legacy",
     "start": "set PORT=4123 && node __sapper__/build",

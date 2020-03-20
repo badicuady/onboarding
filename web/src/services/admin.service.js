@@ -4,16 +4,16 @@ import config from "../config";
 class AdminService {
 	constructor(authorization) {
 		this.authorization = authorization;
+		this.config = {
+			headers: {
+				"Authorization": `Bearer ${this.authorization}`
+			}
+		};
 	}
 
 	async info() {
 		try {
-			const callConfig = {
-				headers: {
-					"Authorization": `Bearer ${this.authorization}`
-				}
-			};
-			const response = await axios.get(`${config.adminApiBase}${config.apiUserInfo}/a`, callConfig);
+			const response = await axios.get(`${config.apiBaseUrl}/${config.apiUserInfoResource}`, this.config);
 			return response;
 		} catch (error) {
 			console.error(error);

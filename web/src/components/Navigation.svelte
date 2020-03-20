@@ -19,7 +19,7 @@
   };
 </script>
 
-{#if user && user.fullName}
+{#if user && user.displayName && segment !== 'login'}
   <nav
     class="main-header navbar navbar-expand-md navbar-light navbar-white
     sticky-top">
@@ -112,21 +112,15 @@
             <i class="fas fa-th-large" />
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <a href="#" class="dropdown-item">
-              <!-- Message Start -->
-              <div class="media">
-                <img
-                  src={user.employeeDirectoryLink}
-                  alt="User Avatar"
-                  class="img-size-50 mr-3 img-circle" />
-                <div class="media-body">
-                  <h3 class="dropdown-item-title">{user.fullName}</h3>
-                  <p class="text-sm">{user.email}</p>
-                  <p class="text-sm text-muted">{user.departmentName}</p>
-                </div>
+            <!-- Message Start -->
+            <div class="media px-3 py-2">
+              <div class="media-body">
+                <h3 class="dropdown-item-title">{user.displayName}</h3>
+                <p class="text-sm">{user.mail}</p>
+                <p class="text-sm text-muted">{user.department}</p>
               </div>
-              <!-- Message End -->
-            </a>
+            </div>
+            <!-- Message End -->
             <div class="dropdown-divider" />
             <a
               href="#"
