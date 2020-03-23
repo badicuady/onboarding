@@ -1,23 +1,27 @@
-import Extensions from "../core/utils/extensions";
+import Extensions from "../core/common/extensions";
 
-class GenericModel {
+export interface IGenericModel {
+  toPlainObject(): any;
+  setup(model: any): void;
+  validate(model: any): boolean;
+}
+
+abstract class GenericModel implements IGenericModel {
   toPlainObject() {
     return Extensions.toPlainObject(this);
   }
 
-  _setup(model: any) {
-    throw new Error("Override method «_setup»!");
-  }
+  abstract setup(model: any): void;
 
-  _validate(model: any) {
+  validate(model: any): boolean {
     if (!model) {
       throw new Error("The model must not be null");
     }
     const modelKeys = Object.keys(model);
     const proto = Object.getPrototypeOf(this);
     return modelKeys.reduce((result, key) => {
-      const descr = Object.getOwnPropertyDescriptor(proto, key);
-      const existence = descr && (typeof descr.get === "function" || typeof descr.set === "function");
+      const description = Object.getOwnPropertyDescriptor(proto, key);
+      const existence = description && (typeof description.get === "function" || typeof description.set === "function");
       if (!existence) {
         throw new Error(`The model does not contain key: «${key}»!`);
       }

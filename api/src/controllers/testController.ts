@@ -41,7 +41,7 @@ const TestControllerRoutes: RouteOptions[] = [
   },
   {
     method: "GET",
-    url: "/api/testauth",
+    url: "/api/test/auth",
     schema: {
       tags: ["test"],
       response: {
@@ -75,3 +75,4 @@ const TestControllerRoutes: RouteOptions[] = [
 ];
 
 export default TestControllerRoutes;
+export { testController as TestController };

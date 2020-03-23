@@ -11,23 +11,37 @@ export interface IUserModel {
   firstName?: string;
   lastName?: string;
   userName?: string;
-  domain?: string;
-  password?: string;
-  role?: UserRole;
+  domain?: string | null;
+  password?: string | null;
+  role?: number;
+}
+
+export interface IActiveDirectoryUserModel {
+  name?: string;
+  givenName?: string;
+  mailNickname?: string;
 }
 
 export default class UserModel extends GenericModel implements IUserModel {
+  //private static _privateFields: WeakMap<any, any> = new WeakMap();
+
   private _firstName: string = "";
   private _lastName: string = "";
   private _userName: string = "";
-  private _domain: string = "";
-  private _password: string = "";
+  private _domain: string | null = "";
+  private _password: string | null = "";
   private _role: UserRole = UserRole.Employee;
 
-  constructor(firstName: string | IUserModel, lastName?: string, userName?: string, password?: string, domain?: string, role?: UserRole) {
+  constructor(userModel: IUserModel | IActiveDirectoryUserModel) {
     super();
-    const model: IUserModel = typeof firstName === "object" ? firstName : { firstName, lastName, userName, password, domain, role };
-    this._setup(model);
+
+    if (userModel && (<IActiveDirectoryUserModel>userModel).givenName) {
+      this._setupActiveDirectoryModel(<IActiveDirectoryUserModel>userModel);
+    }
+
+    if (userModel && (<IUserModel>userModel).firstName) {
+      this.setup(<IUserModel>userModel);
+    }
   }
 
   get firstName() {
@@ -72,8 +86,17 @@ export default class UserModel extends GenericModel implements IUserModel {
     this._role = role;
   }
 
-  _setup(model: IUserModel) {
-    if (!this._validate(model)) {
+  _setupActiveDirectoryModel(model: IActiveDirectoryUserModel) {
+    this._firstName = model.givenName || "";
+    this._lastName = model.name?.replace(model?.givenName || "", "").trim() || "";
+    this._userName = model.mailNickname || "";
+    this._domain = null;
+    this._password = null;
+    this._role = UserRole.Employee;
+  }
+
+  setup(model: IUserModel) {
+    if (!this.validate(model)) {
       throw new Error(`The model is not valid: «${model}»`);
     }
     this._firstName = model.firstName || "";

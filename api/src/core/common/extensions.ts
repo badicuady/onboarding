@@ -1,4 +1,5 @@
-import Flatted from 'flatted';
+import Flatted from "flatted";
+import { Utilities } from "./utilities";
 
 class Extensions {
   static toQueryUri(obj: { [ndx: string]: string }): string {
@@ -7,9 +8,9 @@ class Extensions {
       .join("&");
   }
 
-static toSimplePlainObject(obj: any) {
-	return Flatted.parse(Flatted.stringify(obj));
-}
+  static toSimplePlainObject(obj: any) {
+    return Flatted.parse(Flatted.stringify(obj));
+  }
 
   static toPlainObject(obj: any) {
     if (typeof obj === "object") {
@@ -17,9 +18,9 @@ static toSimplePlainObject(obj: any) {
       const proto = Object.getPrototypeOf(obj);
       const props = Object.getOwnPropertyNames(proto);
       props.forEach(key => {
-        const descr = Object.getOwnPropertyDescriptor(proto, key);
-        if (descr && typeof descr.get === "function") {
-          const value = descr.get.apply(obj);
+        const description = Object.getOwnPropertyDescriptor(proto, key);
+        if (description && typeof description.get === "function") {
+          const value = description.get.apply(obj);
           if (value) {
             plainObject[key] = value;
           }
@@ -28,6 +29,10 @@ static toSimplePlainObject(obj: any) {
       return plainObject;
     }
     return obj;
+  }
+
+  static async AsyncForEach(array:Array<any>, callback:Function): Promise<any> {
+	  await Utilities.AsyncForEach(array, callback);
   }
 }
 

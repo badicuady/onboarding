@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
-import Extensions from "../utils/extensions";
+import Extensions from "../common/extensions";
 
 class JwtService {
   sign(payload: string | object | Buffer, options?: jwt.SignOptions | undefined): string {

@@ -2,29 +2,41 @@ import { ServerResponse } from "http";
 import { FastifyRequestExt, FastifyReply, RouteOptions } from "fastify";
 
 import GenericController from "./genericController";
-import UserMapping from "../db/userMapping";
-import UserModel from "../models/userModel";
+import { IUser, User, UserMapping, UserMandatoryTopicsMappings, IUserMandatoryTopics } from "../db";
+import UserModel, { IUserModel } from "../models/userModel";
+import { UserMandatoryTopics } from "../db";
 
 class UsersController extends GenericController {
-  private _userMapping: UserMapping;
-
   constructor() {
     super();
-    this._userMapping = new UserMapping();
   }
 
-  async listUsers(offset: number, limit: number) {
+  makeAssociations(): void {
+    UserMapping.associations();
+    UserMandatoryTopicsMappings.associations();
+  }
+
+  async doSync(): Promise<void> {
+    await UserMapping.sync({ alter: true });
+    await UserMandatoryTopicsMappings.sync({ alter: true });
+  }
+
+  async listUsers(offset: number, limit: number): Promise<IUser[]> {
     offset = offset || 0;
     limit = limit || 10;
-    return await this._userMapping.list(offset, limit);
+    return await UserMapping.list(offset, limit);
   }
 
-  async findUser(userName: string) {
-    return await this._userMapping.find(userName);
+  async findUser(userName: string): Promise<IUser | null> {
+    return await UserMapping.find(userName);
   }
 
-  async createUser(userModel: any) {
-    return await this._userMapping.create(userModel);
+  async createOrUpdateUser(userModel: IUserModel): Promise<[User, boolean]> {
+    return await UserMapping.createOrUpdate(userModel);
+  }
+
+  async updateMandatoryTopicsUser(userMandatoryTopic:IUserMandatoryTopics): Promise<[UserMandatoryTopics, boolean]> {
+    return await UserMandatoryTopicsMappings.create(userMandatoryTopic);
   }
 }
 
@@ -42,6 +54,15 @@ const userModelSchema = {
   }
 };
 
+const userMandatoryTopicsModelSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    mandatoryTopicsId: { type: "number" },
+    done: { type: "boolean" }
+  }
+};
+
 const UsersControllerRoutes: RouteOptions[] = [
   // getUsers
   {
@@ -56,7 +77,7 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": {
           type: "array",
-          items: [{ ...userModelSchema }]
+          items: { ...userModelSchema }
         },
         "4xx": {
           type: "string"
@@ -114,10 +135,31 @@ const UsersControllerRoutes: RouteOptions[] = [
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userModel = new UserModel(request.body);
-      const user = await userController.createUser(userModel);
+      const [user] = await userController.createOrUpdateUser(userModel);
       reply.send(user);
+    }
+  },
+  {
+    method: "POST",
+    url: "/api/user/mandatorytopics",
+    schema: {
+	  tags: ["user"],
+	  body: { ...userMandatoryTopicsModelSchema },
+      response: {
+        "200": { type: "object" },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+	  const [userMandatoryTopics, wasInserterd] = await userController.updateMandatoryTopicsUser(<IUserMandatoryTopics>request.body);
+      reply.send(userMandatoryTopics);
     }
   }
 ];
 
 export default UsersControllerRoutes;
+export { userController as UserController };

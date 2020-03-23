@@ -19,7 +19,7 @@ class JwtOptionsModel extends GenericModel {
   constructor(algorithm?: jwt.Algorithm | IJwtOptionsModel, issuer?: string, subject?: string, audience?: string, expiresIn?: string, ) {
     super();
     const model: IJwtOptionsModel = typeof algorithm === "object" ? algorithm : { issuer, subject, audience, expiresIn, algorithm };
-    this._setup(model);
+    this.setup(model);
   }
 
   get issuer() {
@@ -57,8 +57,8 @@ class JwtOptionsModel extends GenericModel {
     this._algorithm = algorithm;
   }
 
-  _setup(model: IJwtOptionsModel) {
-    if (!this._validate(model)) {
+  setup(model: IJwtOptionsModel) {
+    if (!this.validate(model)) {
       throw new Error(`The model is not valid: «${model}»`);
     }
     this._issuer = model.issuer || "";

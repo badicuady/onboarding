@@ -26,7 +26,7 @@ export interface IJWTConfig {
   JWT_ISSUER: string;
   JWT_SUBJECT: string;
   JWT_AUDIENCE: string;
-  JWT_EXPIRESIN: string;
+  JWT_EXPIRES_IN: string;
   JWT_ALGORITHM: jwt.Algorithm;
 }
 
@@ -39,7 +39,7 @@ export interface IAppConfigItem {
   SERVER_HOST: string;
   SERVER_PORT: number;
   SERVER_PROTOCOL: string;
-  CRYPTO_ALGOTITHM: string;
+  CRYPTO_ALGORITHM: string;
   CRYPTO_SECRET: string;
   AUTH_LINK: string;
   db: IDBConfig;
@@ -56,7 +56,7 @@ export const app: IAppConfig = {
     SERVER_HOST: "api.onboarding.com",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 3123,
     SERVER_PROTOCOL: "http",
-    CRYPTO_ALGOTITHM: "sha512",
+    CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
     AUTH_LINK: "http://web.onboarding.com:4123/login",
     db: {
@@ -72,7 +72,7 @@ export const app: IAppConfig = {
       JWT_ISSUER: "Ipsos Interactive Services",
       JWT_SUBJECT: "adrian.badicu@ipsos.com",
       JWT_AUDIENCE: "HR",
-      JWT_EXPIRESIN: "1h",
+      JWT_EXPIRES_IN: "1h",
       JWT_ALGORITHM: "RS256"
 	},
 	ad: {
@@ -84,7 +84,7 @@ export const app: IAppConfig = {
     SERVER_HOST: "localhost",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 3123,
     SERVER_PROTOCOL: "http",
-    CRYPTO_ALGOTITHM: "sha512",
+    CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
     AUTH_LINK: "http://web.onboarding.com:4123/login",
     db: {
@@ -100,7 +100,7 @@ export const app: IAppConfig = {
       JWT_ISSUER: "Ipsos Interactive Services",
       JWT_SUBJECT: "adrian.badicu@ipsos.com",
       JWT_AUDIENCE: "HR",
-      JWT_EXPIRESIN: "1h",
+      JWT_EXPIRES_IN: "1h",
       JWT_ALGORITHM: "RS256"
     },
 	ad: {

@@ -1,118 +1,84 @@
 import crypto from "crypto";
-import { Model, DataTypes, CreateOptions, ModelAttributes, InitOptions } from "sequelize";
+import { Model, DataTypes, CreateOptions, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
 
 import { app, argv } from "../config";
 import GenericMapping from "./genericMapping";
 import { UserRole, IUserModel } from "../models/userModel";
+import { UserMandatoryTopics } from "./topics/userMandatoryTopicsMappings";
 
 interface IUser extends Model {
-	id: number;
-    firstName: string;
-    lastName: string;
-    role: UserRole;
-    userName: string;
-    password: string;
-    domain: string;
-    hash: string;
-    generateHash(val: string | NodeJS.ArrayBufferView): string;
+  id?: number;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  userName: string;
+}
+
+class User extends Model<any, any> implements IUser {
+  id!: number;
+  firstName!: string;
+  lastName!: string;
+  role: UserRole = UserRole.Employee;
+  userName!: string;
 }
 
 class UserMapping extends GenericMapping {
-  private static User = class extends Model implements IUser {
-    id!: number;
-    firstName!: string;
-    lastName!: string;
-    role: UserRole = UserRole.Employee;
-    userName!: string;
-    password!: string;
-    domain!: string;
-    hash!: string;
-
-    generateHash(val: string | NodeJS.ArrayBufferView) {
-      return crypto
-        .createHmac(app[argv.env].CRYPTO_ALGOTITHM, app[argv.env].CRYPTO_SECRET)
-        .update(val)
-        .digest("hex");
-    }
-  };
-
   constructor() {
     super();
   }
 
   initialize() {
-    const UserRoleIntEnum: DataTypes.EnumDataTypeOptions<string> = {
-      values: Object.keys(UserRole)
-        .filter(k => Number.isInteger(+k))
-        .map(k => parseInt(k, 10).toString())
-    };
-
     const modelAttributes: ModelAttributes = {
-      id: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        autoIncrement: true,
-        primaryKey: true
-      },
       firstName: {
         type: new DataTypes.STRING(100),
-        field: "first_name",
         allowNull: false
       },
       lastName: {
         type: new DataTypes.STRING(100),
-        field: "last_name",
         allowNull: false
       },
       role: {
-        type: DataTypes.ENUM(UserRoleIntEnum),
-        field: "role",
+        type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: UserRole.Employee.toString()
+        defaultValue: UserRole.Employee
       },
       userName: {
         type: new DataTypes.STRING(50),
-        field: "user_name",
-        allowNull: false
-      },
-      domain: {
-        type: new DataTypes.STRING(50),
-        field: "domain",
-        allowNull: false
-      },
-      hash: {
-        type: new DataTypes.STRING(100),
-        field: "hash",
         allowNull: false
       }
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize,
-      hooks: {
-        beforeCreate: this._updateHash,
-        beforeUpdate: this._updateHash
-      }
+      sequelize: this._sequelize
     };
 
-    UserMapping.User.init(modelAttributes, modelOptions);
+    User.init(modelAttributes, modelOptions);
   }
 
-  async sync(force: boolean = true) {
-    return await UserMapping.User.sync({ force });
+  async sync(options?: SyncOptions) {
+    return await User.sync();
   }
 
-  async create(userModel: IUserModel) {
-    const searchUser = await this._findUser(userModel);
-    if (searchUser) {
-      throw new Error(`User «${userModel.userName}» allready exists!`);
-    }
-    return await UserMapping.User.create(userModel);
+  associations(): void {
+    User.hasMany(UserMandatoryTopics, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+  }
+
+  async createOrUpdate(userModel: IUserModel) {
+    return await User.findOrCreate({
+      where: {
+        userName: userModel.userName || ""
+      },
+      defaults: userModel
+    });
   }
 
   async list(offset: number, limit: number) {
     offset = offset || 0;
     limit = limit || 10;
-    return await UserMapping.User.findAll({ offset, limit });
+    return await User.findAll({ offset, limit });
   }
 
   async find(model: any) {
@@ -120,14 +86,9 @@ class UserMapping extends GenericMapping {
   }
 
   private async _findUser(model: any) {
-    return await UserMapping.User.findOne({ where: { userName: model.userName } });
-  }
-
-  private _updateHash(attributes: IUser, _: CreateOptions) {
-    if (attributes.changed("password")) {
-      attributes.hash = attributes.generateHash(attributes.password);
-    }
+    return await User.findOne({ where: { userName: model.userName } });
   }
 }
 
-export default UserMapping;
+const userMappingInstance: UserMapping = new UserMapping();
+export { IUser, User, userMappingInstance as UserMapping };

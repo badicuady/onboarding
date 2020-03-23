@@ -8,14 +8,13 @@ class DBClient {
     if (!info) {
       throw new Error("DB «info» is not initialized!");
     }
-    console.log(`Connecting to ... ${info.DB_DIALECT}://${info.DB_USERNAME}:${info.DB_PASSWORD}@${info.DB_SERVER}:${info.DB_PORT}/${info.DB_DATABASE}`);
     if (!DBClient.sequelize) {
-	  DBClient.sequelize = new Sequelize(`${info.DB_DIALECT}://` + 
-		  `${info.DB_USERNAME}:${info.DB_PASSWORD}@` + 
-		  `${info.DB_SERVER}:${info.DB_PORT}/${info.DB_DATABASE}`);
+      const connectionString: string = `${info.DB_DIALECT}://${info.DB_USERNAME}:${info.DB_PASSWORD}@${info.DB_SERVER}:${info.DB_PORT}/${info.DB_DATABASE}`;
+      console.log(`Connecting to ... ${connectionString}`);
+      DBClient.sequelize = new Sequelize(connectionString, { logging: console.log });
     }
     return DBClient.sequelize;
   }
 }
 
-export default DBClient;
+export { DBClient };

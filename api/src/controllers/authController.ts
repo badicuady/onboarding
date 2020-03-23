@@ -1,10 +1,8 @@
 import { ServerResponse } from "http";
 import { FastifyReply, FastifyRequest, RouteOptions, FastifyRequestExt } from "fastify";
-import axios from "axios";
 
 import ActiveDirectoryAuthentication from "../core/authentication/ad";
 import GenericController from "./genericController";
-import { app, argv } from "../config";
 
 type TokenPasswordFlowResponse = {
   access_token?: string;
@@ -30,7 +28,7 @@ class AuthController extends GenericController {
         error: err
       };
     }
-  }  
+  }
 }
 
 const authController = new AuthController();
@@ -65,19 +63,22 @@ const AuthControllerRoutes: RouteOptions[] = [
         }
       }
     },
-    handler: async (request: FastifyRequest, reply: FastifyReply<ServerResponse>) => {
+    preHandler: async (request: FastifyRequestExt, response: FastifyReply<ServerResponse>) => {
       if (request.body.grant_type !== "password") {
         throw Error(`Invalid grant type: ${request.body.grant_type}. Must be [password]!`);
       }
-	  const token = await authController.token(request.body.username, request.body.password);
+    },
+    handler: async (request: FastifyRequest, reply: FastifyReply<ServerResponse>) => {
+      const token = await authController.token(request.body.username, request.body.password);
       reply.send(token);
     }
   },
   // callback
   {
     method: "GET",
-    url: "/userinfo",
+    url: "/user/info",
     schema: {
+      tags: ["user"],
       hide: true, // hide it from swagger
       response: {
         "200": {
@@ -93,8 +94,8 @@ const AuthControllerRoutes: RouteOptions[] = [
           type: "string"
         }
       }
-	},
-	preHandler: GenericController.authentication,
+    },
+    preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       reply.send(request.user);
     }
@@ -102,3 +103,4 @@ const AuthControllerRoutes: RouteOptions[] = [
 ];
 
 export default AuthControllerRoutes;
+export { authController as AuthController };

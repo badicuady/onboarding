@@ -1,6 +1,6 @@
-import { Sequelize } from "sequelize";
+import { Sequelize, SyncOptions } from "sequelize";
 import { app, argv } from "../config";
-import DBClient from "./index";
+import { DBClient } from "./index";
 
 class GenericMapping {
   protected _sequelize: Sequelize;
@@ -8,15 +8,18 @@ class GenericMapping {
   constructor() {
     this._sequelize = DBClient.instance(app[argv.env].db);
     this.initialize();
-    this.sync(true);
   }
 
-  initialize() {
-    throw new Error("Override method «initialize»!");
+  initialize():void {
+    throw new Error("Override method [initialize]!");
   }
 
-  sync(force: boolean) {
-    throw new Error("Override method «sync»!");
+  sync(options:SyncOptions | undefined):void {
+    throw new Error("Override method [sync]!");
+  }
+
+  associations():void {
+	throw new Error("Override method «associations»!");
   }
 }
 

@@ -77,7 +77,8 @@ const config = {
   sessionSaveUrl: "/utils/session",
   apiBaseUrl: "http://api.onboarding.com:3123",
   apiTokenResource: "token",
-  apiUserInfoResource: "userinfo",  
+  apiUserInfoResource: "user/info",
+  apiMethodPrefix: "api",
 
   loginSegment: "login",
   loginPage: "https://sampleoneqa.ipsos.com/#/login",

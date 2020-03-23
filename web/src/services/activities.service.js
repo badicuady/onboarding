@@ -33,7 +33,7 @@ export const welcomeToIssSpecialists = {
     ["Corporate Social Responsibility – Abridged version", "ITC Platform", duration.firstWeek, responsabile.lineManager],
     ["Appropriate workplace behavior", "ITC Platform", duration.firstWeek, responsabile.lineManager],
     ["Green Book Presentation", "Ipsos Intranet", duration.firstWeek, responsabile.lineManager],
-    ["Introduction key contacts ", "Meeting", duration.firstTwoWeeks, responsabile.lineManager]
+    ["Introduction key contacts", "Meeting", duration.firstTwoWeeks, responsabile.lineManager]
   ]
 };
 

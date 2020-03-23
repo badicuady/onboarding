@@ -1,7 +1,8 @@
 import { ActiveDirectory } from "node-ad-tools";
-import { SignOptions } from "jsonwebtoken";
 
 import { app, argv } from "../../config";
+import { UserMapping } from "../../db";
+import UserModel, { IUserModel } from "../../models/userModel";
 import Authentication from "./auth";
 import JwtService from "../services/jwtService";
 import JwtOptionsModel from "../../models/jwt/jwtOptionsModel";
@@ -38,15 +39,24 @@ class ActiveDirectoryAuthentication extends Authentication {
   }
 
   async authenticate() {
-	const userResource = await this._adClient.loginUser(this.userName, this.password);
-	const user = ActiveDirectory.createUserObj(userResource.entry);
-	const props = this.allowedAttributes.reduce(
-		(obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }), 
-		{});
-	const userModel = {...user, ...props};
-	return userModel 
-		? ActiveDirectoryAuthentication._jwtService.sign(userModel, ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject())
-		: null;
+    const userResource = await this._adClient.loginUser(this.userName, this.password);
+    const user = ActiveDirectory.createUserObj(userResource.entry);
+    const props = this.allowedAttributes.reduce(
+      (obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }),
+      {}
+    );
+	const userModel = { ...user, ...props };
+	await this._saveUser(new UserModel(userModel).toPlainObject());
+    return userModel
+      ? ActiveDirectoryAuthentication._jwtService.sign(
+          userModel,
+          ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject()
+        )
+      : null;
+  }
+
+  private async _saveUser(user: IUserModel) {
+    return await UserMapping.createOrUpdate(user);
   }
 
   static _jwtService = new JwtService();
@@ -56,7 +66,7 @@ class ActiveDirectoryAuthentication extends Authentication {
     app[argv.env].jwt.JWT_ISSUER,
     app[argv.env].jwt.JWT_SUBJECT,
     app[argv.env].jwt.JWT_AUDIENCE,
-    app[argv.env].jwt.JWT_EXPIRESIN
+    app[argv.env].jwt.JWT_EXPIRES_IN
   );
 }
 
