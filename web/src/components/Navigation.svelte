@@ -114,6 +114,7 @@
                 <h3 class="dropdown-item-title">{user.displayName}</h3>
                 <p class="text-sm">{user.mail}</p>
                 <p class="text-sm text-muted">{user.department}</p>
+				<p class="text-sm text-muted">{user.manager}</p>
               </div>
             </div>
             <!-- Message End -->

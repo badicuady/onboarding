@@ -21,7 +21,7 @@ class Extensions {
         const description = Object.getOwnPropertyDescriptor(proto, key);
         if (description && typeof description.get === "function") {
           const value = description.get.apply(obj);
-          if (value) {
+          if (!!value || value === false) {
             plainObject[key] = value;
           }
         }
@@ -32,7 +32,7 @@ class Extensions {
   }
 
   static async AsyncForEach(array:Array<any>, callback:Function): Promise<any> {
-	  await Utilities.AsyncForEach(array, callback);
+	  return await Utilities.AsyncForEach(array, callback);
   }
 }
 

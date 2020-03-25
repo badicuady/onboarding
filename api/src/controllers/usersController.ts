@@ -2,9 +2,11 @@ import { ServerResponse } from "http";
 import { FastifyRequestExt, FastifyReply, RouteOptions } from "fastify";
 
 import GenericController from "./genericController";
-import { IUser, User, UserMapping, UserMandatoryTopicsMappings, IUserMandatoryTopics } from "../db";
+import { User, UserMapping, UserMandatoryTopicsMappings, IUserMandatoryTopics } from "../db";
 import UserModel, { IUserModel } from "../models/userModel";
 import { UserMandatoryTopics } from "../db";
+import { IGenericModel } from "../models/genericModel";
+import UserMandatoryTopicsModel, { IUserMandatoryTopicsModel } from "../models/topics/userMandatoryTopicsModel";
 
 class UsersController extends GenericController {
   constructor() {
@@ -21,21 +23,27 @@ class UsersController extends GenericController {
     await UserMandatoryTopicsMappings.sync({ alter: true });
   }
 
-  async listUsers(offset: number, limit: number): Promise<IUser[]> {
+  async listUsers(user: IUserModel & IGenericModel, offset: number, limit: number): Promise<User[]> {
     offset = offset || 0;
     limit = limit || 10;
-    return await UserMapping.list(offset, limit);
+    return await UserMapping.list(user, offset, limit);
   }
 
-  async findUser(userName: string): Promise<IUser | null> {
-    return await UserMapping.find(userName);
+  async findUser(user: IUserModel): Promise<User | null> {
+    return await UserMapping.find(user);
   }
 
   async createOrUpdateUser(userModel: IUserModel): Promise<[User, boolean]> {
     return await UserMapping.createOrUpdate(userModel);
   }
 
-  async updateMandatoryTopicsUser(userMandatoryTopic:IUserMandatoryTopics): Promise<[UserMandatoryTopics, boolean]> {
+  async getMandatoryTopicsUser(userId: number): Promise<UserMandatoryTopics[]> {
+    return await UserMandatoryTopicsMappings.get(userId);
+  }
+
+  async addOrUpdateMandatoryTopicsUser(
+    userMandatoryTopic: IUserMandatoryTopicsModel
+  ): Promise<[UserMandatoryTopics, boolean]> {
     return await UserMandatoryTopicsMappings.create(userMandatoryTopic);
   }
 }
@@ -48,8 +56,6 @@ const userModelSchema = {
     firstName: { type: "string" },
     lastName: { type: "string" },
     userName: { type: "string" },
-    domain: { type: "string" },
-    hash: { type: "string" },
     role: { type: "string" }
   }
 };
@@ -72,7 +78,11 @@ const UsersControllerRoutes: RouteOptions[] = [
       tags: ["user"],
       querystring: {
         offset: { type: "integer" },
-        limit: { type: "integer" }
+        limit: { type: "integer" },
+        firstName: { type: "string" },
+        lastName: { type: "string" },
+        userName: { type: "string" },
+        role: { type: "string" }
       },
       response: {
         "200": {
@@ -87,34 +97,17 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const users = await userController.listUsers(request.query.offset, request.query.limit);
-      reply.send(users);
-    }
-  },
-  // getUser
-  {
-    method: "GET",
-    url: "/api/users/:userName",
-    schema: {
-      tags: ["user"],
-      params: {
-        type: "object",
-        properties: {
-          userName: { type: "string" }
-        }
-      },
-      response: {
-        "200": { ...userModelSchema },
-        "4xx": {
-          type: "string"
-        }
-      },
-      security: [{ oauth: [] }]
-    },
-    preHandler: GenericController.authentication,
-    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const user = await userController.findUser(request.params.userName);
-      reply.send(user);
+      const users = await userController.listUsers(
+        new UserModel({
+          firstName: request.query.firstName,
+          lastName: request.query.lastName,
+          userName: request.query.userName,
+          role: request.query.role
+        }),
+        request.query.offset,
+        request.query.limit
+      );
+      reply.send(users.map(e => e.toJSON()));
     }
   },
   // setUser
@@ -136,15 +129,35 @@ const UsersControllerRoutes: RouteOptions[] = [
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userModel = new UserModel(request.body);
       const [user] = await userController.createOrUpdateUser(userModel);
-      reply.send(user);
+      reply.send(user.toJSON());
+    }
+  },
+  {
+    method: "GET",
+    url: "/api/user/mandatorytopics",
+    schema: {
+      tags: ["user"],
+      querystring: { userId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userMandatoryTopicsModelSchema } },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userMandatoryTopics = await userController.getMandatoryTopicsUser(request.query.userId);
+      reply.send(userMandatoryTopics.map(e => e.toJSON()));
     }
   },
   {
     method: "POST",
     url: "/api/user/mandatorytopics",
     schema: {
-	  tags: ["user"],
-	  body: { ...userMandatoryTopicsModelSchema },
+      tags: ["user"],
+      body: { ...userMandatoryTopicsModelSchema },
       response: {
         "200": { type: "object" },
         "4xx": {
@@ -155,8 +168,11 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-	  const [userMandatoryTopics, wasInserterd] = await userController.updateMandatoryTopicsUser(<IUserMandatoryTopics>request.body);
-      reply.send(userMandatoryTopics);
+      const userMandatoryTopicsModel = new UserMandatoryTopicsModel(request.body);
+      const [userMandatoryTopics, wasInserterd] = await userController.addOrUpdateMandatoryTopicsUser(
+        userMandatoryTopicsModel
+      );
+      reply.send(userMandatoryTopics.toJSON());
     }
   }
 ];

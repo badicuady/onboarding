@@ -5,6 +5,7 @@ import { app, argv } from "../config";
 import GenericMapping from "./genericMapping";
 import { UserRole, IUserModel } from "../models/userModel";
 import { UserMandatoryTopics } from "./topics/userMandatoryTopicsMappings";
+import { IGenericModel } from "../models/genericModel";
 
 interface IUser extends Model {
   id?: number;
@@ -75,18 +76,22 @@ class UserMapping extends GenericMapping {
     });
   }
 
-  async list(offset: number, limit: number) {
+  async list(model: IUserModel, offset: number, limit: number) {
     offset = offset || 0;
-    limit = limit || 10;
-    return await User.findAll({ offset, limit });
+	limit = limit || 10;
+    return await User.findAll({ 
+		offset, 
+		limit, 
+		where: { ...model.toPlainObject && model.toPlainObject() }
+	});
   }
 
-  async find(model: any) {
+  async find(model: IUserModel) {
     return await this._findUser(model);
   }
 
-  private async _findUser(model: any) {
-    return await User.findOne({ where: { userName: model.userName } });
+  private async _findUser(model: IUserModel) {
+    return await User.findOne({ where: { userName: model.userName || "" } });
   }
 }
 

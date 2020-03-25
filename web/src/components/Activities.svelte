@@ -17,10 +17,10 @@
   mode = (mode || "").toLowerCase();
   const colWidths = [5, 25, 30, 10, 10, 15, 5];
   const tableCards = [
-    { title: "Welcome to IIS", information: welcomeToIss, id: "one" },
-    { title: "Compliance Topics", information: complianceTopics, id: "two" },
-    { title: "IIS Apps", information: iisAps, id: "three" },
-    { title: "Trainings / workshops", information: trainings, id: "four" }
+    { title: "Welcome to IIS", information: welcomeToIss, id: "one", radicalName: "welcome", group: 1 },
+    { title: "Compliance Topics", information: complianceTopics, id: "two", radicalName: "compliance", group: 2 },
+    { title: "IIS Apps", information: iisAps, id: "three", radicalName: "apps", group: 3 },
+    { title: "Trainings / Workshops", information: trainings, id: "four", radicalName: "trainings", group: 4 }
   ];
 
   const feedbackMonth1 = {
@@ -174,7 +174,10 @@
                     <div class="card-body table-responsive">
                       <ActivitiesTable
                         info={tableInfo.information}
-                        {colWidths} />
+						radicalName={tableInfo.radicalName}
+						group={tableInfo.group}
+                        {colWidths}
+						padding={tableInfo.information.padding} />
                     </div>
                   </div>
                 </div>

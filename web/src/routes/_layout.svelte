@@ -13,20 +13,22 @@
       session[CacheKeys.UserInfo] = config.testUser;
     }
 
-    const user = session[CacheKeys.UserInfo];
+	const user = session[CacheKeys.UserInfo];
+	const token = session[CacheKeys.Token];
     const rex = new RegExp(`\/${config.loginSegment}`, "gim");
     const isNotLogin = page.path.replace(rex, "").length !== 0;
-
     if (isNotLogin && config.useLogin && !user) {
       return this.redirect(302, config.loginSegment);
     }
-    return new Promise(resolve => resolve({ user }));
+    return new Promise(resolve => resolve({ user, token }));
   }
 </script>
 
 <script>
   export let segment;
   export let user;
+  export let token;
+
   let userModel;
   const sessionService = new SessionService();
 
@@ -48,6 +50,10 @@
 	  user = session[CacheKeys.UserInfo];
 	  userModel = new User(user);
 	  CacheService.setOrUpdateValue(CacheKeys.UserInfo, user, new Date(Date.now() + 3600 * 1000));
+	}
+	if (session[CacheKeys.Token]) {
+	  token = session[CacheKeys.Token];
+	  CacheService.setOrUpdateValue(CacheKeys.Token, token, new Date(Date.now() + 3600 * 1000));
     }
   });
 </script>

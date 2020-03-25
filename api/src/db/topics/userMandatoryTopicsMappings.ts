@@ -1,7 +1,9 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
 import GenericMapping from "../genericMapping";
-import { MandatoryTopicsLk, IMandatoryTopicsLk } from "./mandatoryTopicsLkMappings";
+import { MandatoryTopicsLk } from "./mandatoryTopicsLkMappings";
 import { User } from "../userMapping";
+import { IUserMandatoryTopicsModel } from "../../models/topics/userMandatoryTopicsModel";
+import { IGenericModel } from "../../models/genericModel";
 
 interface IUserMandatoryTopics extends Model {
   id?: number;
@@ -51,28 +53,34 @@ class UserMandatoryTopicsMappings extends GenericMapping {
     return await UserMandatoryTopics.sync(options);
   }
 
-  async create(userMandatoryTopics: IUserMandatoryTopics): Promise<[UserMandatoryTopics, boolean]> {
+  async create(userMandatoryTopicsModel: IUserMandatoryTopicsModel): Promise<[UserMandatoryTopics, boolean]> {
+    const plainObjectModel = userMandatoryTopicsModel.toPlainObject && userMandatoryTopicsModel.toPlainObject();
     const where = {
-      mandatoryTopicsId: userMandatoryTopics.mandatoryTopicsId || 0,
-      userId: userMandatoryTopics.userId || 0
+      mandatoryTopicsId: plainObjectModel.mandatoryTopicsId || 0,
+      userId: plainObjectModel.userId || 0
     };
 
     let instanceUserMandatoryTopics, wasCreated;
     [instanceUserMandatoryTopics, wasCreated] = await UserMandatoryTopics.findOrCreate({
       where,
-      defaults: userMandatoryTopics
+      defaults: plainObjectModel
     });
     if (!wasCreated) {
-      const [rowsUpdated, allInstancesUserMandatoryTopics] = await UserMandatoryTopics.update(userMandatoryTopics, {
+      const [rowsUpdated, allInstancesUserMandatoryTopics] = await UserMandatoryTopics.update(plainObjectModel, {
         where,
-        limit: 1
+		limit: 1,
+		returning: true
       });
       instanceUserMandatoryTopics =
-        rowsUpdated === 1 && allInstancesUserMandatoryTopics.length
+        rowsUpdated === 1 && allInstancesUserMandatoryTopics && allInstancesUserMandatoryTopics.length
           ? allInstancesUserMandatoryTopics[0]
           : instanceUserMandatoryTopics;
     }
     return [instanceUserMandatoryTopics, wasCreated];
+  }
+
+  async get(userId: number): Promise<UserMandatoryTopics[]> {
+    return await UserMandatoryTopics.findAll({ where: { userId: userId, done: true } });
   }
 }
 

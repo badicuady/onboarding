@@ -1,4 +1,4 @@
-import GenericModel from "./genericModel";
+import GenericModel, { IGenericModel } from "./genericModel";
 
 export enum UserRole {
   Admin = 1,
@@ -7,16 +7,15 @@ export enum UserRole {
   Employee = 4
 }
 
-export interface IUserModel {
+export interface IUserModel extends IGenericModel {
+  id?: number;
   firstName?: string;
   lastName?: string;
   userName?: string;
-  domain?: string | null;
-  password?: string | null;
   role?: number;
 }
 
-export interface IActiveDirectoryUserModel {
+export interface IActiveDirectoryUserModel extends IGenericModel {
   name?: string;
   givenName?: string;
   mailNickname?: string;
@@ -102,8 +101,6 @@ export default class UserModel extends GenericModel implements IUserModel {
     this._firstName = model.firstName || "";
     this._lastName = model.lastName || "";
     this._userName = model.userName || "";
-    this._domain = model.domain || "";
-    this._password = model.password || "";
     this._role = model.role || UserRole.Employee;
   }
 }

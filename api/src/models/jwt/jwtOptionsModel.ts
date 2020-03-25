@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import GenericModel from "../genericModel";
+import GenericModel, { IGenericModel } from "../genericModel";
 
-export interface IJwtOptionsModel {
+export interface IJwtOptionsModel extends IGenericModel {
   issuer?: string;
   subject?: string;
   audience?: string;

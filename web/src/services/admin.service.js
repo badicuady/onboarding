@@ -1,14 +1,10 @@
 import axios from "axios";
 import config from "../config";
+import AuthService from "./abstract.auth.service.js";
 
-class AdminService {
+class AdminService extends AuthService {
 	constructor(authorization) {
-		this.authorization = authorization;
-		this.config = {
-			headers: {
-				"Authorization": `Bearer ${this.authorization}`
-			}
-		};
+		super(authorization);
 	}
 
 	async info() {

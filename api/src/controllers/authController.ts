@@ -17,17 +17,11 @@ class AuthController extends GenericController {
 
   async token(userName: string, password: string): Promise<TokenPasswordFlowResponse> {
     const adAuth = new ActiveDirectoryAuthentication(userName, password);
-    try {
-      const result = await adAuth.authenticate();
-      return {
-        access_token: result || "",
-        expires_in: 24 * 3600
-      };
-    } catch (err) {
-      return {
-        error: err
-      };
-    }
+    const result = await adAuth.authenticate();
+    return {
+      access_token: result || "",
+      expires_in: 24 * 3600
+    };
   }
 }
 
@@ -54,8 +48,7 @@ const AuthControllerRoutes: RouteOptions[] = [
           type: "object",
           properties: {
             access_token: { type: "string" },
-            expires_in: { type: "number" },
-            error: { type: "object" }
+            expires_in: { type: "number" }
           }
         },
         "4xx": {
@@ -63,7 +56,7 @@ const AuthControllerRoutes: RouteOptions[] = [
         }
       }
     },
-    preHandler: async (request: FastifyRequestExt, response: FastifyReply<ServerResponse>) => {
+    preHandler: async (request: FastifyRequestExt) => {
       if (request.body.grant_type !== "password") {
         throw Error(`Invalid grant type: ${request.body.grant_type}. Must be [password]!`);
       }
@@ -84,11 +77,11 @@ const AuthControllerRoutes: RouteOptions[] = [
         "200": {
           type: "object",
           minProperties: 1,
+          additionalProperties: true,
           properties: {
             employeeID: { type: "number" },
             mail: { type: "string", format: "email" }
-          },
-          additionalProperties: true
+          }
         },
         "4xx": {
           type: "string"

@@ -65,8 +65,8 @@ export const iisApsSpecialists = {
 export const trainingsSpecialists = {
   columns: ["Trainings / workshops", "Tools", "Date", "Responsible", "Done"],
   data: [
-    ["ITC : Fundamentals Program ( Communication / Time Management / Client Service )", "ITC Platform", duration.firstTwoMonths, responsabile.lineManagerOrLDSpecialist],
-    ["In Class: Client Service ", "Workshop", duration.firstTwoMonths, "Andrei Ionescu"]
+    ["ITC: Fundamentals Program (Communication / Time Management / Client Service)", "ITC Platform", duration.firstTwoMonths, responsabile.lineManagerOrLDSpecialist],
+    ["In Class: Client Service", "Workshop", duration.firstTwoMonths, "Andrei Ionescu"]
   ]
 };
 
@@ -82,5 +82,5 @@ export const complianceTopicsManagers = { columns: [...complianceTopicsSpecialis
 
 export const iisApsManagers = { columns: [...iisApsSpecialists.columns], data: [...iisApsSpecialists.data] };
 
-export const trainingsManagers = { columns: [...trainingsSpecialists.columns], data: [...trainingsSpecialists.data] };
+export const trainingsManagers = { columns: [...trainingsSpecialists.columns], data: [...trainingsSpecialists.data], padding: { 4: 2 } };
 trainingsManagers.data = [["GROW IIS Leaders", "ITC Platform / In Class", duration.firstSixMonths, responsabile.lineManagerOrLDSpecialist]];

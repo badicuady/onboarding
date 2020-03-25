@@ -1,6 +1,8 @@
 <script>
+  import { onMount } from "svelte";
   import { OpenTableItemType } from "../models/enums.js";
   import { responsabile, duration } from "../services/activities.service.js";
+  import { CacheKeys, CacheService, UsersService } from "../services";
   import Activities from "../components/Activities.svelte";
   import {
     welcomeToIssSpecialists,

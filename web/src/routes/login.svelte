@@ -15,17 +15,29 @@
 
   const sessionService = new SessionService();
   const apiService = new ApiService();
+  const passwordTypeMap = new Map([[true, "password"], [false, "text"]]);
 
   let loginParams;
-  let email;
-  let password;
+  let email = "";
+  let password = "";
   let formWasValidated = false;
-  let loginFailed = false;
+  let loginFailed = undefined;
+  let hidePassword = true;
+  let passwordType = passwordTypeMap.get(hidePassword);
 
   onMount(() => {
     loginParams = Utilities.uriParametersToPlainObject();
     Utilities.debugVariable({ loginParams });
   });
+
+  const passwordChanged = e => {
+    password = e.target.value;
+  };
+
+  const changePasswordType = e => {
+    hidePassword = !hidePassword;
+    passwordType = passwordTypeMap.get(hidePassword);
+  };
 
   const adjustUser = user => {
     if (user && user.manager) {
@@ -34,19 +46,33 @@
         .map(e => e.split("="))
         .reduce((all, e) => ({ ...all, [e[0]]: e[1] }), {}).CN;
     }
-    Utilities.debugVariable({ user });
     return user;
   };
 
   const saveUserInfo = async token => {
-	const adminService = new AdminService(token.data.access_token);
-	CacheService.setOrUpdateValue(CacheKeys.AdminService, adminService, new Date(Date.now() + 3600 * 1000));
+    const adminService = new AdminService(token.data.access_token);
+    CacheService.setOrUpdateValue(
+      CacheKeys.AdminService,
+      adminService,
+      new Date(Date.now() + 3600 * 1000)
+    );
     const userInfo = await adminService.info();
     if (userInfo.status === 200) {
-      CacheService.setOrUpdateValue(CacheKeys.Token, token.data, new Date(Date.now() + 3600 * 1000));
+      Utilities.debugVariable({ token: token.data });
+      await sessionService.update({ [CacheKeys.Token]: token.data });
+      CacheService.setOrUpdateValue(
+        CacheKeys.Token,
+        token.data,
+        new Date(Date.now() + 3600 * 1000)
+      );
       const userInfoObj = adjustUser(userInfo.data.payload);
+      Utilities.debugVariable({ user: userInfoObj });
       await sessionService.update({ [CacheKeys.UserInfo]: userInfoObj });
-      CacheService.setOrUpdateValue(CacheKeys.UserInfo, userInfoObj, new Date(Date.now() + 3600 * 1000));
+      CacheService.setOrUpdateValue(
+        CacheKeys.UserInfo,
+        userInfoObj,
+        new Date(Date.now() + 3600 * 1000)
+      );
     }
   };
 
@@ -63,21 +89,27 @@
       goto("/");
     }
     if (loginParams) {
-	  const authParams = { ...token.data, state: loginParams.state };
-      window.location.href = `${loginParams.redirect_uri}?${Utilities.plainObjectToUriParameters(authParams)}`;
-	}
+      const authParams = { ...token.data, state: loginParams.state };
+      window.location.href = `${
+        loginParams.redirect_uri
+      }?${Utilities.plainObjectToUriParameters(authParams)}`;
+    }
   };
 
-  const login = async (e) => {
-	loadingStore.setVisible();
+  const login = async e => {
+    loadingStore.setVisible();
     if (validate(e)) {
       const token = await apiService.token(email, password);
       loginFailed = !!(token && token.data && token.data.error);
       if (!loginFailed) {
-		loginStrategy(token);
+        loginStrategy(token);
       }
     }
     loadingStore.setInvisible();
+  };
+
+  const checkboxChange = e => {
+    console.log(e);
   };
 </script>
 
@@ -95,7 +127,7 @@
   </style>
 </svelte:head>
 
-{#if !loginFailed}
+{#if loginFailed || true}
   <div class="container">
     <div class="row">
       <div class="col">
@@ -129,7 +161,8 @@
                           name="email"
                           bind:value={email}
                           placeholder="name@ipsos.com"
-                          required />
+                          required
+                          autocomplete="username" />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -137,14 +170,28 @@
                         <i class="fas fa-unlock-alt" />
                       </label>
                       <div class="col-sm-11">
-                        <input
-                          type="password"
-                          class="form-control"
-                          id="password"
-                          name="password"
-                          bind:value={password}
-                          placeholder="domain password"
-                          required />
+                        <div class="input-group">
+                          <input
+                            type={passwordType}
+                            class="form-control"
+                            id="password"
+                            name="password"
+                            value={password}
+                            placeholder="domain password"
+                            required
+                            autocomplete="current-password"
+                            on:input={passwordChanged} />
+                          <div class="input-group-append">
+                            <span
+                              class="input-group-text bg-white cursor-pointer"
+                              on:click={changePasswordType}>
+                              <i
+                                class="far"
+                                class:fa-eye={hidePassword}
+                                class:fa-eye-slash={!hidePassword} />
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="form-group row">
@@ -156,7 +203,8 @@
                             type="checkbox"
                             id="rememberme"
                             name="rememberme"
-                            checked />
+                            checked
+                            on:change={checkboxChange} />
                           <label class="custom-control-label" for="rememberme">
                             Remember me
                           </label>

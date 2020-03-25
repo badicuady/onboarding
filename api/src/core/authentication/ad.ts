@@ -1,4 +1,4 @@
-import { ActiveDirectory } from "node-ad-tools";
+import ActiveDirectory from "./activeDirectory";
 
 import { app, argv } from "../../config";
 import { UserMapping } from "../../db";
@@ -34,25 +34,33 @@ class ActiveDirectoryAuthentication extends Authentication {
     super(userName, password, domain);
     this._adClient = new ActiveDirectory({
       url: app[argv.env].ad.AD_URL,
-      base: app[argv.env].ad.AD_BASE
+      base: app[argv.env].ad.AD_BASE,
+      idleTimeout: 1000
     });
   }
 
   async authenticate() {
+    console.info(`Authenticating user: [${this.userName}]...`);
     const userResource = await this._adClient.loginUser(this.userName, this.password);
-    const user = ActiveDirectory.createUserObj(userResource.entry);
-    const props = this.allowedAttributes.reduce(
-      (obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }),
-      {}
-    );
-	const userModel = { ...user, ...props };
-	await this._saveUser(new UserModel(userModel).toPlainObject());
-    return userModel
-      ? ActiveDirectoryAuthentication._jwtService.sign(
-          userModel,
-          ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject()
-        )
-      : null;
+    console.info(`Authenticated resource: ${Object.keys(userResource).join()}`);
+
+    if (userResource.entry) {
+      const user = ActiveDirectory.createUserObj(userResource.entry);
+      const props = this.allowedAttributes.reduce(
+        (obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }),
+        {}
+      );
+      const userModel = { ...user, ...props };
+      const [userModelDb] = await this._saveUser(new UserModel(userModel).toPlainObject());
+      const plainUserModelDb = <IUserModel>userModelDb.toJSON();
+      return userModel
+        ? ActiveDirectoryAuthentication._jwtService.sign(
+            { ...userModel, id: plainUserModelDb.id },
+            ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject()
+          )
+        : null;
+    }
+    return null;
   }
 
   private async _saveUser(user: IUserModel) {

@@ -1,9 +1,9 @@
 import Extensions from "../core/common/extensions";
 
 export interface IGenericModel {
-  toPlainObject(): any;
-  setup(model: any): void;
-  validate(model: any): boolean;
+  toPlainObject?(): any;
+  setup?(model: any): void;
+  validate?(model: any): boolean;
 }
 
 abstract class GenericModel implements IGenericModel {
