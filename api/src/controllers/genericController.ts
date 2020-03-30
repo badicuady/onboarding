@@ -15,10 +15,13 @@ abstract class GenericController implements IGenericController {
     this.test = "test";
   }
 
+  // do not mark this as abstract; it should be virtual and not called when not needed; but when needed is should alert the user
   makeAssociations(): void { throw new Error("Override method [makeAssociations]!"); }
 
+  // do not mark this as abstract; it should be virtual and not called when not needed; but when needed is should alert the user
   async doSync(): Promise<void> { throw new Error("Override method [doSync]"); }
 
+  // this should be virtual; TS does not know about virtual
   async postSyncHook():Promise<void> { return undefined; }
 
   static validate(headers: any): null | { [key: string]: any } | string {

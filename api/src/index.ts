@@ -1,19 +1,29 @@
 import { AddressInfo } from "net";
 import { app, argv } from "./config";
 import fastify from "./controllers";
-import GenericController, { IGenericController } from "./controllers/genericController";
+import GenericController from "./controllers/genericController";
 import { MandatoryTopicsController } from "./controllers/mandatoryTopicsController";
 import { UserController } from "./controllers/usersController";
+import { DepartmentsController } from "./controllers/departmentsController";
+import { TimespansController } from "./controllers/timespansController";
+import { ResponsiblesController } from "./controllers/responsiblesController";
 import Extensions from "./core/common/extensions";
 
 console.info(`Starting application for «${argv.env}» environment...`);
 
+/**
+ * add only controllers that have implemented methods: makeAssociations, doSync, postSyncHook
+ */
+const controllers = [
+  DepartmentsController,
+  TimespansController,
+  ResponsiblesController,
+  MandatoryTopicsController,
+  UserController
+];
+
 const connectToDatabase = async (): Promise<void> => {
   try {
-    /**
-     * add only controllers that have implemented methods: makeAssociations, doSync, postSyncHook
-     */
-    const controllers = [MandatoryTopicsController, UserController];
     controllers.forEach(c => c.makeAssociations());
     await Extensions.AsyncForEach(controllers, async (c: GenericController) => await c.doSync());
     await Extensions.AsyncForEach(controllers, async (c: GenericController) => await c.postSyncHook());

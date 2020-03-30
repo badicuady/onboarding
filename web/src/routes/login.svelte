@@ -39,12 +39,26 @@
     passwordType = passwordTypeMap.get(hidePassword);
   };
 
+  const parseUser = user =>
+    user
+      .split(",")
+      .map(e => e.split("="))
+      .reduce((all, e) => ({ ...all, [e[0]]: e[1] }), {}).CN;
+
   const adjustUser = user => {
     if (user && user.manager) {
       user.manager = user.manager
         .split(",")
         .map(e => e.split("="))
         .reduce((all, e) => ({ ...all, [e[0]]: e[1] }), {}).CN;
+      user.isManager = (user.directReports || "").length > 0;
+      if (typeof user.directReports === "string") {
+        user.subordinate = [parseUser(user.directReports)];
+	  }
+	  if (user.directReports instanceof Array) {
+        user.subordinate = user.directReports.map(parseUser);
+	  }
+	  user.isHr = user.groups.findIndex((e) => config.hrGroupName.localeCompare(e, "kf") === 0) >= 0
     }
     return user;
   };
@@ -194,7 +208,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="form-group row">
+                    <!--div class="form-group row">
                       <div class="col-sm-1">&nbsp;</div>
                       <div class="col-sm-11">
                         <div class="custom-control custom-switch">
@@ -210,7 +224,7 @@
                           </label>
                         </div>
                       </div>
-                    </div>
+                    </div-->
                     <div class="form-group row mt-5">
                       <div class="col-sm-12">
                         <button

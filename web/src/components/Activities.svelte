@@ -1,5 +1,8 @@
 <script>
+  import { onMount, onDestroy } from "svelte";
+  import config from "../config";
   import { OpenTableItemType } from "../models/enums.js";
+  import { CacheKeys, CacheService, DictionariesService } from "../services";
   import Layout from "./Layout.svelte";
   import ActivitiesTable from "./ActivitiesTable.svelte";
   import OpenActivitiesTable from "./OpenActivitiesTable.svelte";
@@ -17,10 +20,34 @@
   mode = (mode || "").toLowerCase();
   const colWidths = [5, 25, 30, 10, 10, 15, 5];
   const tableCards = [
-    { title: "Welcome to IIS", information: welcomeToIss, id: "one", radicalName: "welcome", group: 1 },
-    { title: "Compliance Topics", information: complianceTopics, id: "two", radicalName: "compliance", group: 2 },
-    { title: "IIS Apps", information: iisAps, id: "three", radicalName: "apps", group: 3 },
-    { title: "Trainings / Workshops", information: trainings, id: "four", radicalName: "trainings", group: 4 }
+    {
+      title: "Welcome to IIS",
+      information: welcomeToIss,
+      id: "one",
+      radicalName: "welcome",
+      group: 1
+    },
+    {
+      title: "Compliance Topics",
+      information: complianceTopics,
+      id: "two",
+      radicalName: "compliance",
+      group: 2
+    },
+    {
+      title: "IIS Apps",
+      information: iisAps,
+      id: "three",
+      radicalName: "apps",
+      group: 3
+    },
+    {
+      title: "Trainings / Workshops",
+      information: trainings,
+      id: "four",
+      radicalName: "trainings",
+      group: 4
+    }
   ];
 
   const feedbackMonth1 = {
@@ -58,6 +85,17 @@
   feedbackMonth6.columns[0] = "Feedback at the end of 6 months";
 
   const feedbackAll = [feedbackMonth1, feedbackMonth3, feedbackMonth6];
+
+  let userModel;
+  let departments = [];
+  const cacheSubscribe = CacheService.subscribe(cache => {
+	userModel = cache.get(CacheKeys.UserInfo) || {};
+	departments = cache.get(CacheKeys.Departments) || [];
+  });
+
+  onDestroy(() => {
+    cacheSubscribe();
+  });
 </script>
 
 <svelte:head>
@@ -73,7 +111,7 @@
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item">
-            <a href="#">{mode}</a>
+            <a href="##" on:click={config.preventEvent}>{mode}</a>
           </li>
           <li class="breadcrumb-item active">Onboarding Form</li>
         </ol>
@@ -114,6 +152,53 @@
             <form class="form-horizontal">
               <div class="card-body">
                 <div class="form-group row">
+                  <label for="employeeName" class="col-sm-2 col-form-label">
+                    Employee Name:
+                  </label>
+                  <div class="col-sm-10">
+                    <input
+                      disabled
+                      type="text"
+                      class="form-control"
+                      id="employeeName"
+                      name="employeeName"
+                      value={userModel.displayName} />
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="manager" class="col-sm-2 col-form-label">
+                    Manager:
+                  </label>
+                  <div class="col-sm-10">
+                    <input
+                      disabled
+                      type="text"
+                      class="form-control"
+                      id="manager"
+                      name="manager"
+                      value={userModel.manager} />
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="department" class="col-sm-2 col-form-label">
+                    Department:
+                  </label>
+                  <div class="col-sm-10">
+                    <select
+                      class="form-control"
+                      id="department"
+                      name="department"
+                      placeholder="department">
+                      <option value="-1" disabled selected>
+                        Select department
+                      </option>
+                      {#each departments as department}
+                        <option value={department.id}>{department.name}</option>
+                      {/each}
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row">
                   <label for="entryDate" class="col-sm-2 col-form-label">
                     Entry date:
                   </label>
@@ -141,8 +226,8 @@
                         .slice(0, 10)} />
                   </div>
                 </div>
+                <!-- /.card-body -->
               </div>
-              <!-- /.card-body -->
             </form>
           </div>
         </div>
@@ -174,10 +259,10 @@
                     <div class="card-body table-responsive">
                       <ActivitiesTable
                         info={tableInfo.information}
-						radicalName={tableInfo.radicalName}
-						group={tableInfo.group}
+                        radicalName={tableInfo.radicalName}
+                        group={tableInfo.group}
                         {colWidths}
-						padding={tableInfo.information.padding} />
+                        padding={tableInfo.information.padding} />
                     </div>
                   </div>
                 </div>

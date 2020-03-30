@@ -85,5 +85,6 @@ export const CacheKeys = {
 	UserData: "userData",
 	UserInfo: "userInfo",
 	Token: "token",
-	AdminService: "adminService"
+	AdminService: "adminService",
+	Departments: "departments"
 };

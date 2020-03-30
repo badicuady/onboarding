@@ -63,16 +63,17 @@
               {data.question}
             </label>
             <div class="col-4">
-              <input
-                class="invisible"
-                type="checkbox"
-                id="{reviewUniqueId}-action-{ndx}"
-                name="{reviewUniqueId}-action-{ndx}"
-                data-bootstrap-switch
-                data-off-color="danger"
-                data-on-color="success"
-                data-on-text="Yes"
-                data-off-text="No" />
+              <div class="custom-control custom-switch">
+                <input
+                  class="custom-control-input"
+                  type="checkbox"
+                  id="{reviewUniqueId}-action-{ndx}"
+                  name="{reviewUniqueId}-action-{ndx}"
+                  data-id="{ndx}" />
+                <label
+                  class="custom-control-label"
+                  for="{reviewUniqueId}-action-{ndx}" />
+              </div>
             </div>
           </div>
         </div>

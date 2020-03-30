@@ -1,7 +1,7 @@
 #pull latest postgresql image
 docker pull postgres:alpine
 
-#create a volume to store the data; on windows we can't make a volume maped directly to a windows folder
+#create a volume to store the data; on windows we can't make a volume mapped directly to a windows folder
 docker volume create --driver local --name onboarding-volume
 
 #start the container

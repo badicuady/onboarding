@@ -1,6 +1,5 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, BulkCreateOptions, SyncOptions } from "sequelize";
-import GenericMapping from "../genericMapping";
-import { UserMandatoryTopics } from "./userMandatoryTopicsMappings";
+import  { GenericMapping, UserMandatoryTopics } from "../";
 
 interface IMandatoryTopicsLk {
   id?: number;
@@ -32,7 +31,7 @@ class MandatoryTopicsLkMappings extends GenericMapping {
         allowNull: true
       },
       group: {
-        type: DataTypes.SMALLINT.UNSIGNED,
+        type: DataTypes.SMALLINT,
         allowNull: false,
         defaultValue: 1
       }
@@ -54,10 +53,6 @@ class MandatoryTopicsLkMappings extends GenericMapping {
 
   async sync(options?: SyncOptions) {
     return await MandatoryTopicsLk.sync(options);
-  }
-
-  async list(): Promise<IMandatoryTopicsLk[]> {
-    return await MandatoryTopicsLk.findAll();
   }
 
   async prepareData(): Promise<IMandatoryTopicsLk[]> {
@@ -104,7 +99,11 @@ class MandatoryTopicsLkMappings extends GenericMapping {
 
     return await MandatoryTopicsLk.bulkCreate(allRecords, options);
   }
+
+  async list(): Promise<IMandatoryTopicsLk[]> {
+    return await MandatoryTopicsLk.findAll();
+  }
 }
 
 const mandatoryTopicsLkMappingsInstance: MandatoryTopicsLkMappings = new MandatoryTopicsLkMappings();
-export { IMandatoryTopicsLk, MandatoryTopicsLk, mandatoryTopicsLkMappingsInstance as MandatoryTopicsLkMappings };
+export { IMandatoryTopicsLk, MandatoryTopicsLk, mandatoryTopicsLkMappingsInstance as MandatoryTopicsLkMapping };

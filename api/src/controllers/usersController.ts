@@ -1,12 +1,27 @@
 import { ServerResponse } from "http";
 import { FastifyRequestExt, FastifyReply, RouteOptions } from "fastify";
 
-import GenericController from "./genericController";
-import { User, UserMapping, UserMandatoryTopicsMappings, IUserMandatoryTopics } from "../db";
-import UserModel, { IUserModel } from "../models/userModel";
-import { UserMandatoryTopics } from "../db";
 import { IGenericModel } from "../models/genericModel";
-import UserMandatoryTopicsModel, { IUserMandatoryTopicsModel } from "../models/topics/userMandatoryTopicsModel";
+import {
+  IUserModel,
+  UserModel,
+  IUserMandatoryTopicsModel,
+  UserMandatoryTopicsModel,
+  IUserFeedbackModel
+} from "../models";
+import UserFeedbackModel, { IUserSpecificTopicsModel } from "../models/topics/userSpecificTopicsModel";
+
+import GenericController from "./genericController";
+import {
+  User,
+  UserMapping,
+  UserMandatoryTopicsMapping,
+  UserMandatoryTopics,
+  UserSpecificTopicsMapping,
+  UserSpecificTopics,
+  UserFeedback,
+  UserFeedbackMapping
+} from "../db";
 
 class UsersController extends GenericController {
   constructor() {
@@ -15,12 +30,16 @@ class UsersController extends GenericController {
 
   makeAssociations(): void {
     UserMapping.associations();
-    UserMandatoryTopicsMappings.associations();
+    UserMandatoryTopicsMapping.associations();
+	UserSpecificTopicsMapping.associations();
+	UserFeedbackMapping.associations();
   }
 
   async doSync(): Promise<void> {
     await UserMapping.sync({ alter: true });
-    await UserMandatoryTopicsMappings.sync({ alter: true });
+    await UserMandatoryTopicsMapping.sync({ alter: true });
+	await UserSpecificTopicsMapping.sync({ alter: true });
+	await UserFeedbackMapping.sync({ alter: true });
   }
 
   async listUsers(user: IUserModel & IGenericModel, offset: number, limit: number): Promise<User[]> {
@@ -38,13 +57,31 @@ class UsersController extends GenericController {
   }
 
   async getMandatoryTopicsUser(userId: number): Promise<UserMandatoryTopics[]> {
-    return await UserMandatoryTopicsMappings.get(userId);
+    return await UserMandatoryTopicsMapping.get(userId);
   }
 
   async addOrUpdateMandatoryTopicsUser(
-    userMandatoryTopic: IUserMandatoryTopicsModel
+    userMandatoryTopicModel: IUserMandatoryTopicsModel
   ): Promise<[UserMandatoryTopics, boolean]> {
-    return await UserMandatoryTopicsMappings.create(userMandatoryTopic);
+    return await UserMandatoryTopicsMapping.create(userMandatoryTopicModel);
+  }
+
+  async getSpecificTopicsUser(userId: number): Promise<UserSpecificTopics[]> {
+    return await UserSpecificTopicsMapping.get(userId);
+  }
+
+  async addOrUpdateSpecificTopicsUser(
+    userSpecificTopicModel: IUserSpecificTopicsModel
+  ): Promise<[UserSpecificTopics, boolean]> {
+    return await UserSpecificTopicsMapping.create(userSpecificTopicModel);
+  }
+
+  async getUserFeedback(userId: number): Promise<UserFeedback[]> {
+    return await UserFeedbackMapping.get(userId);
+  }
+
+  async addOrUpdateFeedbackUser(userFeedbackModel: IUserFeedbackModel): Promise<[UserFeedback, boolean]> {
+    return await UserFeedbackMapping.create(userFeedbackModel);
   }
 }
 
@@ -66,6 +103,29 @@ const userMandatoryTopicsModelSchema = {
     userId: { type: "number" },
     mandatoryTopicsId: { type: "number" },
     done: { type: "boolean" }
+  }
+};
+
+const userSpecificTopicsModelSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    specificTopicName: { type: "string" },
+    specificTopicMaterials: { type: "string" },
+    timespanId: { type: "number" },
+    responsibleId: { type: "number" },
+    done: { type: "boolean" }
+  }
+};
+
+const userFeedbackModelSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    userType: { type: "number" },
+    feedback: { type: "string" },
+    type: { type: "number" },
+    period: { type: "number" }
   }
 };
 
@@ -159,7 +219,7 @@ const UsersControllerRoutes: RouteOptions[] = [
       tags: ["user"],
       body: { ...userMandatoryTopicsModelSchema },
       response: {
-        "200": { type: "object" },
+        "200": { ...userMandatoryTopicsModelSchema },
         "4xx": {
           type: "string"
         }
@@ -169,10 +229,90 @@ const UsersControllerRoutes: RouteOptions[] = [
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userMandatoryTopicsModel = new UserMandatoryTopicsModel(request.body);
-      const [userMandatoryTopics, wasInserterd] = await userController.addOrUpdateMandatoryTopicsUser(
-        userMandatoryTopicsModel
-      );
+      const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
       reply.send(userMandatoryTopics.toJSON());
+    }
+  },
+  {
+    method: "GET",
+    url: "/api/user/specifictopics",
+    schema: {
+      tags: ["user"],
+      querystring: { userId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userSpecificTopicsModelSchema } },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userSpecificTopics = await userController.getSpecificTopicsUser(request.query.userId);
+      reply.send(userSpecificTopics.map(e => e.toJSON()));
+    }
+  },
+  {
+    method: "POST",
+    url: "/api/user/specifictopics",
+    schema: {
+      tags: ["user"],
+      body: { ...userSpecificTopicsModelSchema },
+      response: {
+        "200": { ...userSpecificTopicsModelSchema },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userSpecificTopicsModel = new UserFeedbackModel(request.body);
+      const [userMandatoryTopics] = await userController.addOrUpdateSpecificTopicsUser(userSpecificTopicsModel);
+      reply.send(userMandatoryTopics.toJSON());
+    }
+  },
+  {
+    method: "GET",
+    url: "/api/user/feedback",
+    schema: {
+      tags: ["user"],
+      querystring: { userId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userFeedbackModelSchema } },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userFeedback = await userController.getUserFeedback(request.query.userId);
+      reply.send(userFeedback.map(e => e.toJSON()));
+    }
+  },
+  {
+    method: "POST",
+    url: "/api/user/feedback",
+    schema: {
+      tags: ["user"],
+      body: { ...userFeedbackModelSchema },
+      response: {
+        "200": { ...userFeedbackModelSchema },
+        "4xx": {
+          type: "string"
+        }
+      },
+      security: [{ oauth: [] }]
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userFeedbackModel = new UserFeedbackModel(request.body);
+      const [userFeedback] = await userController.addOrUpdateFeedbackUser(userFeedbackModel);
+      reply.send(userFeedback.toJSON());
     }
   }
 ];

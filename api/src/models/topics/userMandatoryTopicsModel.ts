@@ -1,9 +1,13 @@
-import GenericModel, { IGenericModel } from "../genericModel";
+import { IGenericModel, GenericModel } from "../";
 
-export interface IUserMandatoryTopicsModel extends IGenericModel {
-  mandatoryTopicsId?: number;
-  userId?: number;
-  done?: boolean;
+export interface IUserMandatoryTopics {
+	id?: number;
+	done?: boolean;
+	mandatoryTopicsId?: number;
+	userId?: number;
+  }
+
+export interface IUserMandatoryTopicsModel extends IGenericModel, IUserMandatoryTopics {
 }
 
 export default class UserMandatoryTopicsModel extends GenericModel implements IUserMandatoryTopicsModel {

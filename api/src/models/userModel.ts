@@ -1,4 +1,4 @@
-import GenericModel, { IGenericModel } from "./genericModel";
+import { IGenericModel, GenericModel } from "./";
 
 export enum UserRole {
   Admin = 1,
@@ -7,13 +7,15 @@ export enum UserRole {
   Employee = 4
 }
 
-export interface IUserModel extends IGenericModel {
+export interface IUser {
   id?: number;
   firstName?: string;
   lastName?: string;
+  role?: UserRole;
   userName?: string;
-  role?: number;
 }
+
+export interface IUserModel extends IGenericModel, IUser {}
 
 export interface IActiveDirectoryUserModel extends IGenericModel {
   name?: string;

@@ -35,16 +35,17 @@
             {/each}
             {#if showDone}
               <td style="width:{colWidths[colWidths.length - 2]}%">
-                <input
-                  class="invisible"
-                  type="checkbox"
-                  id="{switchName}_{rowndx}"
-                  name="{switchName}_{rowndx}"
-                  data-bootstrap-switch
-                  data-off-color="danger"
-                  data-on-color="success"
-                  data-on-text="Yes"
-                  data-off-text="No" />
+                <div class="custom-control custom-switch">
+                  <input
+                    class="custom-control-input"
+                    type="checkbox"
+                    id="{switchName}_{rowndx}"
+                    name="{switchName}_{rowndx}"
+                    data-id={rowndx} />
+                  <label
+                    class="custom-control-label"
+                    for="{switchName}_{rowndx}" />
+                </div>
               </td>
             {/if}
             {#if showClose}
@@ -99,11 +100,17 @@
                     name="{switchName}-text-{ndx}-{ndxvals}"
                     id="{switchName}-text-{ndx}-{ndxvals}" />
                 {:else if vals === OpenTableItemType.check}
-                  <input
-                    type="checkbox"
-                    class="form-control"
-                    name="{switchName}-checkbox-{ndx}-{ndxvals}"
-                    id="{switchName}-checkbox-{ndx}-{ndxvals}" />
+                  <div class="custom-control custom-switch">
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      name="{switchName}-checkbox-{ndx}-{ndxvals}"
+                      id="{switchName}-checkbox-{ndx}-{ndxvals}"
+                      data-id="{ndx}-{ndxvals}" />
+                    <label
+                      class="custom-control-label"
+                      for="{switchName}-checkbox-{ndx}-{ndxvals}" />
+                  </div>
                 {:else if vals === OpenTableItemType.date}
                   <input
                     type="date"
@@ -115,16 +122,17 @@
             {/each}
             {#if showDone}
               <td style="width:{colWidths[colWidths.length - 2]}%">
-                <input
-                  class="invisible"
-                  type="checkbox"
-                  id="{switchName}_{info.data.length + 1}"
-                  name="{switchName}_{info.data.length + 1}"
-                  data-bootstrap-switch
-                  data-off-color="danger"
-                  data-on-color="success"
-                  data-on-text="Yes"
-                  data-off-text="No" />
+                <div class="custom-control custom-switch">
+                  <input
+                    class="custom-control-input"
+                    type="checkbox"
+                    id="{switchName}_{info.data.length + 1}"
+                    name="{switchName}_{info.data.length + 1}"
+                    data-id={info.data.length + 1} />
+                  <label
+                    class="custom-control-label"
+                    for="{switchName}_{info.data.length + 1}" />
+                </div>
               </td>
             {/if}
             {#if showClose}

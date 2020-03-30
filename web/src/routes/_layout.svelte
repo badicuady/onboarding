@@ -1,7 +1,12 @@
 <script context="module">
-  import { afterUpdate } from "svelte";
+  import { onMount } from "svelte";
   import config from "../config";
-  import { CacheKeys, SessionService, CacheService } from "../services";
+  import {
+    CacheKeys,
+    SessionService,
+    CacheService,
+    DictionariesService
+  } from "../services";
   import Utilities from "../common/utilities.js";
   import Navigation from "../components/Navigation.svelte";
   import Footer from "../components/Footer.svelte";
@@ -13,8 +18,8 @@
       session[CacheKeys.UserInfo] = config.testUser;
     }
 
-	const user = session[CacheKeys.UserInfo];
-	const token = session[CacheKeys.Token];
+    const user = session[CacheKeys.UserInfo];
+    const token = session[CacheKeys.Token];
     const rex = new RegExp(`\/${config.loginSegment}`, "gim");
     const isNotLogin = page.path.replace(rex, "").length !== 0;
     if (isNotLogin && config.useLogin && !user) {
@@ -29,32 +34,57 @@
   export let user;
   export let token;
 
-  let userModel;
   const sessionService = new SessionService();
+  let userModel;
+  let dictionariesService;
 
-  afterUpdate(() => {
-    (function($) {
-      $(function() {
-        $(document).ready(function() {
-          $("input[data-bootstrap-switch]").each(function() {
-            $(this).bootstrapSwitch("state", $(this).prop("checked"));
-          });
-        });
-      });
-    })(window.$);
+  const updateSerices = () => {
+    if (token) {
+      dictionariesService = new DictionariesService(token.access_token);
+    }
+  };
+
+  const updateCaches = async () => {
+    if (dictionariesService) {
+	  const departments = await dictionariesService.getDepartments();
+	  if (departments.status === 200 && departments.data) {
+		CacheService.setOrUpdateValue(
+			CacheKeys.Departments,
+			departments.data,
+			new Date(Date.now() + 3600 * 1000)
+		);
+	  }
+    }
+  };
+
+  const updateItems = async () => {
+    updateSerices();
+    await updateCaches();
+  };
+
+  onMount(async () => {
+    await updateItems();
   });
 
-  sessionService.subscribe(session => {
-    userModel = null;
+  sessionService.subscribe(async session => {
     if (session[CacheKeys.UserInfo]) {
-	  user = session[CacheKeys.UserInfo];
-	  userModel = new User(user);
-	  CacheService.setOrUpdateValue(CacheKeys.UserInfo, user, new Date(Date.now() + 3600 * 1000));
-	}
-	if (session[CacheKeys.Token]) {
-	  token = session[CacheKeys.Token];
-	  CacheService.setOrUpdateValue(CacheKeys.Token, token, new Date(Date.now() + 3600 * 1000));
+      user = session[CacheKeys.UserInfo];
+      userModel = new User(user);
+      CacheService.setOrUpdateValue(
+        CacheKeys.UserInfo,
+        user,
+        new Date(Date.now() + 3600 * 1000)
+      );
     }
+    if (session[CacheKeys.Token]) {
+      token = session[CacheKeys.Token];
+      CacheService.setOrUpdateValue(
+        CacheKeys.Token,
+        token,
+        new Date(Date.now() + 3600 * 1000)
+      );
+    }
+    await updateItems();
   });
 </script>
 

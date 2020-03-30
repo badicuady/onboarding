@@ -1,4 +1,5 @@
 <script>
+  import config from "../config";
   import Layout from "../components/Layout.svelte";
   import { OpenTableItemType } from "../models/enums.js";
   import OpenActivitiesTable from "../components/OpenActivitiesTable.svelte";
@@ -7,7 +8,7 @@
 
   let userInfo = {};
   CacheService.subscribe(cache => {
-	userInfo = cache.get(CacheKeys.UserInfo);
+    userInfo = cache.get(CacheKeys.UserInfo);
   });
 
   const objectives = {
@@ -108,7 +109,7 @@
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item">
-            <a href="#">golas</a>
+            <a href="##" on:click={config.preventEvent}>probationaryplan</a>
           </li>
           <li class="breadcrumb-item active">Onboarding Form</li>
         </ol>
@@ -149,7 +150,7 @@
                           type="text"
                           class="form-control"
                           readonly
-						  value={userInfo.name} />
+                          value={userInfo.name} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -163,7 +164,7 @@
                           type="text"
                           class="form-control"
                           readonly
-						  value={userInfo.title} />
+                          value={userInfo.title} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -177,7 +178,7 @@
                           type="text"
                           class="form-control"
                           readonly
-						  value={userInfo.manager} />
+                          value={userInfo.manager} />
                       </div>
                     </div>
                   </div>
@@ -197,6 +198,22 @@
                       </div>
                     </div>
                     <div class="form-group row">
+                      <label for="end-date" class="col-3 col-form-label">
+                        End date
+                      </label>
+                      <div class="col-9">
+                        <input
+                          id="end-date"
+                          name="end-date"
+                          type="date"
+                          class="form-control"
+                          readonly
+                          value={new Date(Date.now() + 3600 * 24 * 30)
+                            .toISOString()
+                            .slice(0, 10)} />
+                      </div>
+                    </div>
+                    <div class="form-group row">
                       <label for="department" class="col-3 col-form-label">
                         Department
                       </label>
@@ -207,7 +224,7 @@
                           type="text"
                           class="form-control"
                           readonly
-						  value={userInfo.department} />
+                          value={userInfo.department} />
                       </div>
                     </div>
                   </div>

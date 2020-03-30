@@ -3,8 +3,7 @@
   import {
     CacheKeys,
     CacheService,
-    UsersService,
-    SessionService
+    UsersService
   } from "../services";
 
   export let colWidths;

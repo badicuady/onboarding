@@ -1,6 +1,6 @@
 import { ServerResponse } from "http";
 import GenericController from "./genericController";
-import { MandatoryTopicsLkMappings, IMandatoryTopicsLk } from "../db";
+import { MandatoryTopicsLkMapping, IMandatoryTopicsLk } from "../db";
 import { RouteOptions, FastifyRequestExt, FastifyReply } from "fastify";
 
 class MandatoryTopicsController extends GenericController {
@@ -10,19 +10,19 @@ class MandatoryTopicsController extends GenericController {
   }
 
   async listMandatoryTopics(): Promise<IMandatoryTopicsLk[]> {
-    return await MandatoryTopicsLkMappings.list();
+    return await MandatoryTopicsLkMapping.list();
   }
 
   makeAssociations():void {
-    MandatoryTopicsLkMappings.associations();
+    MandatoryTopicsLkMapping.associations();
   }
 
   async doSync(): Promise<void> {
-    await MandatoryTopicsLkMappings.sync({ alter: true });
+    await MandatoryTopicsLkMapping.sync({ alter: true });
   }
 
   async postSyncHook(): Promise<void> {
-	await MandatoryTopicsLkMappings.prepareData();
+	await MandatoryTopicsLkMapping.prepareData();
   }
 }
 
@@ -42,7 +42,7 @@ const MandatoryTopicsControllerRoutes: RouteOptions[] = [
     method: "GET",
     url: "/api/mandatorytopics",
     schema: {
-      tags: ["mandatorytopics"],
+      tags: ["dictionaries"],
       response: {
         "200": {
           type: "array",

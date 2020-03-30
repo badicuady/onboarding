@@ -79,6 +79,7 @@ const config = {
   apiTokenResource: "token",
   apiUserInfoResource: "user/info",
   apiMethodPrefix: "api",
+  hrGroupName: "RSG-RO-HR_learn_dev_M",
 
   loginSegment: "login",
   loginPage: "https://sampleoneqa.ipsos.com/#/login",
@@ -106,7 +107,22 @@ const config = {
     day3: () => new Date(Date.now() + milliseconds.day3),
     week: () => new Date(Date.now() + milliseconds.week)
   },
-  profileImageReplace: "PhotoHandler\\.ashx\\?Filename=~\\/"
+  profileImageReplace: "PhotoHandler\\.ashx\\?Filename=~\\/",
+  preventEvent: (e) => {
+	  e.stopPropagation();
+	  e.stopImmediatePropagation();
+	  e.preventDefault();
+	  return false;
+  },
+  preventDefault: (e) => {
+	e.preventDefault();
+	return false;
+  },
+  preventPropagation: (e) => {
+	e.stopPropagation();
+	e.stopImmediatePropagation();
+	return false;
+},
 };
 
 Object.defineProperty(config.loginParams, "state", {

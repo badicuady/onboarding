@@ -23,8 +23,11 @@ const addProperties = _this => {
 	streetAddress: { configurable: true, enumerable: true, writable: true, value: "" },
 	directReports: { configurable: true, enumerable: true, writable: true, value: "" },
 	employeeID: { configurable: true, enumerable: true, writable: true, value: "" },
+	subordinate: { configurable: true, enumerable: true, writable: true, value: [] },
 	userPrincipalName: { configurable: true, enumerable: true, writable: true, value: "" },
 	manager: { configurable: true, enumerable: true, writable: true, value: "" },
+	isManager: { configurable: true, enumerable: true, writable: true, value: false },
+	isHr: { configurable: true, enumerable: true, writable: true, value: false },
 	mailNickname: { configurable: true, enumerable: true, writable: true, value: "" },
     employeeDirectoryLink: {
       configurable: true,

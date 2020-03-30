@@ -9,7 +9,12 @@
   const sessionService = new SessionService();
 
   const logout = async () => {
-    const userInfoObj = ObjectCreator.createObjectProperty({}, CacheKeys.UserInfo, DefinitionType.A, null);
+    const userInfoObj = ObjectCreator.createObjectProperty(
+      {},
+      CacheKeys.UserInfo,
+      DefinitionType.A,
+      null
+    );
     await sessionService.update(userInfoObj);
     goto(config.loginSegment);
   };
@@ -39,72 +44,73 @@
         <!-- Left navbar links -->
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a
-              href="/specialists"
-              class="nav-link"
-              class:active={!segment || segment === 'specialists'}>
-              Specialists
+            <a href="/" class="nav-link" class:active={!segment}>
+              {user.isManager ? 'Managers' : 'Specialists'}
             </a>
           </li>
           <li class="nav-item">
             <a
-              href="/managers"
+              href="/probationaryplan"
               class="nav-link"
-              class:active={segment === 'managers'}>
-              Managers
+              class:active={segment === 'probationaryplan'}>
+              Probationary plan
             </a>
           </li>
-          <li class="nav-item">
-            <a
-              href="/goals"
-              class="nav-link"
-              class:active={segment === 'goals'}>
-              Goals
-            </a>
-          </li>
+          {#if user.IsHr}
+            <li class="nav-item">
+              <a
+                href="/reports"
+                class="nav-link"
+                class:active={segment === 'reports'}>
+                Reports
+              </a>
+            </li>
+          {/if}
+          {#if user.subordinate.length}
+            <li class="nav-item dropdown">
+              <a
+                href="##"
+                class="nav-link dropdown-toggle"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
+                Subordinates
+              </a>
+              <div class="dropdown-menu scroll-bar scroll-bar-200" aria-labelledby="navbarDropdown">
+                {#each user.subordinate as subordinate, rowndx}
+                  <a class="dropdown-item" href="##" on:click="{config.preventDefault}">{subordinate}</a>
+                {/each}
+              </div>
+            </li>
+          {/if}
         </ul>
       </div>
 
       <!-- Right navbar links -->
       <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+        <li class="nav-item">
+          <a href="//ipsos.com" class="nav-link" target="_blank">ITC</a>
+        </li>
+        <li class="nav-item">
+          <a href="//italent.ipsos.com" class="nav-link" target="_blank">
+            iTalent
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="//ipsosgroup.sharepoint.com/sites/Romania/Pages/Home.aspx"
+            class="nav-link"
+            target="_blank">
+            Intranet
+          </a>
+        </li>
+        <li class="nav-item">
+          <span class="nav-link disabled">As <strong class="text-danger">self</strong></span>
+        </li>
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
-          <a
-            class="nav-link"
-            data-toggle="dropdown"
-            href="#"
-            title="Notifications">
-            <i class="far fa-bell" />
-            <span class="badge badge-warning navbar-badge">15</span>
-          </a>
-          <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <span class="dropdown-header">15 Notifications</span>
-            <div class="dropdown-divider" />
-            <a href="#" class="dropdown-item">
-              <i class="fas fa-envelope mr-2" />
-              4 new messages
-              <span class="float-right text-muted text-sm">3 mins</span>
-            </a>
-            <div class="dropdown-divider" />
-            <a href="#" class="dropdown-item">
-              <i class="fas fa-users mr-2" />
-              8 friend requests
-              <span class="float-right text-muted text-sm">12 hours</span>
-            </a>
-            <div class="dropdown-divider" />
-            <a href="#" class="dropdown-item">
-              <i class="fas fa-file mr-2" />
-              3 new reports
-              <span class="float-right text-muted text-sm">2 days</span>
-            </a>
-            <div class="dropdown-divider" />
-            <a href="#" class="dropdown-item dropdown-footer">
-              See All Notifications
-            </a>
-          </div>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link" data-toggle="dropdown" href="#" title="Profile">
+          <a class="nav-link" data-toggle="dropdown" href="##" title="Profile">
             <i class="fas fa-th-large" />
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
@@ -114,13 +120,13 @@
                 <h3 class="dropdown-item-title">{user.displayName}</h3>
                 <p class="text-sm">{user.mail}</p>
                 <p class="text-sm text-muted">{user.department}</p>
-				<p class="text-sm text-muted">{user.manager}</p>
+                <p class="text-sm text-muted">{user.manager}</p>
               </div>
             </div>
             <!-- Message End -->
             <div class="dropdown-divider" />
             <a
-              href="#"
+              href="##"
               class="btn btn-primary btn-xs text-right m-2 float-right"
               on:click={logout}>
               Log out

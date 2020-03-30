@@ -1,21 +1,8 @@
-import crypto from "crypto";
-import { Model, DataTypes, CreateOptions, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
+import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
+import { UserRole, IUserModel, IUser } from "../models";
+import { GenericMapping, GenericDatabase, UserMandatoryTopics, UserSpecificTopics, UserFeedback } from "./";
 
-import { app, argv } from "../config";
-import GenericMapping from "./genericMapping";
-import { UserRole, IUserModel } from "../models/userModel";
-import { UserMandatoryTopics } from "./topics/userMandatoryTopicsMappings";
-import { IGenericModel } from "../models/genericModel";
-
-interface IUser extends Model {
-  id?: number;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  userName: string;
-}
-
-class User extends Model<any, any> implements IUser {
+class User extends GenericDatabase implements IUser {
   id!: number;
   firstName!: string;
   lastName!: string;
@@ -57,11 +44,19 @@ class UserMapping extends GenericMapping {
   }
 
   async sync(options?: SyncOptions) {
-    return await User.sync();
+    return await User.sync(options);
   }
 
   associations(): void {
     User.hasMany(UserMandatoryTopics, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserSpecificTopics, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserFeedback, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
       constraints: true
     });
@@ -78,12 +73,12 @@ class UserMapping extends GenericMapping {
 
   async list(model: IUserModel, offset: number, limit: number) {
     offset = offset || 0;
-	limit = limit || 10;
-    return await User.findAll({ 
-		offset, 
-		limit, 
-		where: { ...model.toPlainObject && model.toPlainObject() }
-	});
+    limit = limit || 10;
+    return await User.findAll({
+      offset,
+      limit,
+      where: { ...(model.toPlainObject && model.toPlainObject()) }
+    });
   }
 
   async find(model: IUserModel) {

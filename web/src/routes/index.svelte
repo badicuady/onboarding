@@ -2,13 +2,17 @@
   import { onMount } from "svelte";
   import { OpenTableItemType } from "../models/enums.js";
   import { responsabile, duration } from "../services/activities.service.js";
-  import { CacheKeys, CacheService, UsersService } from "../services";
+  import { CacheKeys, CacheService } from "../services";
   import Activities from "../components/Activities.svelte";
   import {
     welcomeToIssSpecialists,
     complianceTopicsSpecialists,
     iisApsSpecialists,
-    trainingsSpecialists
+	trainingsSpecialists,
+	welcomeToIssManagers,
+    complianceTopicsManagers,
+    iisApsManagers,
+    trainingsManagers
   } from "../services/activities.service.js";
 
   const topics = {
@@ -78,14 +82,19 @@
       Object.entries(responsabile).map(e => ({ key: e[0], value: e[1] }))
     ]
   };
+
+  let userModel;
+  const cacheSubscribe = CacheService.subscribe(cache => {
+    userModel = cache.get(CacheKeys.UserInfo);
+  });
 </script>
 
 <Activities
-  pageTitle="Onboarding Form Specialists"
-  mode="Specialists"
-  welcomeToIss={welcomeToIssSpecialists}
-  complianceTopics={complianceTopicsSpecialists}
-  iisAps={iisApsSpecialists}
-  trainings={trainingsSpecialists}
+  pageTitle={userModel.isManager ? "Onboarding Form Managers" : "Onboarding Form Specialists"}
+  mode={userModel.isManager ? "Managers" : "Specialists"}
+  welcomeToIss={userModel.isManager ? welcomeToIssManagers : welcomeToIssSpecialists}
+  complianceTopics={userModel.isManager ? complianceTopicsManagers : complianceTopicsSpecialists}
+  iisAps={userModel.isManager ? iisApsManagers : iisApsSpecialists}
+  trainings={userModel.isManager ? trainingsManagers : trainingsSpecialists}
   {topics}
   {subjects} />
