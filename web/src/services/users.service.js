@@ -91,6 +91,33 @@ class UsersService extends AuthService {
       console.error(error);
     }
   }
+
+  async getUserFeedback(userId, userType, feedback, period, type) {
+    try {
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/feedback`;
+      const response = await axios.get(url, { ...this.config, params: { userId } });
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async upsertUserFeedback(userId, period, type, userType, feedback) {
+    try {
+      const data = {
+        userId,
+        userType,
+        feedback,
+        period,
+        type,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/feedback`;
+      const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 
 export default UsersService;

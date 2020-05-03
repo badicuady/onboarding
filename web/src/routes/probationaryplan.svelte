@@ -19,8 +19,11 @@
       "Close"
     ],
     data: [
-      ["Objective 1", "2020-03-01", "Cineva CuHalva"],
-      ["Objective 2", "2020-03-01", "Cineva CuHalva"]
+      {
+        id: 1,
+        cells: ["Objective 1", "2020-03-01", "Cineva CuHalva"]
+      },
+      { id: 2, cells: ["Objective 2", "2020-03-01", "Cineva CuHalva"] }
     ],
     columnVals: [
       OpenTableItemType.single,
@@ -37,8 +40,14 @@
       "Close"
     ],
     data: [
-      ["Development 1", "2020-03-01", "Cineva CuHalva"],
-      ["Development 2", "2020-03-01", "Cineva CuHalva"]
+      {
+        id: 1,
+        cells: ["Development 1", "2020-03-01", "Cineva CuHalva"]
+      },
+      {
+        id: 2,
+        cells: ["Development 2", "2020-03-01", "Cineva CuHalva"]
+      }
     ],
     columnVals: [
       OpenTableItemType.single,
@@ -68,7 +77,10 @@
 
   const firstReviewAction1 = {
     columns: ["Required actions", "Review Date", "Delete"],
-    data: [["Action 1", "2020-03-01"], ["Action 2", "2020-03-01"]],
+    data: [
+      { id: 1, cells: ["Action 1", "2020-03-01"] },
+      { id: 2, cells: ["Action 2", "2020-03-01"] }
+    ],
     columnVals: [OpenTableItemType.single, OpenTableItemType.date]
   };
 
@@ -94,6 +106,8 @@
     Object.assign({}, firstReviewData[0]),
     Object.assign({}, firstReviewData[1])
   ];
+
+  
 </script>
 
 <svelte:head>

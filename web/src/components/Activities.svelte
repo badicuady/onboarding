@@ -39,6 +39,7 @@
   let modeRadical = (mode || "").toLowerCase();
   let localSpecificTopicsType1 = {};
   let localSpecificTopicsType2 = {};
+  let localUserFeedback = {};
   let localTableCards = [];
 
   const readUserMandatoryTopcis = async () => {
@@ -99,6 +100,25 @@
           localSpecificTopicsType2,
           userSpecificTopics.get(2)
         );
+      }
+    }
+  };
+
+  const readUserFeedback = async () => {
+    if (usersService) {
+      const userFeedbackInfo = await usersService.getUserFeedback(userModel.id);
+      if (userFeedbackInfo && userFeedbackInfo.data) {
+        const tmpUserFeedbackInfo = {};
+        const data = userFeedbackInfo.data;
+        for (let ndx = 0; ndx < data.length; ++ndx) {
+          const period = +data[ndx].period - 1;
+          const type = +data[ndx].type - 1;
+          const userType = +data[ndx].userType - 1;
+          tmpUserFeedbackInfo[`feedback-${period}-${type}-${userType}`] =
+            data[ndx].feedback;
+        }
+        localUserFeedback = { ...tmpUserFeedbackInfo };
+        console.log(localUserFeedback);
       }
     }
   };
@@ -168,7 +188,6 @@
             )
           };
         } else if (type === 2) {
-          console.log(e.detail.id, type);
           localSpecificTopicsType2 = {
             ...localSpecificTopicsType2,
             data: localSpecificTopicsType2.data.filter(
@@ -178,12 +197,24 @@
         }
       }
     }
-    console.log(e, type);
   };
 
-  const readInfo = async () => {
-    await readUserMandatoryTopcis();
-    await readUserSpecificTopics();
+  const itemBlurFeedback = async (e, period) => {
+    if (usersService) {
+      period = +period + 1;
+      const type = +e.detail.type + 1;
+      const userType = +e.detail.userType + 1;
+      const feedback = (e.detail.original.target.value || "") + "";
+      if (feedback.trim().length > 0) {
+        const userFeedbackInfo = await usersService.upsertUserFeedback(
+          userModel.id,
+          period,
+          type,
+          userType,
+          feedback
+        );
+      }
+    }
   };
 
   const updateLists = () => {
@@ -240,6 +271,12 @@
         table.information = [...groups[ndx]];
       }
     }
+  };
+
+  const readInfo = async () => {
+    await readUserMandatoryTopcis();
+    await readUserSpecificTopics();
+    await readUserFeedback();
   };
 
   const cacheSubscribe = CacheService.subscribe(cache => {
@@ -550,7 +587,7 @@
           <!-- card-header -->
           <div class="card-body">
             <div id="accordion-{modeRadical}-feedback">
-              {#each feedbackAll as feedback, ndx}
+              {#each feedbackAll as feedback, ndx (feedback)}
                 <div class="card">
                   <div class="card-header bg-navy">
                     <h4 class="card-title bg-navy">
@@ -569,11 +606,13 @@
                     <div class="card-body table-responsive">
                       <OpenActivitiesTable
                         info={feedback}
+                        inputs={localUserFeedback}
                         switchName="feedback-{ndx}"
                         colWidths={[5, 19, 19, 19, 19, 19]}
                         showAddNew={false}
                         showClose={false}
-                        showDone={false} />
+                        showDone={false}
+                        on:itemBlur={e => itemBlurFeedback(e, ndx)} />
                     </div>
                   </div>
                 </div>

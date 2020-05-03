@@ -7,9 +7,9 @@
     AdminService,
     CacheKeys,
     ApiService,
-	CacheService,
-	UsersService,
-	DictionariesService
+    CacheService,
+    UsersService,
+    DictionariesService
   } from "../services/index.js";
   import ObjectCreator, { DefinitionType } from "../common/objectCreator.js";
   import Utilities from "../common/utilities.js";
@@ -25,6 +25,7 @@
   let password = "";
   let formWasValidated = false;
   let loginFailed = undefined;
+  let networkFailed = undefined;
   let hidePassword = true;
   let passwordType = passwordTypeMap.get(hidePassword);
 
@@ -87,7 +88,7 @@
         CacheKeys.UserInfo,
         userInfoObj,
         new Date(Date.now() + 3600 * 1000)
-	  );
+      );
     }
   };
 
@@ -113,12 +114,21 @@
 
   const login = async e => {
     loadingStore.setVisible();
+    networkFailed = false;
     loginFailed = false;
     if (validate(e)) {
       const token = await apiService.token(email, password);
-      loginFailed = !!(token && token.data && token.data.error);
-      if (!loginFailed) {
-        loginStrategy(token);
+      networkFailed = !!(
+        token &&
+        token.data &&
+        token.data.error &&
+        token.data.error.response.data.error.code === "ENOTFOUND"
+      );
+      if (!networkFailed) {
+        loginFailed = !!(token && token.data && token.data.error);
+        if (!loginFailed) {
+          loginStrategy(token);
+        }
       }
     }
     loadingStore.setInvisible();
@@ -170,6 +180,12 @@
                       class:visible={loginFailed}
                       class:invisible={!loginFailed}>
                       <strong>User name or password are invalid!</strong>
+                    </div>
+                    <div
+                      class="text-center text-danger mb-3"
+                      class:visible={networkFailed}
+                      class:invisible={!networkFailed}>
+                      <strong>Internal network not available! (Disconnected from VPN?)</strong>
                     </div>
                     <div class="form-group row">
                       <label for="email" class="col-sm-1 col-form-label">

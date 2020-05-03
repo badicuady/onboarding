@@ -203,9 +203,9 @@ const userFeedbackModelSchema = {
   properties: {
     userId: { type: "number" },
     userType: { type: "number" },
-    feedback: { type: "string" },
-    type: { type: "number" },
-    period: { type: "number" },
+	feedback: { type: "string" },
+	period: { type: "number" },
+    type: { type: "number" }    
   },
 };
 

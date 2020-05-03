@@ -4,6 +4,7 @@
   import { CacheKeys, CacheService } from "../services";
 
   export let info = {};
+  export let inputs = {};
   export let colWidths;
   export let switchName;
   export let showDone = true;
@@ -12,7 +13,6 @@
 
   const dispatch = createEventDispatcher();
 
-  let inputs = {};
   let responsibles = [];
   let timespans = [];
   const rowValsHeaders = info.rowValsHeaders ? info.rowValsHeaders : [""];
@@ -40,6 +40,10 @@
 
   const deleteClicked = (e, id) => {
     dispatch("deleteClicked", { original: e, id });
+  };
+
+  const itemBlur = (e, type, userType) => {
+    dispatch("itemBlur", { original: e, type, userType });
   };
 </script>
 
@@ -132,7 +136,8 @@
                     class="form-control"
                     name="{switchName}-text-{ndx}-{ndxvals}"
                     id="{switchName}-text-{ndx}-{ndxvals}"
-                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]} />
+                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]}
+                    on:blur={e => itemBlur(e, ndx, ndxvals)} />
                 {:else if vals === OpenTableItemType.check}
                   <div class="custom-control custom-switch">
                     <input
