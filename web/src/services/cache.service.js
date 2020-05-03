@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import config from '../config';
 
-const cache = (function () {
+const cache = (() => {
 	const _items = {};
 
 	class Cache {
@@ -53,7 +53,7 @@ const cache = (function () {
 	}
 
 	return () => new Cache();
-}());
+})();
 
 const createCacheStore = () => {
 	const _cleanInterval = config.milliseconds.min10;
@@ -85,6 +85,8 @@ export const CacheKeys = {
 	UserData: "userData",
 	UserInfo: "userInfo",
 	Token: "token",
-	AdminService: "adminService",
-	Departments: "departments"
+	Departments: "departments",
+	MandatoryTopics: "mandatoryTopics",
+	Timespans: "timespans",
+	Responsibles: "responsibles",
 };

@@ -6,6 +6,8 @@
 
   export let segment;
   export let user;
+
+  // do not delete: error Function called outside component initialization
   const sessionService = new SessionService();
 
   const logout = async () => {

@@ -1,6 +1,6 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
-import { IUserFeedback, IUserFeedbackModel, UserFeedbackModel } from "../models";
-import { GenericMapping, GenericDatabase, User } from "./";
+import { IUserFeedback, IUserFeedbackModel, UserFeedbackModel } from "../../models";
+import { GenericMapping, GenericDatabase, User } from "..";
 
 class UserFeedback extends GenericDatabase implements IUserFeedback {
   id!: number;
@@ -9,6 +9,7 @@ class UserFeedback extends GenericDatabase implements IUserFeedback {
   userType!: number;
   type!: number;
   period!: number;
+  alteringUserId!: number;
 }
 
 class UserFeedbackMapping extends GenericMapping {

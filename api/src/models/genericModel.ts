@@ -4,6 +4,7 @@ export interface IGenericModel {
   toPlainObject?(): any;
   setup?(model: any): void;
   validate?(model: any): boolean;
+  [key:string]: any;
 }
 
 abstract class GenericModel implements IGenericModel {

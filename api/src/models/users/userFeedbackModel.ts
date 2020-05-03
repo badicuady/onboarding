@@ -1,4 +1,4 @@
-import { IGenericModel, GenericModel } from "./";
+import { IGenericModel, GenericModel } from "..";
 
 export interface IUserFeedback {
   id?: number;
@@ -7,6 +7,7 @@ export interface IUserFeedback {
   userType?: number;
   type?: number;
   period?: number;
+  alteringUserId?: number;
 }
 
 export interface IUserFeedbackModel extends IGenericModel, IUserFeedback {}

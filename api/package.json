@@ -6,7 +6,7 @@
   "scripts": {
     "serv": "npm run tsc && npm run start",
     "start": "set PORT=3123 && node ./dist/index.js --env=dev",
-    "start-docker": "node ./dist/index.js --env=docker",
+    "start-docker": "set PORT=3123 && node ./index.js --env=docker",
     "mon": "nodemon --delay 2500ms --ext ts --exec npm start",
     "eslint": "eslint src --ext ts",
     "tsc": "tsc && gulp copyKeyFiles"

@@ -1,15 +1,13 @@
-FROM node:13.6.0-alpine
+FROM node:alpine
 
-WORKDIR /usr/src/restapicore
+WORKDIR /usr/src/onboarding/api
 
 COPY package*.json ./
 
 RUN npm cache clean --force && npm install --only=prod && node --version
 
-COPY . .
+COPY ./dist ./
 
-COPY ./oauth.js ./node_modules/fastify-oauth2/index.js
-
-EXPOSE 3000
+EXPOSE 3123
 
 CMD npm run start-docker

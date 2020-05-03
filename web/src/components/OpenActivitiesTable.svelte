@@ -1,5 +1,7 @@
 <script>
+  import { onDestroy, createEventDispatcher } from "svelte";
   import { OpenTableItemType } from "../models/enums.js";
+  import { CacheKeys, CacheService } from "../services";
 
   export let info = {};
   export let colWidths;
@@ -8,14 +10,40 @@
   export let showClose = true;
   export let showAddNew = true;
 
-  const rowValsHeaders = info.rowValsHeaders ? info.rowValsHeaders : [""];
+  const dispatch = createEventDispatcher();
 
-  const validate = e => {
-    console.log(e);
+  let inputs = {};
+  let responsibles = [];
+  let timespans = [];
+  const rowValsHeaders = info.rowValsHeaders ? info.rowValsHeaders : [""];
+  const cacheSubscribe = CacheService.subscribe(cache => {
+    timespans = cache.get(CacheKeys.Timespans) || {};
+    responsibles = cache.get(CacheKeys.Responsibles) || {};
+  });
+
+  onDestroy(() => {
+    cacheSubscribe();
+  });
+
+  const addNewRow = e => {
+    dispatch("addNewRow", { original: e, inputs });
+    for (const ndx in inputs) {
+      if (inputs.hasOwnProperty(ndx)) {
+        inputs[ndx] = "";
+      }
+    }
+  };
+
+  const doneChange = (e, id) => {
+    dispatch("doneChange", { original: e, id });
+  };
+
+  const deleteClicked = (e, id) => {
+    dispatch("deleteClicked", { original: e, id });
   };
 </script>
 
-{#if info && info.columns && info.columnVals}
+{#if info && info.columns && info.columnVals && info.data}
   <form>
     <table class="table table-hover table-striped">
       <thead class="teal white-text">
@@ -27,10 +55,10 @@
         </tr>
       </thead>
       <tbody>
-        {#each info.data as row, rowndx}
-          <tr>
+        {#each info.data as row, rowndx (row)}
+          <tr data-id={row.id}>
             <th scope="row" style="width:{colWidths[0]}%">{rowndx + 1}</th>
-            {#each row as cell, colndx}
+            {#each row.cells as cell, colndx}
               <td style="width:{colWidths[colndx + 1]}%">{cell}</td>
             {/each}
             {#if showDone}
@@ -39,12 +67,14 @@
                   <input
                     class="custom-control-input"
                     type="checkbox"
-                    id="{switchName}_{rowndx}"
-                    name="{switchName}_{rowndx}"
-                    data-id={rowndx} />
+                    id="{switchName}-{rowndx}"
+                    name="{switchName}-{rowndx}"
+                    data-id={rowndx}
+                    checked={row.done === true}
+                    on:change={e => doneChange(e, row.id)} />
                   <label
                     class="custom-control-label"
-                    for="{switchName}_{rowndx}" />
+                    for="{switchName}-{rowndx}" />
                 </div>
               </td>
             {/if}
@@ -53,7 +83,8 @@
                 <button
                   type="button"
                   class="close text-danger float-none mx-auto d-block"
-                  aria-label="Close">
+                  aria-label="Close"
+                  on:click={e => deleteClicked(e, row.id)}>
                   <h2>
                     <span aria-hidden="true">&times;</span>
                   </h2>
@@ -77,13 +108,14 @@
                     placeholder="Select one"
                     class="form-control"
                     name="{switchName}-select-{ndx}-{ndxvals}"
-                    id="{switchName}-select-{ndx}-{ndxvals}">
+                    id="{switchName}-select-{ndx}-{ndxvals}"
+                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]}>
+                    <option value="" selected disabled>--</option>
                     {#each vals as item, itemndx}
                       <option
                         value={item.key}
                         data-index={itemndx}
-                        disabled={(item.value || '').length === 0}
-                        selected={(item.value || '').length === 0}>
+                        disabled={(item.value || '').length === 0}>
                         {item.value}
                       </option>
                     {/each}
@@ -93,12 +125,14 @@
                     type="text"
                     class="form-control"
                     name="{switchName}-input-text-{ndx}-{ndxvals}"
-                    id="{switchName}-input-text-{ndx}-{ndxvals}" />
+                    id="{switchName}-input-text-{ndx}-{ndxvals}"
+                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]} />
                 {:else if vals === OpenTableItemType.multi}
                   <textarea
                     class="form-control"
                     name="{switchName}-text-{ndx}-{ndxvals}"
-                    id="{switchName}-text-{ndx}-{ndxvals}" />
+                    id="{switchName}-text-{ndx}-{ndxvals}"
+                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]} />
                 {:else if vals === OpenTableItemType.check}
                   <div class="custom-control custom-switch">
                     <input
@@ -106,7 +140,8 @@
                       class="custom-control-input"
                       name="{switchName}-checkbox-{ndx}-{ndxvals}"
                       id="{switchName}-checkbox-{ndx}-{ndxvals}"
-                      data-id="{ndx}-{ndxvals}" />
+                      data-id="{ndx}-{ndxvals}"
+                      bind:checked={inputs[`${switchName}-${ndx}-${ndxvals}`]} />
                     <label
                       class="custom-control-label"
                       for="{switchName}-checkbox-{ndx}-{ndxvals}" />
@@ -116,7 +151,8 @@
                     type="date"
                     class="form-control"
                     name="{switchName}-date-{ndx}-{ndxvals}"
-                    id="{switchName}-date-{ndx}-{ndxvals}" />
+                    id="{switchName}-date-{ndx}-{ndxvals}"
+                    bind:value={inputs[`${switchName}-${ndx}-${ndxvals}`]} />
                 {/if}
               </td>
             {/each}
@@ -126,12 +162,13 @@
                   <input
                     class="custom-control-input"
                     type="checkbox"
-                    id="{switchName}_{info.data.length + 1}"
-                    name="{switchName}_{info.data.length + 1}"
-                    data-id={info.data.length + 1} />
+                    id="{switchName}-done-{ndx}-{colWidths.length - 3}"
+                    name="{switchName}-done-{ndx}-{colWidths.length - 3}"
+                    data-id="{ndx}-{colWidths.length - 3}"
+                    bind:checked={inputs[`${switchName}-${ndx}-${colWidths.length - 3}`]} />
                   <label
                     class="custom-control-label"
-                    for="{switchName}_{info.data.length + 1}" />
+                    for="{switchName}-done-{ndx}-{colWidths.length - 3}" />
                 </div>
               </td>
             {/if}
@@ -147,7 +184,7 @@
     <button
       type="button"
       class="btn btn-primary btn-block btn-sm mt-3"
-      on:click={validate}>
+      on:click={addNewRow}>
       Add new row
     </button>
   {/if}

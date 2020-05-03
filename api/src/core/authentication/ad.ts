@@ -2,7 +2,7 @@ import ActiveDirectory from "./activeDirectory";
 
 import { app, argv } from "../../config";
 import { UserMapping } from "../../db";
-import UserModel, { IUserModel } from "../../models/userModel";
+import UserModel, { IUserModel } from "../../models/users/userModel";
 import Authentication from "./auth";
 import JwtService from "../services/jwtService";
 import JwtOptionsModel from "../../models/jwt/jwtOptionsModel";
@@ -42,7 +42,7 @@ class ActiveDirectoryAuthentication extends Authentication {
   async authenticate() {
     console.info(`Authenticating user: [${this.userName}]...`);
     const userResource = await this._adClient.loginUser(this.userName, this.password);
-    console.info(`Authenticated resource: ${Object.keys(userResource).join()}`);
+    console.info(`Authenticated resource: ${userResource.success}`);
 
     if (userResource.entry) {
       const user = ActiveDirectory.createUserObj(userResource.entry);

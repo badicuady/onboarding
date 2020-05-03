@@ -1,5 +1,5 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
-import { GenericMapping, MandatoryTopicsLk, User } from "../";
+import { GenericMapping, MandatoryTopicsLk, User } from "..";
 import { IUserMandatoryTopicsModel, IUserMandatoryTopics } from "../../models";
 
 class UserMandatoryTopics extends Model implements IUserMandatoryTopics {

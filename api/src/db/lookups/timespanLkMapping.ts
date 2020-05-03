@@ -1,5 +1,6 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping, UserSpecificTopics } from "./";
+import { GenericMapping, UserSpecificTopics } from "..";
+import { MandatoryTopicsLk } from "./mandatoryTopicsLkMapping";
 
 interface ITimespanLk {
   id?: number;
@@ -27,33 +28,37 @@ class TimespanLkMapping extends GenericMapping {
         allowNull: false,
         autoIncrementIdentity: true,
         primaryKey: true,
-        unique: true
+        unique: true,
       },
       name: {
         type: new DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
       },
       description: {
         type: new DataTypes.STRING(200),
-        allowNull: true
+        allowNull: true,
       },
       value: {
         type: DataTypes.BIGINT,
-        allowNull: false
-      }
+        allowNull: false,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     TimespanLk.init(modelAttributes, modelOptions);
   }
 
   associations(): void {
+    TimespanLk.hasMany(MandatoryTopicsLk, {
+      foreignKey: { name: "timespanId", field: "timespanId", allowNull: true },
+      constraints: true,
+    });
     TimespanLk.hasMany(UserSpecificTopics, {
-      foreignKey: { name: "timespanId", field: "timespanId", allowNull: false },
-      constraints: true
+      foreignKey: { name: "timespanId", field: "timespanId", allowNull: true },
+      constraints: true,
     });
   }
 
@@ -63,17 +68,17 @@ class TimespanLkMapping extends GenericMapping {
 
   async prepareData(): Promise<ITimespanLk[]> {
     const options: BulkCreateOptions = {
-      ignoreDuplicates: true
+      updateOnDuplicate: ["name", "description", "value"],
     };
     const records: ITimespanLk[] = [
       { name: "firstDay", description: "First day", value: 24 * 60 * 60 * 1000 },
       { name: "firstThreeDays", description: "First three days", value: 3 * 24 * 60 * 60 * 1000 },
       { name: "firstWeek", description: "First week", value: 7 * 24 * 60 * 60 * 1000 },
-	  { name: "firstTwoWeeks", description: "First two weeks", value: 2 * 7 * 24 * 60 * 60 * 1000 },
-	  { name: "firstMonth", description: "First month", value: 4 * 7 * 24 * 60 * 60 * 1000 },
+      { name: "firstTwoWeeks", description: "First two weeks", value: 2 * 7 * 24 * 60 * 60 * 1000 },
+      { name: "firstMonth", description: "First month", value: 4 * 7 * 24 * 60 * 60 * 1000 },
       { name: "firstTwoMonths", description: "First two months", value: 2 * 4 * 7 * 24 * 60 * 60 * 1000 },
       { name: "firstThreeMonths", description: "First three months", value: 3 * 4 * 7 * 24 * 60 * 60 * 1000 },
-      { name: "firstSixMonths", description: "First six months", value: 6 * 4 * 7 * 24 * 60 * 60 * 1000 }
+      { name: "firstSixMonths", description: "First six months", value: 6 * 4 * 7 * 24 * 60 * 60 * 1000 },
     ];
     records.forEach((e, ndx) => (e.id = ndx + 1));
     return await TimespanLk.bulkCreate(records, options);

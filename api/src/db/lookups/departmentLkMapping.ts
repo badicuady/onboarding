@@ -1,5 +1,5 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping } from "./";
+import { GenericMapping } from "..";
 
 interface IDepartmentLk {
   id?: number;
@@ -46,7 +46,7 @@ class DepartmentLkMapping extends GenericMapping {
 
   async prepareData(): Promise<IDepartmentLk[]> {
     const options: BulkCreateOptions = {
-      ignoreDuplicates: true
+		updateOnDuplicate: ["name"]
     };
     const records: IDepartmentLk[] = [
       { name: "Global Scripting (EU)" },

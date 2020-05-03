@@ -1,9 +1,12 @@
 <script>
+  import { fade } from "svelte/transition";
   import { OpenTableItemType } from "../models/enums.js";
   import OpenActivitiesTable from "../components/OpenActivitiesTable.svelte";
 
   export let reviewData;
   export let reviewUniqueId;
+
+  export let showFurtherActions = reviewData.map(e => !!e);
 </script>
 
 <form>
@@ -69,7 +72,8 @@
                   type="checkbox"
                   id="{reviewUniqueId}-action-{ndx}"
                   name="{reviewUniqueId}-action-{ndx}"
-                  data-id="{ndx}" />
+                  data-id={ndx}
+                  bind:checked={showFurtherActions[ndx]} />
                 <label
                   class="custom-control-label"
                   for="{reviewUniqueId}-action-{ndx}" />
@@ -78,14 +82,18 @@
           </div>
         </div>
         <div class="col-7">
-          <p>
-            <label>If NO, what further action is required?</label>
-          </p>
-          <OpenActivitiesTable
-            switchName="{reviewUniqueId}-action-{ndx}"
-            info={data.actions}
-            colWidths={[5, 50, 35, 10]}
-            showDone={false} />
+          {#if !showFurtherActions[ndx]}
+            <div in:fade out:fade>
+              <p>
+                <label>If NO, what further action is required?</label>
+              </p>
+              <OpenActivitiesTable
+                switchName="{reviewUniqueId}-action-{ndx}"
+                info={data.actions}
+                colWidths={[5, 50, 35, 10]}
+                showDone={false} />
+            </div>
+          {/if}
         </div>
       </div>
     {/each}

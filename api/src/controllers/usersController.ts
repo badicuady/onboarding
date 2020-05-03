@@ -7,9 +7,17 @@ import {
   UserModel,
   IUserMandatoryTopicsModel,
   UserMandatoryTopicsModel,
-  IUserFeedbackModel
+  IUserSpecificTopicsModel,
+  IUserFeedbackModel,
+  UserFeedbackModel,
+  UserObjectiveModel,
+  UserSpecificTopicsModel,
+  IUserReviewModel,
+  UserReviewModel,
+  IUserObjectiveModel,
+  IUserRequiredActionsModel,
+  UserRequiredActionsModel,
 } from "../models";
-import UserFeedbackModel, { IUserSpecificTopicsModel } from "../models/topics/userSpecificTopicsModel";
 
 import GenericController from "./genericController";
 import {
@@ -20,7 +28,13 @@ import {
   UserSpecificTopicsMapping,
   UserSpecificTopics,
   UserFeedback,
-  UserFeedbackMapping
+  UserFeedbackMapping,
+  UserObjective,
+  UserObjectiveMapping,
+  UserReviewMapping,
+  UserReview,
+  UserRequiredActions,
+  UserRequiredActionsMapping,
 } from "../db";
 
 class UsersController extends GenericController {
@@ -31,15 +45,23 @@ class UsersController extends GenericController {
   makeAssociations(): void {
     UserMapping.associations();
     UserMandatoryTopicsMapping.associations();
-	UserSpecificTopicsMapping.associations();
-	UserFeedbackMapping.associations();
+    UserSpecificTopicsMapping.associations();
+    UserFeedbackMapping.associations();
+    UserObjectiveMapping.associations();
+    UserReviewMapping.associations();
+    UserRequiredActionsMapping.associations();
   }
 
   async doSync(): Promise<void> {
-    await UserMapping.sync({ alter: true });
-    await UserMandatoryTopicsMapping.sync({ alter: true });
-	await UserSpecificTopicsMapping.sync({ alter: true });
-	await UserFeedbackMapping.sync({ alter: true });
+    await Promise.all([
+      UserMapping.sync({ alter: true }),
+      UserMandatoryTopicsMapping.sync({ alter: true }),
+      UserSpecificTopicsMapping.sync({ alter: true }),
+      UserFeedbackMapping.sync({ alter: true }),
+      UserObjectiveMapping.sync({ alter: true }),
+      UserReviewMapping.sync({ alter: true }),
+      UserRequiredActionsMapping.sync({ alter: true }),
+    ]);
   }
 
   async listUsers(user: IUserModel & IGenericModel, offset: number, limit: number): Promise<User[]> {
@@ -76,6 +98,14 @@ class UsersController extends GenericController {
     return await UserSpecificTopicsMapping.create(userSpecificTopicModel);
   }
 
+  async updateSpecificTopicsUser(userSpecificTopicModel: IUserSpecificTopicsModel): Promise<UserSpecificTopics | null> {
+    return await UserSpecificTopicsMapping.update(userSpecificTopicModel);
+  }
+
+  async deleteSpecificTopicsUser(userSpecificTopicModel: IUserSpecificTopicsModel): Promise<boolean | null> {
+    return await UserSpecificTopicsMapping.delete(userSpecificTopicModel);
+  }
+
   async getUserFeedback(userId: number): Promise<UserFeedback[]> {
     return await UserFeedbackMapping.get(userId);
   }
@@ -83,9 +113,42 @@ class UsersController extends GenericController {
   async addOrUpdateFeedbackUser(userFeedbackModel: IUserFeedbackModel): Promise<[UserFeedback, boolean]> {
     return await UserFeedbackMapping.create(userFeedbackModel);
   }
+
+  async getUserObjective(userId: number): Promise<UserObjective[]> {
+    return await UserObjectiveMapping.get(userId);
+  }
+
+  async addOrUpdateObjectiveUser(userObjectiveModel: IUserObjectiveModel): Promise<[UserObjective, boolean]> {
+    return await UserObjectiveMapping.create(userObjectiveModel);
+  }
+
+  async getUserReview(userId: number): Promise<UserReview[]> {
+    return await UserReviewMapping.get(userId);
+  }
+
+  async addOrUpdateReviewUser(userReviewModel: IUserReviewModel): Promise<[UserReview, boolean]> {
+    return await UserReviewMapping.create(userReviewModel);
+  }
+
+  async getUserRequiredActions(userRequiredActionId: number): Promise<UserRequiredActions[]> {
+    return await UserRequiredActionsMapping.get(userRequiredActionId);
+  }
+
+  async addOrUpdateRequiredActionsUser(
+    userRequiredActionsModel: IUserRequiredActionsModel
+  ): Promise<[UserRequiredActions, boolean]> {
+    return await UserRequiredActionsMapping.create(userRequiredActionsModel);
+  }
 }
 
 const userController = new UsersController();
+
+const paramsIdSchema = {
+  type: "object",
+  properties: {
+    id: { type: "number" },
+  },
+};
 
 const userModelSchema = {
   type: "object",
@@ -93,8 +156,8 @@ const userModelSchema = {
     firstName: { type: "string" },
     lastName: { type: "string" },
     userName: { type: "string" },
-    role: { type: "string" }
-  }
+    role: { type: "string" },
+  },
 };
 
 const userMandatoryTopicsModelSchema = {
@@ -102,20 +165,37 @@ const userMandatoryTopicsModelSchema = {
   properties: {
     userId: { type: "number" },
     mandatoryTopicsId: { type: "number" },
-    done: { type: "boolean" }
-  }
+    done: { type: "boolean" },
+  },
 };
 
 const userSpecificTopicsModelSchema = {
   type: "object",
   properties: {
     userId: { type: "number" },
+    id: { type: "number" },
     specificTopicName: { type: "string" },
     specificTopicMaterials: { type: "string" },
     timespanId: { type: "number" },
     responsibleId: { type: "number" },
-    done: { type: "boolean" }
-  }
+    done: { type: "boolean" },
+    type: { type: "number", minimum: 1, maximum: 2 },
+  },
+};
+
+const userSpecificTopicsModelPatchSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    done: { type: "boolean" },
+  },
+};
+
+const userSpecificTopicsModelDeleteSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+  },
 };
 
 const userFeedbackModelSchema = {
@@ -125,8 +205,43 @@ const userFeedbackModelSchema = {
     userType: { type: "number" },
     feedback: { type: "string" },
     type: { type: "number" },
-    period: { type: "number" }
-  }
+    period: { type: "number" },
+  },
+};
+
+const userObjectiveModelSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    description: { type: "string" },
+    deadline: { type: "string", format: "date" },
+    responsible: { type: "string" },
+  },
+};
+
+const userReviewModelSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
+    date: { type: "string", format: "date" },
+    performance: { type: "string" },
+    concerns: { type: "string" },
+    summary: { type: "string" },
+    objectivesMet: { type: "boolean" },
+    trainingsMet: { type: "boolean" },
+  },
+};
+
+const userRequiredActionsModelSchema = {
+  type: "object",
+  properties: {
+    userReviewId: { type: "number" },
+    alteringUserId: { type: "number" },
+    action: { type: "string" },
+    date: { type: "string", format: "date" },
+    type: { type: "number" },
+  },
 };
 
 const UsersControllerRoutes: RouteOptions[] = [
@@ -142,18 +257,18 @@ const UsersControllerRoutes: RouteOptions[] = [
         firstName: { type: "string" },
         lastName: { type: "string" },
         userName: { type: "string" },
-        role: { type: "string" }
+        role: { type: "string" },
       },
       response: {
         "200": {
           type: "array",
-          items: { ...userModelSchema }
+          items: { ...userModelSchema },
         },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
@@ -162,13 +277,13 @@ const UsersControllerRoutes: RouteOptions[] = [
           firstName: request.query.firstName,
           lastName: request.query.lastName,
           userName: request.query.userName,
-          role: request.query.role
+          role: request.query.role,
         }),
         request.query.offset,
         request.query.limit
       );
-      reply.send(users.map(e => e.toJSON()));
-    }
+      reply.send(users.map((e) => e.toJSON()));
+    },
   },
   // setUser
   {
@@ -180,17 +295,17 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { ...userModelSchema },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userModel = new UserModel(request.body);
       const [user] = await userController.createOrUpdateUser(userModel);
       reply.send(user.toJSON());
-    }
+    },
   },
   {
     method: "GET",
@@ -201,16 +316,16 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { type: "array", items: { ...userMandatoryTopicsModelSchema } },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userMandatoryTopics = await userController.getMandatoryTopicsUser(request.query.userId);
-      reply.send(userMandatoryTopics.map(e => e.toJSON()));
-    }
+      reply.send(userMandatoryTopics.map((e) => e.toJSON()));
+    },
   },
   {
     method: "POST",
@@ -221,17 +336,17 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { ...userMandatoryTopicsModelSchema },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userMandatoryTopicsModel = new UserMandatoryTopicsModel(request.body);
       const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
       reply.send(userMandatoryTopics.toJSON());
-    }
+    },
   },
   {
     method: "GET",
@@ -242,16 +357,16 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { type: "array", items: { ...userSpecificTopicsModelSchema } },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userSpecificTopics = await userController.getSpecificTopicsUser(request.query.userId);
-      reply.send(userSpecificTopics.map(e => e.toJSON()));
-    }
+      reply.send(userSpecificTopics.map((e) => e.toJSON()));
+    },
   },
   {
     method: "POST",
@@ -262,17 +377,71 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { ...userSpecificTopicsModelSchema },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const userSpecificTopicsModel = new UserFeedbackModel(request.body);
-      const [userMandatoryTopics] = await userController.addOrUpdateSpecificTopicsUser(userSpecificTopicsModel);
-      reply.send(userMandatoryTopics.toJSON());
-    }
+      const userSpecificTopicsModel = new UserSpecificTopicsModel(request.body);
+      const [userSpecificTopics] = await userController.addOrUpdateSpecificTopicsUser(userSpecificTopicsModel);
+      reply.send(userSpecificTopics.toJSON());
+    },
+  },
+  {
+    method: "PATCH",
+    url: "/api/user/specifictopics/:id",
+    schema: {
+      tags: ["user"],
+      body: { ...userSpecificTopicsModelPatchSchema },
+      params: { ...paramsIdSchema },
+      response: {
+        "200": { ...userSpecificTopicsModelSchema },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+	  const userSpecificTopicsModel = new UserSpecificTopicsModel(request.body);
+      userSpecificTopicsModel.id = request.params.id;
+      const userSpecificTopics = await userController.updateSpecificTopicsUser(userSpecificTopicsModel);
+      if (userSpecificTopics) {
+        reply.send(userSpecificTopics.toJSON());
+      } else {
+        reply.status(404).send(undefined);
+      }
+    },
+  },
+  {
+    method: "DELETE",
+    url: "/api/user/specifictopics/:id",
+    schema: {
+      tags: ["user"],
+      body: { ...userSpecificTopicsModelDeleteSchema },
+      params: { ...paramsIdSchema },
+      response: {
+        "204": { type: "boolean" },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userSpecificTopicsModel = new UserSpecificTopicsModel(request.body);
+      userSpecificTopicsModel.id = request.params.id;
+      const deleteResult = await userController.deleteSpecificTopicsUser(userSpecificTopicsModel);
+      if (deleteResult === true) {
+        reply.status(204).send(deleteResult);
+      } else {
+        reply.status(404).send(undefined);
+      }
+    },
   },
   {
     method: "GET",
@@ -283,16 +452,16 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { type: "array", items: { ...userFeedbackModelSchema } },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userFeedback = await userController.getUserFeedback(request.query.userId);
-      reply.send(userFeedback.map(e => e.toJSON()));
-    }
+      reply.send(userFeedback.map((e) => e.toJSON()));
+    },
   },
   {
     method: "POST",
@@ -303,18 +472,141 @@ const UsersControllerRoutes: RouteOptions[] = [
       response: {
         "200": { ...userFeedbackModelSchema },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userFeedbackModel = new UserFeedbackModel(request.body);
       const [userFeedback] = await userController.addOrUpdateFeedbackUser(userFeedbackModel);
       reply.send(userFeedback.toJSON());
-    }
-  }
+    },
+  },
+  {
+    method: "GET",
+    url: "/api/user/objective",
+    schema: {
+      tags: ["user"],
+      querystring: { userId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userObjectiveModelSchema } },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userObjective = await userController.getUserObjective(request.query.userId);
+      reply.send(userObjective.map((e) => e.toJSON()));
+    },
+  },
+  {
+    method: "POST",
+    url: "/api/user/objective",
+    schema: {
+      tags: ["user"],
+      body: { ...userObjectiveModelSchema },
+      response: {
+        "200": { ...userObjectiveModelSchema },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userObjectiveModel = new UserObjectiveModel(request.body);
+      const [userObjective] = await userController.addOrUpdateObjectiveUser(userObjectiveModel);
+      reply.send(userObjective.toJSON());
+    },
+  },
+  {
+    method: "GET",
+    url: "/api/user/review",
+    schema: {
+      tags: ["user"],
+      querystring: { userId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userReviewModelSchema } },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userReview = await userController.getUserReview(request.query.userId);
+      reply.send(userReview.map((e) => e.toJSON()));
+    },
+  },
+  {
+    method: "POST",
+    url: "/api/user/review",
+    schema: {
+      tags: ["user"],
+      body: { ...userReviewModelSchema },
+      response: {
+        "200": { ...userReviewModelSchema },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userReviewModel = new UserReviewModel(request.body);
+      const [userReview] = await userController.addOrUpdateReviewUser(userReviewModel);
+      reply.send(userReview.toJSON());
+    },
+  },
+  {
+    method: "GET",
+    url: "/api/user/review/requiredactions",
+    schema: {
+      tags: ["user"],
+      querystring: { userRequiredActionsId: { type: "number" } },
+      response: {
+        "200": { type: "array", items: { ...userRequiredActionsModelSchema } },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userRequiredActions = await userController.getUserRequiredActions(request.query.userId);
+      reply.send(userRequiredActions.map((e) => e.toJSON()));
+    },
+  },
+  {
+    method: "POST",
+    url: "/api/user/review/requiredactions",
+    schema: {
+      tags: ["user"],
+      body: { ...userRequiredActionsModelSchema },
+      response: {
+        "200": { ...userRequiredActionsModelSchema },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userRequiredActionsModel = new UserRequiredActionsModel(request.body);
+      const [userRequiredActions] = await userController.addOrUpdateReviewUser(userRequiredActionsModel);
+      reply.send(userRequiredActions.toJSON());
+    },
+  },
 ];
 
 export default UsersControllerRoutes;

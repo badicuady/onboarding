@@ -1,4 +1,4 @@
-import { IGenericModel, GenericModel } from "./";
+import { IGenericModel, GenericModel } from "..";
 
 export enum UserRole {
   Admin = 1,

@@ -7,12 +7,15 @@
     AdminService,
     CacheKeys,
     ApiService,
-    CacheService
+	CacheService,
+	UsersService,
+	DictionariesService
   } from "../services/index.js";
   import ObjectCreator, { DefinitionType } from "../common/objectCreator.js";
   import Utilities from "../common/utilities.js";
   import loadingStore from "../services/loading.service.js";
 
+  // do not delete: error Function called outside component initialization
   const sessionService = new SessionService();
   const apiService = new ApiService();
   const passwordTypeMap = new Map([[true, "password"], [false, "text"]]);
@@ -54,22 +57,20 @@
       user.isManager = (user.directReports || "").length > 0;
       if (typeof user.directReports === "string") {
         user.subordinate = [parseUser(user.directReports)];
-	  }
-	  if (user.directReports instanceof Array) {
+      }
+      if (user.directReports instanceof Array) {
         user.subordinate = user.directReports.map(parseUser);
-	  }
-	  user.isHr = user.groups.findIndex((e) => config.hrGroupName.localeCompare(e, "kf") === 0) >= 0
+      }
+      user.isHr =
+        user.groups.findIndex(
+          e => config.hrGroupName.localeCompare(e, "kf") === 0
+        ) >= 0;
     }
     return user;
   };
 
   const saveUserInfo = async token => {
     const adminService = new AdminService(token.data.access_token);
-    CacheService.setOrUpdateValue(
-      CacheKeys.AdminService,
-      adminService,
-      new Date(Date.now() + 3600 * 1000)
-    );
     const userInfo = await adminService.info();
     if (userInfo.status === 200) {
       Utilities.debugVariable({ token: token.data });
@@ -86,7 +87,7 @@
         CacheKeys.UserInfo,
         userInfoObj,
         new Date(Date.now() + 3600 * 1000)
-      );
+	  );
     }
   };
 
@@ -112,6 +113,7 @@
 
   const login = async e => {
     loadingStore.setVisible();
+    loginFailed = false;
     if (validate(e)) {
       const token = await apiService.token(email, password);
       loginFailed = !!(token && token.data && token.data.error);
@@ -120,6 +122,12 @@
       }
     }
     loadingStore.setInvisible();
+  };
+
+  const loginFromEnter = async e => {
+    if (e.keyCode === 13) {
+      login(e);
+    }
   };
 
   const checkboxChange = e => {
@@ -176,7 +184,8 @@
                           bind:value={email}
                           placeholder="name@ipsos.com"
                           required
-                          autocomplete="username" />
+                          autocomplete="username"
+                          on:keypress={loginFromEnter} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -194,7 +203,8 @@
                             placeholder="domain password"
                             required
                             autocomplete="current-password"
-                            on:input={passwordChanged} />
+                            on:input={passwordChanged}
+                            on:keypress={loginFromEnter} />
                           <div class="input-group-append">
                             <span
                               class="input-group-text bg-white cursor-pointer"

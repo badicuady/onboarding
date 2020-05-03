@@ -1,6 +1,15 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
-import { UserRole, IUserModel, IUser } from "../models";
-import { GenericMapping, GenericDatabase, UserMandatoryTopics, UserSpecificTopics, UserFeedback } from "./";
+import { UserRole, IUserModel, IUser } from "../../models";
+import {
+  GenericMapping,
+  GenericDatabase,
+  UserMandatoryTopics,
+  UserSpecificTopics,
+  UserFeedback,
+  UserObjective,
+  UserReview,
+  UserRequiredActions
+} from "..";
 
 class User extends GenericDatabase implements IUser {
   id!: number;
@@ -58,6 +67,22 @@ class UserMapping extends GenericMapping {
     });
     User.hasMany(UserFeedback, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserObjective, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserReview, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserReview, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true
+    });
+    User.hasMany(UserRequiredActions, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
       constraints: true
     });
   }

@@ -25,8 +25,8 @@ const controllers = [
 const connectToDatabase = async (): Promise<void> => {
   try {
     controllers.forEach(c => c.makeAssociations());
-    await Extensions.AsyncForEach(controllers, async (c: GenericController) => await c.doSync());
-    await Extensions.AsyncForEach(controllers, async (c: GenericController) => await c.postSyncHook());
+    await Extensions.asyncForEach(controllers, async (c: GenericController) => await c.doSync());
+    await Extensions.asyncForEach(controllers, async (c: GenericController) => await c.postSyncHook());
   } catch (err) {
     fastify.log.error(err);
   }

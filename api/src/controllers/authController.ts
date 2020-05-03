@@ -66,7 +66,6 @@ const AuthControllerRoutes: RouteOptions[] = [
       reply.send(token);
     }
   },
-  // callback
   {
     method: "GET",
     url: "/user/info",
@@ -81,6 +80,35 @@ const AuthControllerRoutes: RouteOptions[] = [
           properties: {
             employeeID: { type: "number" },
             mail: { type: "string", format: "email" }
+          }
+        },
+        "4xx": {
+          type: "string"
+        }
+      }
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      reply.send(request.user);
+    }
+  },
+  {
+    method: "GET",
+    url: "/user/subordinates",
+    schema: {
+      tags: ["user"],
+      hide: true, // hide it from swagger
+      response: {
+        "200": {
+          type: "array",
+          items: {
+            type: "object",
+            minProperties: 1,
+            additionalProperties: true,
+            properties: {
+              employeeID: { type: "number" },
+              mail: { type: "string", format: "email" }
+            }
           }
         },
         "4xx": {

@@ -1,5 +1,6 @@
 import Flatted from "flatted";
 import { Utilities } from "./utilities";
+import { GenericModel, IGenericModel } from "../../models";
 
 class Extensions {
   static toQueryUri(obj: { [ndx: string]: string }): string {
@@ -17,7 +18,7 @@ class Extensions {
       const plainObject: { [index: string]: any } = {};
       const proto = Object.getPrototypeOf(obj);
       const props = Object.getOwnPropertyNames(proto);
-      props.forEach(key => {
+      props.forEach((key) => {
         const description = Object.getOwnPropertyDescriptor(proto, key);
         if (description && typeof description.get === "function") {
           const value = description.get.apply(obj);
@@ -31,8 +32,23 @@ class Extensions {
     return obj;
   }
 
-  static async AsyncForEach(array:Array<any>, callback:Function): Promise<any> {
-	  return await Utilities.AsyncForEach(array, callback);
+  static async asyncForEach(array: Array<any>, callback: Function): Promise<any> {
+    return await Utilities.asyncForEach(array, callback);
+  }
+
+  static updateObjectWithModel(dbModel: { [key: string]: any }, model: IGenericModel, safe: boolean = true): void {
+    const keys = Object.keys(model.toPlainObject && model.toPlainObject());
+    if (keys && keys.length > 0) {
+      keys.forEach((key) => {
+        if (model[key] !== undefined) {
+          if (safe) {
+            dbModel[key] = model[key] !== undefined ? model[key] : dbModel[key];
+          } else {
+            dbModel[key] = model[key];
+          }
+        }
+      });
+    }
   }
 }
 

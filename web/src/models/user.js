@@ -1,5 +1,3 @@
-import config from "../config";
-
 const addProperties = _this => {
   let _employeeDirectoryLink = "";
   Object.defineProperties(_this, {

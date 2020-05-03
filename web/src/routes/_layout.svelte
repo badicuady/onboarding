@@ -2,12 +2,15 @@
   import { onMount } from "svelte";
   import config from "../config";
   import {
-    CacheKeys,
     SessionService,
     CacheService,
-    DictionariesService
+    CacheKeys,
+    StateService,
+    StateInfo,
+    UsersService,
+    DictionariesService,
+    AdminService
   } from "../services";
-  import Utilities from "../common/utilities.js";
   import Navigation from "../components/Navigation.svelte";
   import Footer from "../components/Footer.svelte";
   import Loading from "../components/Loading.svelte";
@@ -34,42 +37,77 @@
   export let user;
   export let token;
 
+  // do not delete: error Function called outside component initialization
   const sessionService = new SessionService();
-  let userModel;
-  let dictionariesService;
 
-  const updateSerices = () => {
+  let userModel;
+  let services = {};
+
+  const setupServices = () => {
     if (token) {
-      dictionariesService = new DictionariesService(token.access_token);
+      services = {
+        [StateInfo.Services.Admin]: new AdminService(token.access_token),
+        [StateInfo.Services.Users]: new UsersService(token.access_token),
+        [StateInfo.Services.Dictionaries]: new DictionariesService(
+          token.access_token
+        )
+      };
+      StateService.updateServices(services);
+    }
+  };
+
+  const updateDictionariesCaches = async dictionariesService => {
+    const [departments, mandatoryTopics, timespans, responsibles] = await Promise.all([
+	  dictionariesService.getDepartments(),
+	  dictionariesService.getMandatoryTopics(userModel.isManager ? undefined : true, userModel.isManager ? true : undefined),
+      dictionariesService.getTimespans(),
+      dictionariesService.getResponsibles()
+    ]);
+    if (departments.status === 200 && departments.data) {
+      CacheService.setOrUpdateValue(
+        CacheKeys.Departments,
+        departments.data,
+        new Date(Date.now() + 3600 * 1000)
+      );
+	}
+	if (mandatoryTopics.status === 200 && mandatoryTopics.data) {
+      CacheService.setOrUpdateValue(
+        CacheKeys.MandatoryTopics,
+        mandatoryTopics.data,
+        new Date(Date.now() + 3600 * 1000)
+      );
+    }
+    if (timespans.status === 200 && timespans.data) {
+      CacheService.setOrUpdateValue(
+        CacheKeys.Timespans,
+        timespans.data,
+        new Date(Date.now() + 3600 * 1000)
+      );
+    }
+    if (responsibles.status === 200 && responsibles.data) {
+      CacheService.setOrUpdateValue(
+        CacheKeys.Responsibles,
+        responsibles.data,
+        new Date(Date.now() + 3600 * 1000)
+      );
     }
   };
 
   const updateCaches = async () => {
-    if (dictionariesService) {
-	  const departments = await dictionariesService.getDepartments();
-	  if (departments.status === 200 && departments.data) {
-		CacheService.setOrUpdateValue(
-			CacheKeys.Departments,
-			departments.data,
-			new Date(Date.now() + 3600 * 1000)
-		);
-	  }
+    if (services[StateInfo.Services.Dictionaries]) {
+      await updateDictionariesCaches(services[StateInfo.Services.Dictionaries]);
     }
   };
 
   const updateItems = async () => {
-    updateSerices();
+    setupServices();
     await updateCaches();
   };
 
-  onMount(async () => {
-    await updateItems();
-  });
-
-  sessionService.subscribe(async session => {
+  const sessionSubscribe = sessionService.subscribe(async session => {
     if (session[CacheKeys.UserInfo]) {
       user = session[CacheKeys.UserInfo];
-      userModel = new User(user);
+	  userModel = new User(user);
       CacheService.setOrUpdateValue(
         CacheKeys.UserInfo,
         user,
@@ -83,8 +121,14 @@
         token,
         new Date(Date.now() + 3600 * 1000)
       );
-    }
-    await updateItems();
+	}
+	if (token && userModel) {
+	  await updateItems();
+	}
+  });
+
+  const stateSubscribe = StateService.subscribe(async state => {
+    services = state.getServices();
   });
 </script>
 

@@ -1,5 +1,6 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping, UserSpecificTopics } from "./";
+import { GenericMapping, UserSpecificTopics } from "..";
+import { MandatoryTopicsLk } from "./mandatoryTopicsLkMapping";
 
 interface IResponsibleLk {
   id?: number;
@@ -25,29 +26,33 @@ class ResponsibleLkMapping extends GenericMapping {
         allowNull: false,
         autoIncrementIdentity: true,
         primaryKey: true,
-        unique: true
+        unique: true,
       },
       name: {
         type: new DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
       },
       description: {
         type: new DataTypes.STRING(200),
-        allowNull: true
-      }
+        allowNull: true,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     ResponsibleLk.init(modelAttributes, modelOptions);
   }
 
   associations(): void {
+    ResponsibleLk.hasMany(MandatoryTopicsLk, {
+      foreignKey: { name: "responsibleId", field: "responsibleId", allowNull: true },
+      constraints: true,
+    });
     ResponsibleLk.hasMany(UserSpecificTopics, {
-      foreignKey: { name: "responsibleId", field: "responsibleId", allowNull: false },
-      constraints: true
+      foreignKey: { name: "responsibleId", field: "responsibleId", allowNull: true },
+      constraints: true,
     });
   }
 
@@ -57,17 +62,19 @@ class ResponsibleLkMapping extends GenericMapping {
 
   async prepareData(): Promise<IResponsibleLk[]> {
     const options: BulkCreateOptions = {
-      ignoreDuplicates: true
+      updateOnDuplicate: ["name", "description"]
     };
     const records: IResponsibleLk[] = [
-		{ name: "administrativeOffice", description: "Administrative Office" },
-		{ name: "lineManager", description: "Line Manager" },
-		{ name: "ldSpecialist", description: "LD Specialist" },
-		{ name: "hrGeneralist", description: "HR Generalist" },
-		{ name: "hrAdmin", description: "HR Admin" },
-		{ name: "qualityTeam", description: "Quality Team" },
-		{ name: "dpoRomania", description: "DPO Romania" },
-		{ name: "lineManagerOrLDSpecialist", description: "Line Manager / LD Specialist" }
+      { name: "administrativeOffice", description: "Administrative Office" },
+      { name: "lineManager", description: "Line Manager" },
+      { name: "ldSpecialist", description: "LD Specialist" },
+      { name: "hrGeneralist", description: "HR Generalist" },
+      { name: "hrAdmin", description: "HR Admin" },
+      { name: "qualityTeam", description: "Quality Team" },
+      { name: "dpoRomania", description: "DPO Romania" },
+	  { name: "itSpecialist", description: "IT Specialist" },
+	  { name: "odSpecialist", description: "OD Specialist" },
+	  { name: "clientService", description: "Andrei Ionescu" },
     ];
     records.forEach((e, ndx) => (e.id = ndx + 1));
     return await ResponsibleLk.bulkCreate(records, options);

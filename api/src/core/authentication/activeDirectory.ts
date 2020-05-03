@@ -395,7 +395,7 @@ class ActiveDirectory {
     password: string,
     customBase?: string,
     formatted?: boolean
-  ): Promise<{ success: boolean; groups?: ActiveDirectoryUserModel[]; message?: string; error?: Error }> {
+  ): Promise<{ success: boolean; users?: ActiveDirectoryUserModel[]; message?: string; error?: Error }> {
     // For backwards compatibility until v2
     if (formatted === undefined && typeof customBase === "boolean") {
       formatted = customBase;
