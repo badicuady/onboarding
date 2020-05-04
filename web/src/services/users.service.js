@@ -92,7 +92,7 @@ class UsersService extends AuthService {
     }
   }
 
-  async getUserFeedback(userId, userType, feedback, period, type) {
+  async getUserFeedback(userId) {
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/feedback`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -113,6 +113,46 @@ class UsersService extends AuthService {
       };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/feedback`;
       const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async getUserObjectives(userId) {
+    try {
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/objectives`;
+      const response = await axios.get(url, { ...this.config, params: { userId } });
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async insertUserObjectives(userId, description, deadline, responsible, type) {
+    try {
+      const data = {
+        userId,
+        description,
+        deadline,
+        responsible,
+        type,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/objectives`;
+      const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async deleteUserObjectives(userId, objectiveId) {
+    try {
+      const data = {
+        userId: userId,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/objectives/${objectiveId}`;
+      const response = await axios.delete(url, { ...this.config, data: data });
       return response;
     } catch (error) {
       console.error(error);

@@ -4,7 +4,7 @@ import UserModel, { UserRole, IUserModel, IUser } from './users/userModel';
 import UserMandatoryTopicsModel, { IUserMandatoryTopics, IUserMandatoryTopicsModel } from './users/userMandatoryTopicsModel';
 import UserSpecificTopicsModel, { IUserSpecificTopics, IUserSpecificTopicsModel } from './users/userSpecificTopicsModel';
 import UserFeedbackModel, { IUserFeedback, IUserFeedbackModel } from './users/userFeedbackModel';
-import UserObjectiveModel, { IUserObjective, IUserObjectiveModel } from './users/userObjectiveModel';
+import UserObjectivesModel, { IUserObjectives, IUserObjectivesModel } from './users/userObjectivesModel';
 import UserReviewModel, { IUserReview, IUserReviewModel } from './users/userReviewModel';
 import UserRequiredActionsModel, { IUserRequiredActions, IUserRequiredActionsModel } from './users/userRequiredActionsModel';
 
@@ -15,7 +15,7 @@ export {
 	IUserMandatoryTopicsModel, IUserMandatoryTopics, UserMandatoryTopicsModel,
 	UserSpecificTopicsModel, IUserSpecificTopics, IUserSpecificTopicsModel,
 	IUserFeedback, IUserFeedbackModel, UserFeedbackModel,
-	UserObjectiveModel, IUserObjective, IUserObjectiveModel,
+	UserObjectivesModel, IUserObjectives, IUserObjectivesModel,
 	UserReviewModel, IUserReview, IUserReviewModel,
 	UserRequiredActionsModel, IUserRequiredActions, IUserRequiredActionsModel
 };

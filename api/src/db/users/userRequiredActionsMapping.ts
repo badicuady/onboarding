@@ -59,12 +59,22 @@ class UserRequiredActionsMapping extends GenericMapping {
   }
 
   async create(userRequiredActionsModel: IUserRequiredActionsModel): Promise<[UserRequiredActions, boolean]> {
+	const where = super.createWhere(userRequiredActionsModel, ["id", "userId"]);
+    const [instance, wasCreated] = await super.genericCreate(UserRequiredActions, userRequiredActionsModel, where);
+    return [<UserRequiredActions>instance, wasCreated];
+  }
+
+  async delete(userRequiredActionsModel: IUserRequiredActionsModel): Promise<boolean | null> {
     const where = {
       id: userRequiredActionsModel.id || 0,
       userReviewId: userRequiredActionsModel.userReviewId || 0
     };
-    const [instance, wasCreated] = await super.genericCreate(UserRequiredActions, userRequiredActionsModel, where);
-    return [<UserRequiredActions>instance, wasCreated];
+    const instance = await UserRequiredActions.findOne({ where });
+    if (instance) {
+      await instance.destroy();
+      return true;
+    }
+    return null;
   }
 }
 

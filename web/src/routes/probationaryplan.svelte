@@ -1,62 +1,127 @@
 <script>
+  import { onDestroy } from "svelte";
   import config from "../config";
   import Layout from "../components/Layout.svelte";
   import { OpenTableItemType } from "../models/enums.js";
   import OpenActivitiesTable from "../components/OpenActivitiesTable.svelte";
   import Review from "../components/Review.svelte";
-  import { CacheService, CacheKeys } from "../services";
+  import {
+    CacheService,
+    CacheKeys,
+    StateService,
+    StateInfo
+  } from "../services";
 
-  let userInfo = {};
-  CacheService.subscribe(cache => {
-    userInfo = cache.get(CacheKeys.UserInfo);
+  let usersService;
+  let userModel;
+
+  const readUserObjectives = async () => {
+    if (usersService) {
+      const userObjectivesInfo = await usersService.getUserObjectives(
+        userModel.id
+      );
+
+      if (userObjectivesInfo && userObjectivesInfo.data) {
+        for (let type = 0; type < partOneInfo.length; type++) {
+          const tmpUserObjectivesInfo = userObjectivesInfo.data
+            .filter(e => e.type === type + 1)
+            .map(e => ({
+              id: e.id,
+              cells: [
+                e.description,
+                new Date(e.deadline).toLocaleDateString(),
+                e.responsible
+              ]
+            }));
+          partOneInfo[type].info.data = [...tmpUserObjectivesInfo];
+        }
+        partOneInfo = [...partOneInfo]; // trigger the update
+      }
+    }
+  };
+
+  const addNewObjective = async (e, type) => {
+    if (usersService && e.detail.inputs) {
+      const firstKey = Object.keys(e.detail.inputs)[0];
+      const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
+      const userObjectivesInfo = await usersService.insertUserObjectives(
+        userModel.id,
+        e.detail.inputs[`${radical}-0`],
+        e.detail.inputs[`${radical}-1`],
+        e.detail.inputs[`${radical}-2`],
+        type
+      );
+      if (userObjectivesInfo && userObjectivesInfo.data) {
+        partOneInfo[type - 1].info.data.push({
+          id: userObjectivesInfo.data.id,
+          cells: [
+            userObjectivesInfo.data.description,
+            new Date(userObjectivesInfo.data.deadline).toLocaleDateString(),
+            userObjectivesInfo.data.responsible
+          ]
+        });
+        partOneInfo = [...partOneInfo]; // trigger the update
+      }
+    }
+  };
+
+  const deleteObjectives = async (e, type) => {
+    if (usersService) {
+      const userObjectivesInfo = await usersService.deleteUserObjectives(
+		userModel.id,
+		e.detail.id
+      );
+      if (userObjectivesInfo && userObjectivesInfo.status === 204) {
+        partOneInfo[type - 1].info.data = [
+          ...partOneInfo[type - 1].info.data.filter(
+            el => +el.id !== e.detail.id
+          )
+		];
+		partOneInfo = [...partOneInfo]; // trigger the update
+      }
+    }
+  };
+
+  const readInfo = async () => {
+    await readUserObjectives();
+  };
+
+  const cacheSubscribe = CacheService.subscribe(cache => {
+    if (!userModel) {
+      userModel = cache.get(CacheKeys.UserInfo) || {};
+    }
   });
 
+  const stateSubscribe = StateService.subscribe(async state => {
+    if (!usersService) {
+      usersService = state.getService(StateInfo.Services.Users);
+      await readInfo();
+    }
+  });
+
+  onDestroy(() => {
+    cacheSubscribe();
+    stateSubscribe();
+  });
+
+  const partOneColumnVals = [
+    OpenTableItemType.single,
+    OpenTableItemType.date,
+    OpenTableItemType.single
+  ];
+  const partOneColumns = ["Deadline", "Responsible for support", "Close"];
   const objectives = {
-    columns: [
-      "Objective Description",
-      "Deadline",
-      "Responsible for support",
-      "Close"
-    ],
-    data: [
-      {
-        id: 1,
-        cells: ["Objective 1", "2020-03-01", "Cineva CuHalva"]
-      },
-      { id: 2, cells: ["Objective 2", "2020-03-01", "Cineva CuHalva"] }
-    ],
-    columnVals: [
-      OpenTableItemType.single,
-      OpenTableItemType.date,
-      OpenTableItemType.single
-    ]
+    columns: ["Objective Description", ...partOneColumns],
+    data: [],
+    columnVals: [...partOneColumnVals]
   };
-
   const developmentPlan = {
-    columns: [
-      "Development need",
-      "Deadline",
-      "Responsible for support",
-      "Close"
-    ],
-    data: [
-      {
-        id: 1,
-        cells: ["Development 1", "2020-03-01", "Cineva CuHalva"]
-      },
-      {
-        id: 2,
-        cells: ["Development 2", "2020-03-01", "Cineva CuHalva"]
-      }
-    ],
-    columnVals: [
-      OpenTableItemType.single,
-      OpenTableItemType.date,
-      OpenTableItemType.single
-    ]
+    columns: ["Development need", ...partOneColumns],
+    data: [],
+    columnVals: [...partOneColumnVals]
   };
 
-  const partOneInfo = [
+  let partOneInfo = [
     {
       title: "Objectives",
       headline: `The line manager should identify specific objectives for the employee for the first three months / four months.
@@ -75,7 +140,7 @@
     }
   ];
 
-  const firstReviewAction1 = {
+  const reviewActions = {
     columns: ["Required actions", "Review Date", "Delete"],
     data: [
       { id: 1, cells: ["Action 1", "2020-03-01"] },
@@ -88,12 +153,12 @@
     {
       question:
         "Have the objectives identified for this period of the probation been met?",
-      actions: Object.assign({}, firstReviewAction1)
+      actions: Object.assign({}, reviewActions)
     },
     {
       question:
         "Have the training / development needs identified for this period of the probation been addressed?",
-      actions: Object.assign({}, firstReviewAction1)
+      actions: Object.assign({}, reviewActions)
     }
   ];
 
@@ -106,8 +171,6 @@
     Object.assign({}, firstReviewData[0]),
     Object.assign({}, firstReviewData[1])
   ];
-
-  
 </script>
 
 <svelte:head>
@@ -164,7 +227,7 @@
                           type="text"
                           class="form-control"
                           readonly
-                          value={userInfo.name} />
+                          value={userModel.name} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -178,7 +241,7 @@
                           type="text"
                           class="form-control"
                           readonly
-                          value={userInfo.title} />
+                          value={userModel.title} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -192,7 +255,7 @@
                           type="text"
                           class="form-control"
                           readonly
-                          value={userInfo.manager} />
+                          value={userModel.manager} />
                       </div>
                     </div>
                   </div>
@@ -238,7 +301,7 @@
                           type="text"
                           class="form-control"
                           readonly
-                          value={userInfo.department} />
+                          value={userModel.department} />
                       </div>
                     </div>
                   </div>
@@ -263,7 +326,7 @@
             </p>
 
             <div id="accordion-part-one">
-              {#each partOneInfo as cardInfo}
+              {#each partOneInfo as cardInfo, ndx (cardInfo)}
                 <div class="card">
                   <div class="card-header bg-navy">
                     <h4 class="card-title bg-navy">
@@ -285,7 +348,9 @@
                         switchName={cardInfo.title.toLowerCase()}
                         info={cardInfo.info}
                         colWidths={[5, 45, 20, 20, 10]}
-                        showDone={false} />
+                        showDone={false}
+                        on:addNewRow={e => addNewObjective(e, ndx + 1)}
+                        on:deleteClicked={e => deleteObjectives(e, ndx + 1)} />
                     </div>
                   </div>
                 </div>

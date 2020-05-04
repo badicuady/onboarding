@@ -20,12 +20,7 @@
 
   export let mode;
   export let pageTitle;
-  /*
-  export let welcomeToIss;
-  export let complianceTopics;
-  export let iisAps;
-  export let trainings;
-  */
+
   const colWidths = [5, 25, 30, 10, 10, 15, 5];
 
   let usersService;
@@ -118,7 +113,6 @@
             data[ndx].feedback;
         }
         localUserFeedback = { ...tmpUserFeedbackInfo };
-        console.log(localUserFeedback);
       }
     }
   };

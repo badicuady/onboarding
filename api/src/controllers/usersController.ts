@@ -10,11 +10,11 @@ import {
   IUserSpecificTopicsModel,
   IUserFeedbackModel,
   UserFeedbackModel,
-  UserObjectiveModel,
+  UserObjectivesModel,
   UserSpecificTopicsModel,
   IUserReviewModel,
   UserReviewModel,
-  IUserObjectiveModel,
+  IUserObjectivesModel,
   IUserRequiredActionsModel,
   UserRequiredActionsModel,
 } from "../models";
@@ -29,8 +29,8 @@ import {
   UserSpecificTopics,
   UserFeedback,
   UserFeedbackMapping,
-  UserObjective,
-  UserObjectiveMapping,
+  UserObjectives,
+  UserObjectivesMapping,
   UserReviewMapping,
   UserReview,
   UserRequiredActions,
@@ -47,7 +47,7 @@ class UsersController extends GenericController {
     UserMandatoryTopicsMapping.associations();
     UserSpecificTopicsMapping.associations();
     UserFeedbackMapping.associations();
-    UserObjectiveMapping.associations();
+    UserObjectivesMapping.associations();
     UserReviewMapping.associations();
     UserRequiredActionsMapping.associations();
   }
@@ -58,7 +58,7 @@ class UsersController extends GenericController {
       UserMandatoryTopicsMapping.sync({ alter: true }),
       UserSpecificTopicsMapping.sync({ alter: true }),
       UserFeedbackMapping.sync({ alter: true }),
-      UserObjectiveMapping.sync({ alter: true }),
+      UserObjectivesMapping.sync({ alter: true }),
       UserReviewMapping.sync({ alter: true }),
       UserRequiredActionsMapping.sync({ alter: true }),
     ]);
@@ -114,12 +114,16 @@ class UsersController extends GenericController {
     return await UserFeedbackMapping.create(userFeedbackModel);
   }
 
-  async getUserObjective(userId: number): Promise<UserObjective[]> {
-    return await UserObjectiveMapping.get(userId);
+  async getUserObjectives(userId: number): Promise<UserObjectives[]> {
+    return await UserObjectivesMapping.get(userId);
   }
 
-  async addOrUpdateObjectiveUser(userObjectiveModel: IUserObjectiveModel): Promise<[UserObjective, boolean]> {
-    return await UserObjectiveMapping.create(userObjectiveModel);
+  async addOrUpdateObjectivesUser(userObjectiveModel: IUserObjectivesModel): Promise<[UserObjectives, boolean]> {
+    return await UserObjectivesMapping.create(userObjectiveModel);
+  }
+
+  async deleteObjectivesUser(userObjectivesModel: IUserObjectivesModel): Promise<boolean | null> {
+    return await UserObjectivesMapping.delete(userObjectivesModel);
   }
 
   async getUserReview(userId: number): Promise<UserReview[]> {
@@ -138,6 +142,10 @@ class UsersController extends GenericController {
     userRequiredActionsModel: IUserRequiredActionsModel
   ): Promise<[UserRequiredActions, boolean]> {
     return await UserRequiredActionsMapping.create(userRequiredActionsModel);
+  }
+
+  async deleteRequiredActionsUser(userRequiredActionsModel: IUserRequiredActionsModel): Promise<boolean | null> {
+    return await UserRequiredActionsMapping.delete(userRequiredActionsModel);
   }
 }
 
@@ -203,19 +211,21 @@ const userFeedbackModelSchema = {
   properties: {
     userId: { type: "number" },
     userType: { type: "number" },
-	feedback: { type: "string" },
-	period: { type: "number" },
-    type: { type: "number" }    
+    feedback: { type: "string" },
+    period: { type: "number" },
+    type: { type: "number" },
   },
 };
 
 const userObjectiveModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	userId: { type: "number" },
+	id: { type: "number" },
     description: { type: "string" },
     deadline: { type: "string", format: "date" },
-    responsible: { type: "string" },
+	responsible: { type: "string" },
+	type: { type: "number" }
   },
 };
 
@@ -406,7 +416,7 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-	  const userSpecificTopicsModel = new UserSpecificTopicsModel(request.body);
+      const userSpecificTopicsModel = new UserSpecificTopicsModel(request.body);
       userSpecificTopicsModel.id = request.params.id;
       const userSpecificTopics = await userController.updateSpecificTopicsUser(userSpecificTopicsModel);
       if (userSpecificTopics) {
@@ -486,7 +496,7 @@ const UsersControllerRoutes: RouteOptions[] = [
   },
   {
     method: "GET",
-    url: "/api/user/objective",
+    url: "/api/user/objectives",
     schema: {
       tags: ["user"],
       querystring: { userId: { type: "number" } },
@@ -500,13 +510,13 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const userObjective = await userController.getUserObjective(request.query.userId);
+      const userObjective = await userController.getUserObjectives(request.query.userId);
       reply.send(userObjective.map((e) => e.toJSON()));
     },
   },
   {
     method: "POST",
-    url: "/api/user/objective",
+    url: "/api/user/objectives",
     schema: {
       tags: ["user"],
       body: { ...userObjectiveModelSchema },
@@ -520,9 +530,35 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const userObjectiveModel = new UserObjectiveModel(request.body);
-      const [userObjective] = await userController.addOrUpdateObjectiveUser(userObjectiveModel);
+      const userObjectiveModel = new UserObjectivesModel(request.body);
+      const [userObjective] = await userController.addOrUpdateObjectivesUser(userObjectiveModel);
       reply.send(userObjective.toJSON());
+    },
+  },
+  {
+    method: "DELETE",
+    url: "/api/user/objectives/:id",
+    schema: {
+      tags: ["user"],
+      params: { id: { type: "number" } },
+      response: {
+        "204": { type: "boolean" },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userObjectivesModel = new UserObjectivesModel(request.body);
+      userObjectivesModel.id = request.params.id;
+      const deleteResult = await userController.deleteObjectivesUser(userObjectivesModel);
+      if (deleteResult === true) {
+        reply.status(204).send(deleteResult);
+      } else {
+        reply.status(404).send(undefined);
+      }
     },
   },
   {
@@ -605,6 +641,32 @@ const UsersControllerRoutes: RouteOptions[] = [
       const userRequiredActionsModel = new UserRequiredActionsModel(request.body);
       const [userRequiredActions] = await userController.addOrUpdateReviewUser(userRequiredActionsModel);
       reply.send(userRequiredActions.toJSON());
+    },
+  },
+  {
+    method: "DELETE",
+    url: "/api/user/requiredactions/:id",
+    schema: {
+      tags: ["user"],
+      params: { id: { type: "number" } },
+      response: {
+        "204": { type: "boolean" },
+        "4xx": {
+          type: "string",
+        },
+      },
+      security: [{ oauth: [] }],
+    },
+    preHandler: GenericController.authentication,
+    handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
+      const userRequiredActionsModel = new UserRequiredActionsModel(request.body);
+      userRequiredActionsModel.id = request.params.id;
+      const deleteResult = await userController.deleteRequiredActionsUser(userRequiredActionsModel);
+      if (deleteResult === true) {
+        reply.status(204).send(deleteResult);
+      } else {
+        reply.status(404).send(undefined);
+      }
     },
   },
 ];

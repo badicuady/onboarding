@@ -78,10 +78,7 @@ class UserReviewMapping extends GenericMapping {
   }
 
   async create(userObjectiveModel: IUserReviewModel): Promise<[UserReview, boolean]> {
-    const where = {
-      id: userObjectiveModel.id || 0,
-      userId: userObjectiveModel.userId || 0
-    };
+	const where = super.createWhere(userObjectiveModel, ["id", "userId"]);
     const [instance, wasCreated] = await super.genericCreate(UserReview, userObjectiveModel, where);
     return [<UserReview>instance, wasCreated];
   }

@@ -79,14 +79,10 @@ class UserSpecificTopicsMapping extends GenericMapping {
   }
 
   async update(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<UserSpecificTopics | null> {
-    const where = {
-      id: userSpecificTopicsModel.id || 0,
-      userId: userSpecificTopicsModel.userId || 0,
-    };
+	const where = super.createWhere(userSpecificTopicsModel, ["id", "userId"]);
     const instance = await UserSpecificTopics.findOne({ where });
     if (instance) {
 	  Extensions.updateObjectWithModel(instance, userSpecificTopicsModel);
-	  console.log(instance.id, instance.done);
       instance.save();
       return instance;
     }

@@ -8,7 +8,7 @@ import { IMandatoryTopicsLk, MandatoryTopicsLk, MandatoryTopicsLkMapping } from 
 import { IUserMandatoryTopics, UserMandatoryTopics, UserMandatoryTopicsMapping } from "./users/userMandatoryTopicsMapping";
 import { IUserSpecificTopics, UserSpecificTopics, UserSpecificTopicsMapping } from "./users/userSpecificTopicsMapping";
 import { IUserFeedback, UserFeedback, UserFeedbackMapping } from "./users/userFeedbackMapping";
-import { IUserObjective, UserObjective, UserObjectiveMapping } from "./users/userObjectiveMapping";
+import { IUserObjectives, UserObjectives, UserObjectivesMapping } from "./users/userObjectivesMapping";
 import { IUserReview, UserReview, UserReviewMapping } from "./users/userReviewMapping";
 import { IUserRequiredActions, UserRequiredActions, UserRequiredActionsMapping } from "./users/userRequiredActionsMapping";
 
@@ -23,7 +23,7 @@ export {
 	IUserMandatoryTopics, UserMandatoryTopics, UserMandatoryTopicsMapping, 
 	IUserSpecificTopics, UserSpecificTopics, UserSpecificTopicsMapping,
 	IUserFeedback, UserFeedback, UserFeedbackMapping,
-	IUserObjective, UserObjective, UserObjectiveMapping,
+	IUserObjectives, UserObjectives, UserObjectivesMapping,
 	IUserReview, UserReview, UserReviewMapping,
 	IUserRequiredActions, UserRequiredActions, UserRequiredActionsMapping
  };

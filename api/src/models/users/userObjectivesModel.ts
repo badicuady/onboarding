@@ -1,23 +1,24 @@
 import { IGenericModel, GenericModel } from "..";
 
-export interface IUserObjective {
+export interface IUserObjectives {
   id?: number;
   description?: string;
   deadline?: Date;
   responsible?: string;
+  type?: number;
   userId?: number;
 }
 
-export interface IUserObjectiveModel extends IGenericModel, IUserObjective {}
+export interface IUserObjectivesModel extends IGenericModel, IUserObjectives {}
 
-const UserObjectiveModel = () => {
+const UserObjectivesModel = () => {
   /**
    * Implementing the private pattern
    */
-  const _privateFields: WeakMap<IUserObjective, IUserObjective> = new WeakMap();
+  const _privateFields: WeakMap<IUserObjectives, IUserObjectives> = new WeakMap();
 
-  return class UserObjectiveModel extends GenericModel implements IUserObjectiveModel {
-    constructor(userObjectiveModel: IUserObjective) {
+  return class UserObjectiveModel extends GenericModel implements IUserObjectivesModel {
+    constructor(userObjectiveModel: IUserObjectives) {
       super();
       _privateFields.set(this, {});
       if (userObjectiveModel) {
@@ -46,6 +47,13 @@ const UserObjectiveModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), responsible });
     }
 
+    get type(): number | undefined {
+      return _privateFields.get(this)?.type;
+    }
+    set type(type) {
+      _privateFields.set(this, { ..._privateFields.get(this), type });
+    }
+
     get userId(): number | undefined {
       return _privateFields.get(this)?.userId;
     }
@@ -53,7 +61,14 @@ const UserObjectiveModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), userId });
     }
 
-    setup(model: IUserObjective) {
+    get id(): number | undefined {
+      return _privateFields.get(this)?.id;
+    }
+    set id(id) {
+      _privateFields.set(this, { ..._privateFields.get(this), id });
+    }
+
+    setup(model: IUserObjectives) {
       if (!this.validate(model)) {
         throw new Error(`The model is not valid: «${model}»`);
       }
@@ -61,10 +76,12 @@ const UserObjectiveModel = () => {
         deadline: model.deadline || new Date(Date.now() + 30 * 24 * 3600 * 1000),
         description: model.description || "",
         responsible: model.responsible || "",
-        userId: model.userId || 0
+        userId: model.userId || 0,
+		id: model.id || 0,
+		type: model.type || 0,
       });
     }
   };
 };
 
-export default UserObjectiveModel();
+export default UserObjectivesModel();

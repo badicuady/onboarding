@@ -44,10 +44,7 @@ class UserMandatoryTopicsMapping extends GenericMapping {
   }
 
   async create(userMandatoryTopicsModel: IUserMandatoryTopicsModel): Promise<[UserMandatoryTopics, boolean]> {
-    const where = {
-      mandatoryTopicsId: userMandatoryTopicsModel.mandatoryTopicsId || 0,
-      userId: userMandatoryTopicsModel.userId || 0
-    };
+	const where = super.createWhere(userMandatoryTopicsModel, ["id", "userId"]);
     const [instance, wasCreated] = await super.genericCreate(UserMandatoryTopics, userMandatoryTopicsModel, where);
     return [<UserMandatoryTopics>instance, wasCreated];
   }

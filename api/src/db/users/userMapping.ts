@@ -6,7 +6,7 @@ import {
   UserMandatoryTopics,
   UserSpecificTopics,
   UserFeedback,
-  UserObjective,
+  UserObjectives,
   UserReview,
   UserRequiredActions
 } from "..";
@@ -69,7 +69,7 @@ class UserMapping extends GenericMapping {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
       constraints: true
     });
-    User.hasMany(UserObjective, {
+    User.hasMany(UserObjectives, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
       constraints: true
     });
