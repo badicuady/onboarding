@@ -8,7 +8,7 @@ class DepartmentsController extends GenericController {
     super();
   }
 
-  makeAssociations():void {
+  makeAssociations(): void {
     DepartmentLkMapping.associations();
   }
 
@@ -17,7 +17,7 @@ class DepartmentsController extends GenericController {
   }
 
   async postSyncHook(): Promise<void> {
-	await DepartmentLkMapping.prepareData();
+    await DepartmentLkMapping.prepareData();
   }
 
   async listDepartments(): Promise<IDepartmentLk[]> {
@@ -31,8 +31,8 @@ const departmentsLkModelSchema = {
   type: "object",
   properties: {
     id: { type: "number" },
-    name: { type: "string" }
-  }
+    name: { type: "string" },
+  },
 };
 
 const departmentsControllerRoutes: RouteOptions[] = [
@@ -44,20 +44,20 @@ const departmentsControllerRoutes: RouteOptions[] = [
       response: {
         "200": {
           type: "array",
-          items: { ...departmentsLkModelSchema }
+          items: { ...departmentsLkModelSchema },
         },
         "4xx": {
-          type: "string"
-        }
+          type: "string",
+        },
       },
-      security: [{ oauth: [] }]
+      security: [{ oauth: [] }],
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const departments = await departmentsController.listDepartments();
       reply.send(departments);
-    }
-  }
+    },
+  },
 ];
 
 export default departmentsControllerRoutes;

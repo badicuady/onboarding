@@ -10,6 +10,7 @@ export interface IUserReview {
   alteringUserId?: number;
   objectivesMet?: boolean;
   trainingsMet?: boolean;
+  period?: number;
 }
 
 export interface IUserReviewModel extends IGenericModel, IUserReview {}
@@ -92,6 +93,13 @@ const UserReviewModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), trainingsMet });
     }
 
+    get period(): number | undefined {
+      return _privateFields.get(this)?.period;
+    }
+    set period(period) {
+      _privateFields.set(this, { ..._privateFields.get(this), period });
+    }
+
     setup(model: IUserReview) {
       if (!this.validate(model)) {
         throw new Error(`The model is not valid: «${model}»`);
@@ -101,10 +109,12 @@ const UserReviewModel = () => {
         performance: model.performance || "",
         concerns: model.concerns || "",
         summary: model.summary || "",
-        userId: model.userId || 0,
+		userId: model.userId || 0,
+		id: model.id || 0,
         alteringUserId: model.alteringUserId || 0,
         objectivesMet: model.objectivesMet || false,
-        trainingsMet: model.trainingsMet || false
+        trainingsMet: model.trainingsMet || false,
+        period: model.period || 0,
       });
     }
   };

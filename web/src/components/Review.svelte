@@ -1,12 +1,20 @@
 <script>
+  import { createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
   import { OpenTableItemType } from "../models/enums.js";
   import OpenActivitiesTable from "../components/OpenActivitiesTable.svelte";
 
   export let reviewData;
   export let reviewUniqueId;
+  export let inputs = {};
 
-  export let showFurtherActions = reviewData.map(e => !!e);
+  const dispatch = createEventDispatcher();
+  inputs[`${reviewUniqueId}-date`] = new Date().toISOString().slice(0, 10);
+  let showFurtherActions = reviewData.map(e => !!e);
+
+  const itemBlur = e => {
+    dispatch("itemBlur", { original: e, uniqueId: reviewUniqueId, inputs });
+  };
 </script>
 
 <form>
@@ -18,8 +26,7 @@
         name="{reviewUniqueId}-date"
         type="date"
         class="form-control"
-        readonly
-        value={new Date().toISOString().slice(0, 10)} />
+        bind:value={inputs[`${reviewUniqueId}-date`]} />
     </div>
   </div>
 
@@ -31,7 +38,9 @@
     <textarea
       id="{reviewUniqueId}-performance"
       name="{reviewUniqueId}-performance"
-      class="form-control" />
+      class="form-control"
+      bind:value={inputs[`${reviewUniqueId}-performance`]}
+      on:blur={itemBlur} />
   </div>
 
   <div class="form-group">
@@ -42,7 +51,9 @@
     <textarea
       id="{reviewUniqueId}-concerns"
       name="{reviewUniqueId}-concerns"
-      class="form-control" />
+      class="form-control"
+      bind:value={inputs[`${reviewUniqueId}-concerns`]}
+      on:blur={itemBlur} />
   </div>
 
   <div class="form-group">
@@ -52,7 +63,9 @@
     <textarea
       id="{reviewUniqueId}-sumarise"
       name="{reviewUniqueId}-sumarise"
-      class="form-control" />
+      class="form-control"
+      bind:value={inputs[`${reviewUniqueId}-sumarise`]}
+      on:blur={itemBlur} />
   </div>
 
   <div class="container">

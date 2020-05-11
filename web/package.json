@@ -1,12 +1,27 @@
 {
-  "name": "onboardingwebapp",
-  "description": "Onboarding Web App",
-  "version": "0.0.1",
+  "name": "onboarding-web",
+  "description": "OnBoarding Web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/badicuady/onboarding.git"
+  },
+  "keywords": [
+    "onboarding"
+  ],
+  "author": "Adrian Badicu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/badicuady/onboarding/issues"
+  },
+  "homepage": "https://github.com/badicuady/onboarding#readme",
   "scripts": {
     "dev": "set PORT=4123 && sapper dev",
-    "build": "sapper build --legacy && copy \".\\server.package.json\" \".\\__sapper__\\build\\package.json\" /Y && npm install --cwd __sapper__/build --prefix __sapper__/build",
+    "build": "sapper build --legacy && copy \".\\server.package.json\" \".\\__sapper__\\build\\package.json\" /Y && npm install --cwd __sapper__/build/ --prefix __sapper__/build/",
     "export": "sapper export --legacy",
-    "start": "set PORT=4123 && node __sapper__/build",
+    "start": "set PORT=4123 && node ./__sapper__/build --env=dev",
+    "start-docker": "node ./__sapper__/build/index.js --env=docker",
     "serv": "npm run build && npm run start",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
@@ -20,8 +35,7 @@
     "express-session": "^1.17.0",
     "memorystore": "^1.6.2",
     "polka": "next",
-    "sirv": "^0.4.0",
-    "sirv-cli": "^0.4.5"
+    "sirv": "^0.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
@@ -37,7 +51,9 @@
     "rollup-plugin-babel": "^4.0.2",
     "rollup-plugin-svelte": "^5.0.1",
     "rollup-plugin-terser": "^5.2.0",
-    "sapper": "^0.27.0",
-    "svelte": "^3.0.0"
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "sapper": "^0.27.12",
+    "svelte": "^3.0.0",
+    "sirv-cli": "^0.4.5"
   }
 }

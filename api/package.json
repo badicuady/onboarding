@@ -1,13 +1,15 @@
 {
-  "name": "onboarding",
+  "name": "onboarding-api",
   "version": "1.0.0",
-  "description": "Base configuration for a rest api",
+  "description": "OnBoarding API",
   "main": "index.js",
   "scripts": {
-    "serv": "npm run tsc && npm run start",
+	"serv": "npm run tsc && npm run start",
+	"build": "npm run tsc && copy \".\\server.package.json\" \".\\dist\\package.json\" /Y",
+	"buildinstall": "npm run tsc && copy \".\\server.package.json\" \".\\dist\\package.json\" /Y && npm install --cwd dist/ --prefix dist/",
     "start": "set PORT=3123 && node ./dist/index.js --env=dev",
-    "start-docker": "set PORT=3123 && node ./index.js --env=docker",
-    "mon": "nodemon --delay 2500ms --ext ts --exec npm start",
+    "start-docker": "node ./index.js --env=docker",
+    "mon": "nodemon --delay 2500ms --ext ts --exec npm serv",
     "eslint": "eslint src --ext ts",
     "tsc": "tsc && gulp copyKeyFiles"
   },
@@ -16,8 +18,7 @@
     "url": "git+https://github.com/badicuady/onboarding.git"
   },
   "keywords": [
-    "api",
-    "rest"
+    "onboarding"
   ],
   "author": "Adrian Badicu",
   "license": "MIT",
@@ -26,6 +27,7 @@
   },
   "homepage": "https://github.com/badicuady/onboarding#readme",
   "devDependencies": {
+    "@types/ldapjs": "^1.0.5",
     "@types/bluebird": "^3.5.30",
     "@types/jsonwebtoken": "^8.3.8",
     "@types/validator": "^12.0.1",
@@ -41,7 +43,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@types/ldapjs": "^1.0.5",
     "axios": "^0.19.1",
     "fastify": "^2.11.0",
     "fastify-cors": "^3.0.2",

@@ -1,13 +1,14 @@
-FROM node:alpine
+FROM node:13.14-alpine
 
-WORKDIR /usr/src/onboarding/api
+RUN mkdir -p /usr/onboarding/api
 
-COPY package*.json ./
-
-RUN npm cache clean --force && npm install --only=prod && node --version
+WORKDIR /usr/onboarding/api
 
 COPY ./dist ./
 
+ENV PORT=3123
+
 EXPOSE 3123
 
-CMD npm run start-docker
+#CMD node ./index.js --env=docker
+CMD node ./index.js --env=localdocker

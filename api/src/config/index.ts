@@ -42,6 +42,7 @@ export interface IAppConfigItem {
   CRYPTO_ALGORITHM: string;
   CRYPTO_SECRET: string;
   AUTH_LINK: string;
+  KEYS_PATH: string;
   db: IDBConfig;
   jwt: IJWTConfig;
   ad: IADConfig;
@@ -58,7 +59,8 @@ export const app: IAppConfig = {
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
-    AUTH_LINK: "http://web.onboarding.com:4123/login",
+	AUTH_LINK: "http://web.onboarding.com:4123/login",
+	KEYS_PATH: "./src",
     db: {
       DB_SERVER: "localhost",
       DB_PORT: 5432,
@@ -80,15 +82,45 @@ export const app: IAppConfig = {
     	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
 	}
   },
-  docker: {
-    SERVER_HOST: "localhost",
+  localdocker: {
+    SERVER_HOST: "api.onboarding.com",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 3123,
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
-    AUTH_LINK: "http://web.onboarding.com:4123/login",
+	AUTH_LINK: "http://web.onboarding.com:4123/login",
+	KEYS_PATH: "./",
     db: {
-      DB_SERVER: "postgres",
+      DB_SERVER: "onboarding-database",
+      DB_PORT: 5432,
+      DB_DATABASE: "postgres",
+      DB_USERNAME: "postgres",
+      DB_PASSWORD: "docker",
+      // 'mysql'|'mariadb'|'sqlite'|'postgres'|'mssql'
+      DB_DIALECT: "postgres"
+    },
+    jwt: {
+      JWT_ISSUER: "Ipsos Interactive Services",
+      JWT_SUBJECT: "adrian.badicu@ipsos.com",
+      JWT_AUDIENCE: "HR",
+      JWT_EXPIRES_IN: "1h",
+      JWT_ALGORITHM: "RS256"
+	},
+	ad: {
+		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
+    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
+	}
+  },
+  docker: {
+    SERVER_HOST: "onboardingapitest.ipsosinteractive.com",
+    SERVER_PORT: parseInt(process.env.PORT || "", 10) || 443,
+    SERVER_PROTOCOL: "https",
+    CRYPTO_ALGORITHM: "sha512",
+    CRYPTO_SECRET: "123456",
+	AUTH_LINK: "https://onboardingtest.ipsosinteractive.com/login",
+	KEYS_PATH: "./",
+    db: {
+      DB_SERVER: "onboarding-database",
       DB_PORT: 5432,
       DB_DATABASE: "postgres",
       DB_USERNAME: "postgres",

@@ -1,15 +1,18 @@
-FROM node:13.6.0-alpine
+FROM node:13.14-alpine
 
-WORKDIR /usr/src/restapicore
+RUN mkdir -p /usr/src/onboarding/web
 
-COPY package*.json ./
+WORKDIR /usr/src/onboarding/web
 
-RUN npm cache clean --force && npm install --only=prod && node --version
+COPY ./__sapper__/build ./__sapper__/build
 
-COPY . .
+COPY ./static/ ./static
 
-COPY ./oauth.js ./node_modules/fastify-oauth2/index.js
+COPY ./server.package.json ./package.json
 
-EXPOSE 3000
+ENV PORT=4123
+ENV ENV=localdocker
 
-CMD npm run start-docker
+EXPOSE 4123
+
+CMD node __sapper__/build/index.js

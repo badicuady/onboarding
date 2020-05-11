@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
+import { app, argv } from "../../config/index";
 import Extensions from "../common/extensions";
 
 class JwtService {
@@ -16,8 +17,8 @@ class JwtService {
     return jwt.decode(token, { complete: true });
   }
 
-  private static _privateKey: string = fs.readFileSync(path.resolve("./dist/", "./config/keys/private.key"), "utf8");
-  private static _publicKey: string = fs.readFileSync(path.resolve("./dist/", "./config/keys/public.key"), "utf8");
+  private static _privateKey: string = fs.readFileSync(path.resolve(app[argv.env].KEYS_PATH, "./config/keys/private.key"), "utf8");
+  private static _publicKey: string = fs.readFileSync(path.resolve(app[argv.env].KEYS_PATH, "./config/keys/public.key"), "utf8");
 }
 
 export default JwtService;

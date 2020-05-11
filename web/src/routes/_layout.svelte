@@ -17,10 +17,6 @@
   import User from "../models/user.js";
 
   export async function preload(page, session) {
-    if (!config.useLogin) {
-      session[CacheKeys.UserInfo] = config.testUser;
-    }
-
     const user = session[CacheKeys.UserInfo];
     const token = session[CacheKeys.Token];
     const rex = new RegExp(`\/${config.loginSegment}`, "gim");

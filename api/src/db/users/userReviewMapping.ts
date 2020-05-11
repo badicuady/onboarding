@@ -12,6 +12,7 @@ class UserReview extends GenericDatabase implements IUserReview {
   alteringUserId!: number;
   objectivesMet!: boolean;
   trainingsMet!: boolean;
+  period!: number;
 }
 
 class UserReviewMapping extends GenericMapping {
@@ -23,32 +24,37 @@ class UserReviewMapping extends GenericMapping {
     const modelAttributes: ModelAttributes = {
       date: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
       },
       performance: {
         type: new DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: true,
       },
       concerns: {
         type: new DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: true,
       },
       summary: {
         type: new DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: true,
       },
       objectivesMet: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
       },
       trainingsMet: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
-      }
+        allowNull: false,
+      },
+      period: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     UserReview.init(modelAttributes, modelOptions);
@@ -61,16 +67,16 @@ class UserReviewMapping extends GenericMapping {
   associations(): void {
     UserReview.belongsTo(User, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
     UserReview.belongsTo(User, {
       foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
-      constraints: true
-	});
-	UserReview.hasMany(UserRequiredActions, {
-		foreignKey: { name: "userRequiredActionsId", field: "userRequiredActionsId", allowNull: false },
-		constraints: true
-	  });
+      constraints: true,
+    });
+    UserReview.hasMany(UserRequiredActions, {
+      foreignKey: { name: "userRequiredActionsId", field: "userRequiredActionsId", allowNull: true },
+      constraints: true,
+    });
   }
 
   async get(userId: number): Promise<UserReview[]> {
@@ -78,7 +84,7 @@ class UserReviewMapping extends GenericMapping {
   }
 
   async create(userObjectiveModel: IUserReviewModel): Promise<[UserReview, boolean]> {
-	const where = super.createWhere(userObjectiveModel, ["id", "userId"]);
+    const where = super.createWhere(userObjectiveModel, ["id", "userId"]);
     const [instance, wasCreated] = await super.genericCreate(UserReview, userObjectiveModel, where);
     return [<UserReview>instance, wasCreated];
   }

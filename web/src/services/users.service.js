@@ -158,6 +158,47 @@ class UsersService extends AuthService {
       console.error(error);
     }
   }
+
+  async getUserReview(userId) {
+    try {
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review`;
+      const response = await axios.get(url, { ...this.config, params: { userId } });
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async upsertUserReview(
+    userId,
+    alteringUserId,
+    date,
+    performance,
+    concerns,
+    summary,
+    objectivesMet,
+    trainingsMet,
+    period
+  ) {
+    try {
+      const data = {
+        userId,
+        alteringUserId,
+        date,
+        performance,
+        concerns,
+        summary,
+        objectivesMet,
+        trainingsMet,
+        period,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review`;
+      const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 
 export default UsersService;

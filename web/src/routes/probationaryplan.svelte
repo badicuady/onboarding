@@ -68,17 +68,33 @@
   const deleteObjectives = async (e, type) => {
     if (usersService) {
       const userObjectivesInfo = await usersService.deleteUserObjectives(
-		userModel.id,
-		e.detail.id
+        userModel.id,
+        e.detail.id
       );
       if (userObjectivesInfo && userObjectivesInfo.status === 204) {
         partOneInfo[type - 1].info.data = [
           ...partOneInfo[type - 1].info.data.filter(
             el => +el.id !== e.detail.id
           )
-		];
-		partOneInfo = [...partOneInfo]; // trigger the update
+        ];
+        partOneInfo = [...partOneInfo]; // trigger the update
       }
+    }
+  };
+
+  const itemBlurReview = async (e, type) => {
+    if (usersService) {
+      const userObjectivesInfo = await usersService.upsertUserReview(
+        userModel.id,
+        userModel.id,
+        e.detail.inputs[`${e.detail.uniqueId}-date`],
+        e.detail.inputs[`${e.detail.uniqueId}-performance`],
+        e.detail.inputs[`${e.detail.uniqueId}-concerns`],
+        e.detail.inputs[`${e.detail.uniqueId}-summary`],
+        false,
+        false,
+        type
+      );
     }
   };
 
@@ -397,7 +413,8 @@
                     </p>
                     <Review
                       reviewUniqueId="first-review"
-                      reviewData={firstReviewData} />
+                      reviewData={firstReviewData}
+                      on:itemBlur={e => itemBlurReview(e, 1)} />
                   </div>
                 </div>
               </div>
@@ -420,7 +437,8 @@
                   <div class="card-body table-responsive">
                     <Review
                       reviewUniqueId="second-review"
-                      reviewData={secondReviewData} />
+                      reviewData={secondReviewData}
+                      on:itemBlur={e => itemBlurReview(e, 3)} />
                   </div>
                 </div>
               </div>
@@ -450,7 +468,8 @@
                     </p>
                     <Review
                       reviewUniqueId="final-review"
-                      reviewData={finalReviewData} />
+                      reviewData={finalReviewData}
+                      on:itemBlur={e => itemBlurReview(e, 3)} />
                   </div>
                 </div>
               </div>

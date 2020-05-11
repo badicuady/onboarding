@@ -1,0 +1,9 @@
+docker build -t onboarding-web .
+docker run --name onboarding-web -p 4123:4123 --network onboarding-network onboarding-web
+
+# publish
+docker login https://dockerrepotest.ipsosinteractive.com/ 
+user: repousertest
+pass: T@k3MYimageUPtest
+docker tag onboarding-web dockerrepotest.ipsosinteractive.com/onboarding-web:latest
+docker push dockerrepotest.ipsosinteractive.com/onboarding-web:latest

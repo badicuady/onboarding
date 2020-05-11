@@ -220,19 +220,20 @@ const userFeedbackModelSchema = {
 const userObjectiveModelSchema = {
   type: "object",
   properties: {
-	userId: { type: "number" },
-	id: { type: "number" },
+    userId: { type: "number" },
+    id: { type: "number" },
     description: { type: "string" },
     deadline: { type: "string", format: "date" },
-	responsible: { type: "string" },
-	type: { type: "number" }
+    responsible: { type: "string" },
+    type: { type: "number" },
   },
 };
 
 const userReviewModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	userId: { type: "number" },
+	id: { type: "number" },
     alteringUserId: { type: "number" },
     date: { type: "string", format: "date" },
     performance: { type: "string" },
@@ -240,6 +241,7 @@ const userReviewModelSchema = {
     summary: { type: "string" },
     objectivesMet: { type: "boolean" },
     trainingsMet: { type: "boolean" },
+    period: { type: "number", minimum: 1, maximum: 3 },
   },
 };
 

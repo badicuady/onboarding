@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+  onboarding-web:
+    build: ./web
+    environment: 
+      - PORT=4123
+    ports:
+      - "4123:4123"
+    depends_on:
+      - onboarding-api
+    restart: on-failure
+  onboarding-api:
+    build: ./api
+    environment: 
+      - PORT=3123
+    ports:
+      - "3123:3123"
+    depends_on:
+      - onboarding-database
+    restart: on-failure
+  onboarding-database:
+    image: "postgres:alpine"
+    environment: 
+      - POSTGRES_PASSWORD=docker
+    ports:
+      - "5432:5432"
+    volumes:
+      - onboarding-volume:/var/lib/postgresql/data
+    restart: on-failure
+volumes:
+  onboarding-volume:
+    external: true

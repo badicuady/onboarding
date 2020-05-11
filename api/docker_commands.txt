@@ -1,0 +1,24 @@
+# create a network
+docker network create -d bridge onboarding-network
+
+#build image
+docker build -t onboarding-api --rm .
+
+#start container
+docker run --name onboarding-api -p 3123:3123 --network onboarding-network onboarding-api
+docker run --name onboarding-api -p 3123:3123 --network onboarding-network -v d:\Workspaces\onboarding\api\logs\:/var/logs/api/ onboarding-api
+docker run -i -t --name onboarding-api -p 3123:3123 --network onboarding-network onboarding-api sh
+
+npm run tsc
+docker container prune -f
+docker build -t onboarding-api --rm . 
+docker run -t --name onboarding-api -p 3123:3123 --network onboarding-network onboarding-api
+
+#docker run -i -t -p 3123:3123 --network onboarding-network --name onboarding-api onboarding-api sh
+
+# publish
+docker login https://dockerrepotest.ipsosinteractive.com/ 
+user: repousertest
+pass: T@k3MYimageUPtest
+docker tag onboarding-api dockerrepotest.ipsosinteractive.com/onboarding-api:latest
+docker push dockerrepotest.ipsosinteractive.com/onboarding-api:latest
