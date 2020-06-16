@@ -466,7 +466,7 @@
                           name="end-date"
                           type="date"
                           class="form-control"
-                          value={new Date(Date.now() + 3600 * 24 * 30)
+                          value={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
                             .toISOString()
                             .slice(0, 10)} />
                       </div>
