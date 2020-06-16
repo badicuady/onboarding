@@ -453,7 +453,6 @@
                           name="start-date"
                           type="date"
                           class="form-control"
-                          readonly
                           value={new Date().toISOString().slice(0, 10)} />
                       </div>
                     </div>
@@ -467,7 +466,6 @@
                           name="end-date"
                           type="date"
                           class="form-control"
-                          readonly
                           value={new Date(Date.now() + 3600 * 24 * 30)
                             .toISOString()
                             .slice(0, 10)} />

@@ -433,7 +433,6 @@
                   </label>
                   <div class="col-sm-10">
                     <input
-                      disabled
                       type="date"
                       class="form-control"
                       id="entryDate"
@@ -446,7 +445,6 @@
                   </label>
                   <div class="col-sm-10">
                     <input
-                      disabled
                       type="date"
                       class="form-control"
                       id="endOfProbation"
