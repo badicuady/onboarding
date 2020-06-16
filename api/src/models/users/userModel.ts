@@ -4,7 +4,7 @@ export enum UserRole {
   Admin = 1,
   HR = 2,
   IT = 3,
-  Employee = 4
+  Employee = 4,
 }
 
 export interface IUser {

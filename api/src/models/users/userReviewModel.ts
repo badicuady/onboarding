@@ -87,7 +87,7 @@ const UserReviewModel = () => {
     }
 
     get trainingsMet(): boolean | undefined {
-      return _privateFields.get(this)?.objectivesMet;
+      return _privateFields.get(this)?.trainingsMet;
     }
     set trainingsMet(trainingsMet) {
       _privateFields.set(this, { ..._privateFields.get(this), trainingsMet });

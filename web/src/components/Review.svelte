@@ -9,11 +9,25 @@
   export let inputs = {};
 
   const dispatch = createEventDispatcher();
-  inputs[`${reviewUniqueId}-date`] = new Date().toISOString().slice(0, 10);
-  let showFurtherActions = reviewData.map(e => !!e);
 
   const itemBlur = e => {
     dispatch("itemBlur", { original: e, uniqueId: reviewUniqueId, inputs });
+  };
+
+  const addNewUserRequiredAction = (e, type) => {
+    dispatch("addNewUserRequiredAction", {
+      ...e.detail,
+      userRequiredActionsId: inputs[`${reviewUniqueId}-id`],
+      type
+    });
+  };
+
+  const deleteUserRequiredAction = (e, type) => {
+    dispatch("deleteUserRequiredAction", {
+      ...e.detail,
+      userRequiredActionsId: inputs[`${reviewUniqueId}-id`],
+      type
+    });
   };
 </script>
 
@@ -26,7 +40,8 @@
         name="{reviewUniqueId}-date"
         type="date"
         class="form-control"
-        bind:value={inputs[`${reviewUniqueId}-date`]} />
+        bind:value={inputs[`${reviewUniqueId}-date`]}
+        on:blur={itemBlur} />
     </div>
   </div>
 
@@ -57,14 +72,14 @@
   </div>
 
   <div class="form-group">
-    <label for="{reviewUniqueId}-sumarise" class="col-form-label">
+    <label for="{reviewUniqueId}-summary" class="col-form-label">
       Summarise the employee's performance and progress over the period:
     </label>
     <textarea
-      id="{reviewUniqueId}-sumarise"
-      name="{reviewUniqueId}-sumarise"
+      id="{reviewUniqueId}-summary"
+      name="{reviewUniqueId}-summary"
       class="form-control"
-      bind:value={inputs[`${reviewUniqueId}-sumarise`]}
+      bind:value={inputs[`${reviewUniqueId}-summary`]}
       on:blur={itemBlur} />
   </div>
 
@@ -86,7 +101,8 @@
                   id="{reviewUniqueId}-action-{ndx}"
                   name="{reviewUniqueId}-action-{ndx}"
                   data-id={ndx}
-                  bind:checked={showFurtherActions[ndx]} />
+                  bind:checked={inputs[`${reviewUniqueId}-show-further-actions-${ndx}`]}
+                  on:change={itemBlur} />
                 <label
                   class="custom-control-label"
                   for="{reviewUniqueId}-action-{ndx}" />
@@ -95,7 +111,7 @@
           </div>
         </div>
         <div class="col-7">
-          {#if !showFurtherActions[ndx]}
+          {#if !inputs[`${reviewUniqueId}-show-further-actions-${ndx}`]}
             <div in:fade out:fade>
               <p>
                 <label>If NO, what further action is required?</label>
@@ -104,7 +120,9 @@
                 switchName="{reviewUniqueId}-action-{ndx}"
                 info={data.actions}
                 colWidths={[5, 50, 35, 10]}
-                showDone={false} />
+                showDone={false}
+                on:addNewRow={e => addNewUserRequiredAction(e, ndx + 1)}
+				on:deleteClicked={e => deleteUserRequiredAction(e, ndx + 1)} />
             </div>
           {/if}
         </div>

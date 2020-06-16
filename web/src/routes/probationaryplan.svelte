@@ -22,7 +22,7 @@
       );
 
       if (userObjectivesInfo && userObjectivesInfo.data) {
-        for (let type = 0; type < partOneInfo.length; type++) {
+        for (let type = 0; type < partOneInfo.length; ++type) {
           const tmpUserObjectivesInfo = userObjectivesInfo.data
             .filter(e => e.type === type + 1)
             .map(e => ({
@@ -82,6 +82,54 @@
     }
   };
 
+  const readUserReviews = async () => {
+    const computeKey = k =>
+      k === "objectivesMet"
+        ? "show-further-actions-0"
+        : k === "trainingsMet"
+        ? "show-further-actions-1"
+        : k;
+
+    if (usersService) {
+      const userReviewInfo = await usersService.getUserReview(userModel.id);
+      const first = userReviewInfo.data.filter(e => e.period === 1);
+      const firstActions = await populateUserRequiredAction(
+        partTwoFirstReviewData,
+        first[0].id
+      );
+      partTwoFirstReviewData = [...firstActions];
+      partTwoFirstReviewInputs = Object.keys(first[0]).reduce((all, key) => {
+        const computedKey = computeKey(key);
+        all[`first-review-${computedKey}`] = first[0][key];
+        return all;
+      }, {});
+
+      const second = userReviewInfo.data.filter(e => e.period === 2);
+      const secondActions = await populateUserRequiredAction(
+        partTwoSecondReviewData,
+        second[0].id
+      );
+      partTwoSecondReviewData = [...secondActions];
+      partTwoSecondReviewInputs = Object.keys(second[0]).reduce((all, key) => {
+        const computedKey = computeKey(key);
+        all[`second-review-${computedKey}`] = second[0][key];
+        return all;
+      }, {});
+
+      const final = userReviewInfo.data.filter(e => e.period === 3);
+      const finalActions = await populateUserRequiredAction(
+        partTwoFinalReviewData,
+        final[0].id
+      );
+      partTwoFinalReviewData = [...finalActions];
+      partTwoFinalReviewInputs = Object.keys(final[0]).reduce((all, key) => {
+        const computedKey = computeKey(key);
+        all[`final-review-${computedKey}`] = final[0][key];
+        return all;
+      }, {});
+    }
+  };
+
   const itemBlurReview = async (e, type) => {
     if (usersService) {
       const userObjectivesInfo = await usersService.upsertUserReview(
@@ -91,16 +139,127 @@
         e.detail.inputs[`${e.detail.uniqueId}-performance`],
         e.detail.inputs[`${e.detail.uniqueId}-concerns`],
         e.detail.inputs[`${e.detail.uniqueId}-summary`],
-        false,
-        false,
+        e.detail.inputs[`${e.detail.uniqueId}-show-further-actions-0`],
+        e.detail.inputs[`${e.detail.uniqueId}-show-further-actions-1`],
         type
       );
     }
   };
 
+  const populateUserRequiredAction = async (reviewData, userReviewId) => {
+    const actions = await readUserRequiredAction(userReviewId);
+    for (let ndx = 0; ndx < actions.length; ++ndx) {
+      reviewData[+actions[ndx].type - 1].actions.data.push({
+        id: actions[ndx].id,
+        cells: [actions[ndx].action, actions[ndx].date]
+      });
+    }
+    return reviewData;
+  };
+
+  const readUserRequiredAction = async userRequiredActionsId => {
+    if (usersService) {
+      const userFeedbackInfo = await usersService.getUserRequiredActions(
+        userRequiredActionsId
+      );
+      if (userFeedbackInfo && userFeedbackInfo.data) {
+        return userFeedbackInfo.data;
+      }
+      return [];
+    }
+    return [];
+  };
+
+  const addNewUserRequiredAction = async (e, type) => {
+    const firstKey = Object.keys(e.detail.inputs)[0];
+    const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
+    if (usersService) {
+      const userRequiredActionInfo = await usersService.upsertUserRequiredActions(
+        userModel.id,
+        userModel.id,
+        e.detail.inputs[`${radical}-0`],
+        e.detail.inputs[`${radical}-1`],
+        +e.detail.type,
+        +e.detail.userRequiredActionsId
+      );
+      if (userRequiredActionInfo && userRequiredActionInfo.data) {
+        if (type === 1) {
+          partTwoFirstReviewData[
+            +e.detail.type - 1
+          ].actions = updateObjectUserSpecificTopics(
+            partTwoFirstReviewData[+e.detail.type - 1].actions,
+            [userRequiredActionInfo.data]
+          );
+          partTwoFirstReviewData = [...partTwoFirstReviewData];
+        } else if (type === 2) {
+          partTwoSecondReviewData[
+            +e.detail.type - 1
+          ].actions = updateObjectUserSpecificTopics(
+            partTwoSecondReviewData[+e.detail.type - 1].actions,
+            [userRequiredActionInfo.data]
+          );
+          partTwoSecondReviewData = [...partTwoSecondReviewData];
+        } else if (type === 3) {
+          partTwoFinalReviewData[
+            +e.detail.type - 1
+          ].actions = updateObjectUserSpecificTopics(
+            partTwoFinalReviewData[+e.detail.type - 1].actions,
+            [userRequiredActionInfo.data]
+          );
+          partTwoFinalReviewData = [...partTwoFinalReviewData];
+        }
+      }
+    }
+  };
+
+  const deleteUserRequiredAction = async (e, type) => {
+    if (usersService) {
+      const userRequiredActionInfo = await usersService.deleteUserRequiredActions(
+        userModel.id,
+        e.detail.id
+      );
+      if (userRequiredActionInfo && userRequiredActionInfo.status === 204) {
+        if (type === 1) {
+          partTwoFirstReviewData[e.detail.type - 1].actions.data = [
+            ...partTwoFirstReviewData[e.detail.type - 1].actions.data.filter(
+              el => +el.id !== e.detail.id
+            )
+          ];
+          partTwoFirstReviewData = [...partTwoFirstReviewData];
+        } else if (type === 2) {
+          partTwoSecondReviewData[e.detail.type - 1].actions.data = [
+            ...partTwoSecondReviewData[e.detail.type - 1].actions.data.filter(
+              el => +el.id !== e.detail.id
+            )
+          ];
+          partTwoSecondReviewData = [...partTwoSecondReviewData];
+        } else if (type === 3) {
+          partTwoFinalReviewData[e.detail.type - 1].actions.data = [
+            ...partTwoFinalReviewData[e.detail.type - 1].actions.data.filter(
+              el => +el.id !== e.detail.id
+            )
+          ];
+          partTwoFinalReviewData = [...partTwoFinalReviewData];
+        }
+      }
+    }
+  };
+
   const readInfo = async () => {
     await readUserObjectives();
+    await readUserReviews();
   };
+
+  const updateObjectUserSpecificTopics = (repository, fromData) => ({
+    ...repository,
+    data: [
+      ...repository.data,
+      ...Array.from(fromData || []).map(e => ({
+        cells: [e.action, e.date],
+        id: e.id
+      }))
+    ]
+  });
 
   const cacheSubscribe = CacheService.subscribe(cache => {
     if (!userModel) {
@@ -156,37 +315,45 @@
     }
   ];
 
-  const reviewActions = {
-    columns: ["Required actions", "Review Date", "Delete"],
-    data: [
-      { id: 1, cells: ["Action 1", "2020-03-01"] },
-      { id: 2, cells: ["Action 2", "2020-03-01"] }
-    ],
-    columnVals: [OpenTableItemType.single, OpenTableItemType.date]
-  };
+  const reviewActionsColumns = ["Required actions", "Review Date", "Delete"];
+  const reviewActionsColumnVals = [
+    OpenTableItemType.single,
+    OpenTableItemType.date
+  ];
+  const reviewActionsQuestion1 =
+    "Have the objectives identified for this period of the probation been met?";
+  const reviewActionsQuesiton2 =
+    "Have the training / development needs identified for this period of the probation been addressed?";
 
-  const firstReviewData = [
+  let partTwoFirstReviewData = [
     {
-      question:
-        "Have the objectives identified for this period of the probation been met?",
-      actions: Object.assign({}, reviewActions)
+      question: reviewActionsQuestion1,
+      actions: {
+        columns: [...reviewActionsColumns],
+        data: [],
+        columnVals: [...reviewActionsColumnVals]
+      }
     },
     {
-      question:
-        "Have the training / development needs identified for this period of the probation been addressed?",
-      actions: Object.assign({}, reviewActions)
+      question: reviewActionsQuesiton2,
+      actions: {
+        columns: [...reviewActionsColumns],
+        data: [],
+        columnVals: [...reviewActionsColumnVals]
+      }
     }
   ];
 
-  const secondReviewData = [
-    Object.assign({}, firstReviewData[0]),
-    Object.assign({}, firstReviewData[1])
-  ];
+  let partTwoSecondReviewData = JSON.parse(
+    JSON.stringify(partTwoFirstReviewData)
+  );
+  let partTwoFinalReviewData = JSON.parse(
+    JSON.stringify(partTwoFirstReviewData)
+  );
 
-  const finalReviewData = [
-    Object.assign({}, firstReviewData[0]),
-    Object.assign({}, firstReviewData[1])
-  ];
+  let partTwoFirstReviewInputs = {};
+  let partTwoSecondReviewInputs = {};
+  let partTwoFinalReviewInputs = {};
 </script>
 
 <svelte:head>
@@ -196,11 +363,11 @@
 <Layout>
   <div slot="content-header" class="container">
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-6">
         <h1 class="m-0 text-dark">Probationary period plan</h1>
       </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
+      <div class="col-6">
+        <ol class="breadcrumb float-right">
           <li class="breadcrumb-item">
             <a href="##" on:click={config.preventEvent}>probationaryplan</a>
           </li>
@@ -413,8 +580,11 @@
                     </p>
                     <Review
                       reviewUniqueId="first-review"
-                      reviewData={firstReviewData}
-                      on:itemBlur={e => itemBlurReview(e, 1)} />
+                      reviewData={partTwoFirstReviewData}
+                      inputs={partTwoFirstReviewInputs}
+                      on:itemBlur={e => itemBlurReview(e, 1)}
+                      on:addNewUserRequiredAction={e => addNewUserRequiredAction(e, 1)}
+                      on:deleteUserRequiredAction={e => deleteUserRequiredAction(e, 1)} />
                   </div>
                 </div>
               </div>
@@ -437,8 +607,11 @@
                   <div class="card-body table-responsive">
                     <Review
                       reviewUniqueId="second-review"
-                      reviewData={secondReviewData}
-                      on:itemBlur={e => itemBlurReview(e, 3)} />
+                      reviewData={partTwoSecondReviewData}
+                      inputs={partTwoSecondReviewInputs}
+                      on:itemBlur={e => itemBlurReview(e, 2)}
+                      on:addNewUserRequiredAction={e => addNewUserRequiredAction(e, 2)}
+                      on:deleteUserRequiredAction={e => deleteUserRequiredAction(e, 2)} />
                   </div>
                 </div>
               </div>
@@ -468,8 +641,11 @@
                     </p>
                     <Review
                       reviewUniqueId="final-review"
-                      reviewData={finalReviewData}
-                      on:itemBlur={e => itemBlurReview(e, 3)} />
+                      reviewData={partTwoFinalReviewData}
+                      inputs={partTwoFinalReviewInputs}
+                      on:itemBlur={e => itemBlurReview(e, 3)}
+                      on:addNewUserRequiredAction={e => addNewUserRequiredAction(e, 3)}
+                      on:deleteUserRequiredAction={e => deleteUserRequiredAction(e, 3)} />
                   </div>
                 </div>
               </div>

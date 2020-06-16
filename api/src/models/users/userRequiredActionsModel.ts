@@ -4,9 +4,10 @@ export interface IUserRequiredActions {
   id?: number;
   action?: string;
   date?: Date;
-  userReviewId?: number;
   type?: number;
   alteringUserId?: number;
+  userId?: number;
+  userRequiredActionsId?: number;
 }
 
 export interface IUserRequiredActionsModel extends IGenericModel, IUserRequiredActions {}
@@ -47,13 +48,6 @@ const UserRequiredActionsModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), date });
     }
 
-    get userReviewId(): number | undefined {
-      return _privateFields.get(this)?.userReviewId;
-    }
-    set userReviewId(userReviewId) {
-      _privateFields.set(this, { ..._privateFields.get(this), userReviewId });
-    }
-
     get type(): number | undefined {
       return _privateFields.get(this)?.type;
     }
@@ -61,11 +55,25 @@ const UserRequiredActionsModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), type });
     }
 
+    get userId(): number | undefined {
+      return _privateFields.get(this)?.userId;
+    }
+    set userId(userId) {
+      _privateFields.set(this, { ..._privateFields.get(this), userId });
+    }
+
     get alteringUserId(): number | undefined {
       return _privateFields.get(this)?.alteringUserId;
     }
     set alteringUserId(alteringUserId) {
       _privateFields.set(this, { ..._privateFields.get(this), alteringUserId });
+    }
+
+    get userRequiredActionsId(): number | undefined {
+      return _privateFields.get(this)?.userRequiredActionsId;
+    }
+    set userRequiredActionsId(userRequiredActionsId) {
+      _privateFields.set(this, { ..._privateFields.get(this), userRequiredActionsId });
     }
 
     setup(model: IUserRequiredActions) {
@@ -76,9 +84,10 @@ const UserRequiredActionsModel = () => {
         id: model.id || 0,
         date: model.date || new Date(),
         action: model.action || "",
-        type: model.type || 0,
-        userReviewId: model.userReviewId || 0,
-        alteringUserId: model.alteringUserId || 0
+        type: model.type || 1,
+        userId: model.userId || 0,
+        alteringUserId: model.alteringUserId || 0,
+        userRequiredActionsId: model.userRequiredActionsId || 0,
       });
     }
   };

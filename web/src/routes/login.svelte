@@ -150,11 +150,13 @@
     body {
       background-color: #f4f6f9;
     }
-    .with-image {
-      background-image: url("/img/login_1.png");
-      background-repeat: no-repeat;
-      background-position-x: right;
-      background-position-y: -35px;
+    @media (min-width: 1200px) {
+      .with-image {
+        background-image: url("/img/login_1.png");
+        background-repeat: no-repeat;
+        background-position-x: right;
+        background-position-y: -35px;
+      }
     }
   </style>
 </svelte:head>
@@ -164,10 +166,10 @@
     <div class="row">
       <div class="col">
         <div class="card mt-5 with-image">
-          <div class="card-body m-5">
-            <div class="container m-5">
+          <div class="card-body m-3">
+            <div class="container m-xl-5">
               <div class="row">
-                <div class="col-5 mr-auto">
+                <div class="col-xl-5 mr-auto">
                   <form
                     class="needs-validation"
                     novalidate
@@ -185,13 +187,15 @@
                       class="text-center text-danger mb-3"
                       class:visible={networkFailed}
                       class:invisible={!networkFailed}>
-                      <strong>Internal network not available! (Disconnected from VPN?)</strong>
+                      <strong>
+                        Internal network not available! (Disconnected from VPN?)
+                      </strong>
                     </div>
                     <div class="form-group row">
-                      <label for="email" class="col-sm-1 col-form-label">
+                      <label for="email" class="col-1 col-form-label">
                         <i class="fas fa-user" />
                       </label>
-                      <div class="col-sm-11">
+                      <div class="col-11">
                         <input
                           type="email"
                           class="form-control"
@@ -205,10 +209,10 @@
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label for="email" class="col-sm-1 col-form-label">
+                      <label for="email" class="col-1 col-form-label">
                         <i class="fas fa-unlock-alt" />
                       </label>
-                      <div class="col-sm-11">
+                      <div class="col-11">
                         <div class="input-group">
                           <input
                             type={passwordType}

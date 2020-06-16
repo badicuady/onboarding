@@ -29,11 +29,11 @@ class UserObjectivesMapping extends GenericMapping {
       responsible: {
         type: new DataTypes.STRING(100),
         allowNull: false,
-	  },
-	  type: {
+      },
+      type: {
         type: DataTypes.INTEGER,
-		allowNull: false,
-		defaultValue: 1
+        allowNull: false,
+        defaultValue: 1,
       },
     };
 
@@ -53,6 +53,10 @@ class UserObjectivesMapping extends GenericMapping {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
       constraints: true,
     });
+    UserObjectives.belongsTo(User, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
   }
 
   async get(userId: number): Promise<UserObjectives[]> {
@@ -60,16 +64,13 @@ class UserObjectivesMapping extends GenericMapping {
   }
 
   async create(userObjectivesModel: IUserObjectivesModel): Promise<[UserObjectives, boolean]> {
-    const where = {
-      id: userObjectivesModel.id || 0,
-      userId: userObjectivesModel.userId || 0,
-    };
+	const where = super.createWhere(userObjectivesModel, ["id", "userId", "alteringUserId"]);
     const [instance, wasCreated] = await super.genericCreate(UserObjectives, userObjectivesModel, where);
     return [<UserObjectives>instance, wasCreated];
   }
 
   async delete(userObjectivesModel: IUserObjectivesModel): Promise<boolean | null> {
-    const where = super.createWhere(userObjectivesModel, ["id", "userId"]);
+    const where = super.createWhere(userObjectivesModel, ["id"]);
     const instance = await UserObjectives.findOne({ where });
     if (instance) {
       await instance.destroy();

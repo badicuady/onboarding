@@ -19,7 +19,7 @@ class UsersService extends AuthService {
 
   async updateUserMandatoryTopics(userId, mandatoryTopicsId, done) {
     try {
-      const data = { userId, mandatoryTopicsId, done };
+      const data = { userId, alteringUserId: userId, mandatoryTopicsId, done };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/mandatorytopics`;
       const response = await axios.post(url, data, this.config);
       return response;
@@ -50,6 +50,7 @@ class UsersService extends AuthService {
     try {
       const data = {
         userId,
+        alteringUserId: userId,
         specificTopicName,
         specificTopicMaterials,
         timespanId,
@@ -69,6 +70,7 @@ class UsersService extends AuthService {
     try {
       const data = {
         userId,
+        alteringUserId: userId,
         done,
       };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/specifictopics/${specificTopicId}`;
@@ -106,6 +108,7 @@ class UsersService extends AuthService {
     try {
       const data = {
         userId,
+        alteringUserId: userId,
         userType,
         feedback,
         period,
@@ -133,6 +136,7 @@ class UsersService extends AuthService {
     try {
       const data = {
         userId,
+        alteringUserId: userId,
         description,
         deadline,
         responsible,
@@ -188,12 +192,53 @@ class UsersService extends AuthService {
         performance,
         concerns,
         summary,
-        objectivesMet,
-        trainingsMet,
+        objectivesMet: objectivesMet === true ? 1 : 0,
+        trainingsMet: trainingsMet === true ? 1 : 0,
         period,
       };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review`;
       const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async getUserRequiredActions(userRequiredActionsId) {
+    try {
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review/requiredactions`;
+      const response = await axios.get(url, { ...this.config, params: { userRequiredActionsId } });
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async upsertUserRequiredActions(userId, alteringUserId, action, date, type, userRequiredActionsId) {
+    try {
+      const data = {
+        userId,
+        alteringUserId,
+        action,
+        date,
+        type,
+        userRequiredActionsId,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review/requiredactions`;
+      const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async deleteUserRequiredActions(userId, userRequiredActionsId) {
+    try {
+      const data = {
+        userId: userId,
+      };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review/requiredactions/${userRequiredActionsId}`;
+      const response = await axios.delete(url, { ...this.config, data: data });
       return response;
     } catch (error) {
       console.error(error);

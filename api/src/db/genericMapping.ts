@@ -58,15 +58,17 @@ export class GenericMapping {
   }
 
   protected createWhere(model: IGenericModel, props: string[]): WhereOptions {
-    const where: WhereOptions = {};
-    for (const val in props) {
+	const where: WhereOptions = {};
+	const plainObjectModel = model.toPlainObject && model.toPlainObject();
+    for (let ndx = 0; ndx < props.length; ++ndx) {
+	  const key = props[ndx];
       if (
-        model.hasOwnProperty(val) &&
-        props[val] !== undefined &&
-        props[val] !== null &&
-        typeof props[val] !== "object"
+        plainObjectModel.hasOwnProperty(key) &&
+        model[key] !== undefined &&
+        model[key] !== null &&
+        typeof model[key] !== "object"
       ) {
-        where[val] = props[val];
+        where[key] = model[key];
       }
     }
     return where;

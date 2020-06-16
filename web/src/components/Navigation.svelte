@@ -55,7 +55,15 @@
               href="/probationaryplan"
               class="nav-link"
               class:active={segment === 'probationaryplan'}>
-              Probationary plan
+              Probationary&nbsp;plan
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="/resources"
+              class="nav-link"
+              class:active={segment === 'resources'}>
+              Resources
             </a>
           </li>
           {#if user.IsHr}
@@ -79,9 +87,16 @@
                 aria-expanded="false">
                 Subordinates
               </a>
-              <div class="dropdown-menu scroll-bar scroll-bar-200" aria-labelledby="navbarDropdown">
+              <div
+                class="dropdown-menu scroll-bar scroll-bar-200"
+                aria-labelledby="navbarDropdown">
                 {#each user.subordinate as subordinate, rowndx}
-                  <a class="dropdown-item" href="##" on:click="{config.preventDefault}">{subordinate}</a>
+                  <a
+                    class="dropdown-item"
+                    href="##"
+                    on:click={config.preventDefault}>
+                    {subordinate}
+                  </a>
                 {/each}
               </div>
             </li>
@@ -91,24 +106,57 @@
 
       <!-- Right navbar links -->
       <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
-        <li class="nav-item">
-          <a href="//ipsos.com" class="nav-link" target="_blank">ITC</a>
-        </li>
-        <li class="nav-item">
-          <a href="//italent.ipsos.com" class="nav-link" target="_blank">
-            iTalent
-          </a>
-        </li>
-        <li class="nav-item">
+        <li class="nav-item dropdown">
           <a
-            href="//ipsosgroup.sharepoint.com/sites/Romania/Pages/Home.aspx"
-            class="nav-link"
-            target="_blank">
-            Intranet
+            href="##"
+            class="nav-link dropdown-toggle"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false">
+            Useful links
           </a>
+          <div
+            class="dropdown-menu scroll-bar scroll-bar-200"
+            aria-labelledby="navbarDropdown">
+            {#if !user.isManager}
+              <a href="//ipsos.com?EmployeeGuideline" class="nav-link" target="_blank">
+                Employee guideline
+              </a>
+            {/if}
+			{#if user.isManager}
+              <a href="//ipsos.com?ManagerToolkit" class="nav-link" target="_blank">
+                Manager toolkit
+              </a>
+            {/if}
+            <a
+              href="//campus.ipsos-trainingcenter.com/students/students/login"
+              class="dropdown-item"
+              target="_blank">
+              ITC
+            </a>
+            <a
+              href="//ipsosgroup-my.sharepoint.com/:f:/r/personal/romina_pricopie_ipsos_com/Documents/New%20Hire%20Orientation%202020"
+              class="dropdown-item"
+              target="_blank">
+              New Hire Orientation
+            </a>
+            <a href="//italent.ipsos.com" class="dropdown-item" target="_blank">
+              iTalent
+            </a>
+            <a
+              href="//ipsosgroup.sharepoint.com/sites/Romania/Pages/Home.aspx"
+              class="dropdown-item"
+              target="_blank">
+              Intranet
+            </a>
+          </div>
         </li>
         <li class="nav-item">
-          <span class="nav-link disabled">As <strong class="text-danger">self</strong></span>
+          <span class="nav-link disabled">
+            As
+            <strong class="text-danger">self</strong>
+          </span>
         </li>
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
@@ -132,6 +180,11 @@
               class="btn btn-primary btn-xs text-right m-2 float-right"
               on:click={logout}>
               Log out
+            </a>
+			<a
+              href="/contact"
+              class="btn btn-primary btn-xs text-right my-2 float-right">
+              Contact
             </a>
           </div>
         </li>

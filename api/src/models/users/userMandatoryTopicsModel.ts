@@ -5,6 +5,7 @@ export interface IUserMandatoryTopics {
 	done?: boolean;
 	mandatoryTopicsId?: number;
 	userId?: number;
+	alteringUserId?: number;
   }
 
 export interface IUserMandatoryTopicsModel extends IGenericModel, IUserMandatoryTopics {
@@ -15,6 +16,7 @@ export default class UserMandatoryTopicsModel extends GenericModel implements IU
   
   private _mandatoryTopicsId: number = 0;
   private _userId:number = 0;
+  private _alteringUserId:number = 0;
   private _done:boolean = false;
   
   constructor(userMandatoryTopicsModel: IUserMandatoryTopicsModel) {
@@ -37,6 +39,13 @@ export default class UserMandatoryTopicsModel extends GenericModel implements IU
   }
   set userId(userId) {
     this._userId = userId;
+  }
+
+  get alteringUserId() {
+    return this._alteringUserId;
+  }
+  set alteringUserId(alteringUserId) {
+    this._alteringUserId = alteringUserId;
   }
 
   get done() {

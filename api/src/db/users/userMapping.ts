@@ -8,7 +8,7 @@ import {
   UserFeedback,
   UserObjectives,
   UserReview,
-  UserRequiredActions
+  UserRequiredActions,
 } from "..";
 
 class User extends GenericDatabase implements IUser {
@@ -28,25 +28,25 @@ class UserMapping extends GenericMapping {
     const modelAttributes: ModelAttributes = {
       firstName: {
         type: new DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
       },
       lastName: {
         type: new DataTypes.STRING(100),
-        allowNull: false
+        allowNull: false,
       },
       role: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: UserRole.Employee
+        defaultValue: UserRole.Employee,
       },
       userName: {
         type: new DataTypes.STRING(50),
-        allowNull: false
-      }
+        allowNull: false,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     User.init(modelAttributes, modelOptions);
@@ -59,40 +59,65 @@ class UserMapping extends GenericMapping {
   associations(): void {
     User.hasMany(UserMandatoryTopics, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
+    User.hasMany(UserMandatoryTopics, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
+
     User.hasMany(UserSpecificTopics, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
+    User.hasMany(UserSpecificTopics, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
+
     User.hasMany(UserFeedback, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
+    User.hasMany(UserFeedback, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
+
     User.hasMany(UserObjectives, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
+    User.hasMany(UserObjectives, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
+
     User.hasMany(UserReview, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
     User.hasMany(UserReview, {
       foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
-      constraints: true
+      constraints: true,
+    });
+
+    User.hasMany(UserRequiredActions, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true,
     });
     User.hasMany(UserRequiredActions, {
       foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
   }
 
   async createOrUpdate(userModel: IUserModel) {
     return await User.findOrCreate({
       where: {
-        userName: userModel.userName || ""
+        userName: userModel.userName || "",
       },
-      defaults: userModel
+      defaults: userModel,
     });
   }
 
@@ -102,7 +127,7 @@ class UserMapping extends GenericMapping {
     return await User.findAll({
       offset,
       limit,
-      where: { ...(model.toPlainObject && model.toPlainObject()) }
+      where: { ...(model.toPlainObject && model.toPlainObject()) },
     });
   }
 

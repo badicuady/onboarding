@@ -6,7 +6,7 @@ import _yargs from "yargs";
 import AppConfig from "./appConfig";
 
 export const argv = fromEntries(
-  Object.entries(_yargs.argv).map(e => {
+  Object.entries(_yargs.argv).map((e) => {
     const key: string = e[0];
     const val: string = typeof e[1] === "string" ? e[1] : "";
     return [key, val];
@@ -31,11 +31,12 @@ export interface IJWTConfig {
 }
 
 export interface IADConfig {
-	AD_URL:string;
-	AD_BASE: string;
+  AD_URL: string;
+  AD_BASE: string;
 }
 
 export interface IAppConfigItem {
+  USE_TEST_USER: boolean;
   SERVER_HOST: string;
   SERVER_PORT: number;
   SERVER_PROTOCOL: string;
@@ -49,18 +50,30 @@ export interface IAppConfigItem {
 }
 
 export interface IAppConfig {
-	[index: string]: IAppConfigItem;
+  [index: string]: IAppConfigItem;
+}
+
+export const testUser = {
+	name: "Adrian Badicu",
+	givenName: "Adrian",
+	mailNickname: "Adrian.Badicu",
+	displayName: "Adrian Badicu",
+	manager: "CN=Adrian Badicu",
+	groups:[],
+	department: "Development",
+	title: "Developer"
 }
 
 export const app: IAppConfig = {
   dev: {
+    USE_TEST_USER: false,
     SERVER_HOST: "api.onboarding.com",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 3123,
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
-	AUTH_LINK: "http://web.onboarding.com:4123/login",
-	KEYS_PATH: "./src",
+    AUTH_LINK: "http://web.onboarding.com:4123/login",
+    KEYS_PATH: "./src",
     db: {
       DB_SERVER: "localhost",
       DB_PORT: 5432,
@@ -68,28 +81,29 @@ export const app: IAppConfig = {
       DB_USERNAME: "postgres",
       DB_PASSWORD: "docker",
       // 'mysql'|'mariadb'|'sqlite'|'postgres'|'mssql'
-      DB_DIALECT: "postgres"
+      DB_DIALECT: "postgres",
     },
     jwt: {
       JWT_ISSUER: "Ipsos Interactive Services",
       JWT_SUBJECT: "adrian.badicu@ipsos.com",
       JWT_AUDIENCE: "HR",
       JWT_EXPIRES_IN: "1h",
-      JWT_ALGORITHM: "RS256"
-	},
-	ad: {
-		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
-    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
-	}
+      JWT_ALGORITHM: "RS256",
+    },
+    ad: {
+      AD_URL: "ldap://ipsosgroup.ipsos.com", // You can use DNS as well, like domain.local
+      AD_BASE: "dc=ipsosgroup,dc=ipsos,dc=com",
+    },
   },
   localdocker: {
+    USE_TEST_USER: false,
     SERVER_HOST: "api.onboarding.com",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 3123,
     SERVER_PROTOCOL: "http",
     CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
-	AUTH_LINK: "http://web.onboarding.com:4123/login",
-	KEYS_PATH: "./",
+    AUTH_LINK: "http://web.onboarding.com:4123/login",
+    KEYS_PATH: "./",
     db: {
       DB_SERVER: "onboarding-database",
       DB_PORT: 5432,
@@ -97,28 +111,29 @@ export const app: IAppConfig = {
       DB_USERNAME: "postgres",
       DB_PASSWORD: "docker",
       // 'mysql'|'mariadb'|'sqlite'|'postgres'|'mssql'
-      DB_DIALECT: "postgres"
+      DB_DIALECT: "postgres",
     },
     jwt: {
       JWT_ISSUER: "Ipsos Interactive Services",
       JWT_SUBJECT: "adrian.badicu@ipsos.com",
       JWT_AUDIENCE: "HR",
       JWT_EXPIRES_IN: "1h",
-      JWT_ALGORITHM: "RS256"
-	},
-	ad: {
-		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
-    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
-	}
+      JWT_ALGORITHM: "RS256",
+    },
+    ad: {
+      AD_URL: "ldap://ipsosgroup.ipsos.com", // You can use DNS as well, like domain.local
+      AD_BASE: "dc=ipsosgroup,dc=ipsos,dc=com",
+    },
   },
   docker: {
+    USE_TEST_USER: false,
     SERVER_HOST: "onboardingapitest.ipsosinteractive.com",
     SERVER_PORT: parseInt(process.env.PORT || "", 10) || 443,
     SERVER_PROTOCOL: "https",
     CRYPTO_ALGORITHM: "sha512",
     CRYPTO_SECRET: "123456",
-	AUTH_LINK: "https://onboardingtest.ipsosinteractive.com/login",
-	KEYS_PATH: "./",
+    AUTH_LINK: "https://onboardingtest.ipsosinteractive.com/login",
+    KEYS_PATH: "./",
     db: {
       DB_SERVER: "onboarding-database",
       DB_PORT: 5432,
@@ -126,20 +141,20 @@ export const app: IAppConfig = {
       DB_USERNAME: "postgres",
       DB_PASSWORD: "docker",
       // 'mysql'|'mariadb'|'sqlite'|'postgres'|'mssql'
-      DB_DIALECT: "postgres"
+      DB_DIALECT: "postgres",
     },
     jwt: {
       JWT_ISSUER: "Ipsos Interactive Services",
       JWT_SUBJECT: "adrian.badicu@ipsos.com",
       JWT_AUDIENCE: "HR",
       JWT_EXPIRES_IN: "1h",
-      JWT_ALGORITHM: "RS256"
+      JWT_ALGORITHM: "RS256",
     },
-	ad: {
-		AD_URL: 'ldap://ipsosgroup.ipsos.com', // You can use DNS as well, like domain.local
-    	AD_BASE: 'dc=ipsosgroup,dc=ipsos,dc=com'
-	}
-  }
+    ad: {
+      AD_URL: "ldap://ipsosgroup.ipsos.com", // You can use DNS as well, like domain.local
+      AD_BASE: "dc=ipsosgroup,dc=ipsos,dc=com",
+    },
+  },
 };
 
 export const fastify = _fastify({ logger: true });

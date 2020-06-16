@@ -40,11 +40,13 @@ class UserReviewMapping extends GenericMapping {
       },
       objectivesMet: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
+		allowNull: false,
+		defaultValue: true,
       },
       trainingsMet: {
         type: DataTypes.BOOLEAN,
-        allowNull: false,
+		allowNull: false,
+		defaultValue: true,
       },
       period: {
         type: DataTypes.INTEGER,
@@ -84,7 +86,7 @@ class UserReviewMapping extends GenericMapping {
   }
 
   async create(userObjectiveModel: IUserReviewModel): Promise<[UserReview, boolean]> {
-    const where = super.createWhere(userObjectiveModel, ["id", "userId"]);
+    const where = super.createWhere(userObjectiveModel, ["id", "userId", "period"]);
     const [instance, wasCreated] = await super.genericCreate(UserReview, userObjectiveModel, where);
     return [<UserReview>instance, wasCreated];
   }

@@ -7,6 +7,7 @@ export interface IUserObjectives {
   responsible?: string;
   type?: number;
   userId?: number;
+  alteringUserId?: number;
 }
 
 export interface IUserObjectivesModel extends IGenericModel, IUserObjectives {}
@@ -61,6 +62,13 @@ const UserObjectivesModel = () => {
       _privateFields.set(this, { ..._privateFields.get(this), userId });
     }
 
+    get alteringUserId(): number | undefined {
+      return _privateFields.get(this)?.alteringUserId;
+    }
+    set alteringUserId(alteringUserId) {
+      _privateFields.set(this, { ..._privateFields.get(this), alteringUserId });
+    }
+
     get id(): number | undefined {
       return _privateFields.get(this)?.id;
     }
@@ -77,8 +85,9 @@ const UserObjectivesModel = () => {
         description: model.description || "",
         responsible: model.responsible || "",
         userId: model.userId || 0,
-		id: model.id || 0,
-		type: model.type || 0,
+        alteringUserId: model.alteringUserId || 0,
+        id: model.id || 0,
+        type: model.type || 0,
       });
     }
   };

@@ -17,12 +17,12 @@ class UserMandatoryTopicsMapping extends GenericMapping {
       done: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false
-      }
+        defaultValue: false,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     UserMandatoryTopics.init(modelAttributes, modelOptions);
@@ -31,11 +31,15 @@ class UserMandatoryTopicsMapping extends GenericMapping {
   associations(): void {
     UserMandatoryTopics.belongsTo(MandatoryTopicsLk, {
       foreignKey: { name: "mandatoryTopicsId", field: "mandatoryTopicsId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
     UserMandatoryTopics.belongsTo(User, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
+    });
+    UserMandatoryTopics.belongsTo(User, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
     });
   }
 
@@ -44,7 +48,7 @@ class UserMandatoryTopicsMapping extends GenericMapping {
   }
 
   async create(userMandatoryTopicsModel: IUserMandatoryTopicsModel): Promise<[UserMandatoryTopics, boolean]> {
-	const where = super.createWhere(userMandatoryTopicsModel, ["id", "userId"]);
+    const where = super.createWhere(userMandatoryTopicsModel, ["id", "userId", "alteringUserId", "mandatoryTopicsId"]);
     const [instance, wasCreated] = await super.genericCreate(UserMandatoryTopics, userMandatoryTopicsModel, where);
     return [<UserMandatoryTopics>instance, wasCreated];
   }
@@ -55,8 +59,4 @@ class UserMandatoryTopicsMapping extends GenericMapping {
 }
 
 const userMandatoryTopicsMappingsInstance: UserMandatoryTopicsMapping = new UserMandatoryTopicsMapping();
-export {
-  IUserMandatoryTopics,
-  UserMandatoryTopics,
-  userMandatoryTopicsMappingsInstance as UserMandatoryTopicsMapping
-};
+export { IUserMandatoryTopics, UserMandatoryTopics, userMandatoryTopicsMappingsInstance as UserMandatoryTopicsMapping };

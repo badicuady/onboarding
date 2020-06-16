@@ -50,6 +50,10 @@ class UserSpecificTopicsMapping extends GenericMapping {
       foreignKey: { name: "userId", field: "UserId", allowNull: false },
       constraints: true,
     });
+    UserSpecificTopics.belongsTo(User, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
+    });
     UserSpecificTopics.belongsTo(TimespanLk, {
       foreignKey: { name: "timespanId", field: "timespanId", allowNull: false },
       constraints: true,
@@ -69,20 +73,16 @@ class UserSpecificTopicsMapping extends GenericMapping {
   }
 
   async create(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<[UserSpecificTopics, boolean]> {
-    const where = {
-      id: userSpecificTopicsModel.id || 0,
-      userId: userSpecificTopicsModel.userId || 0,
-    };
-
+    const where = super.createWhere(userSpecificTopicsModel, ["id", "userId"]);
     const [instance, wasCreated] = await super.genericCreate(UserSpecificTopics, userSpecificTopicsModel, where);
     return [<UserSpecificTopics>instance, wasCreated];
   }
 
   async update(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<UserSpecificTopics | null> {
-	const where = super.createWhere(userSpecificTopicsModel, ["id", "userId"]);
+    const where = super.createWhere(userSpecificTopicsModel, ["id", "userId"]);
     const instance = await UserSpecificTopics.findOne({ where });
     if (instance) {
-	  Extensions.updateObjectWithModel(instance, userSpecificTopicsModel);
+      Extensions.updateObjectWithModel(instance, userSpecificTopicsModel);
       instance.save();
       return instance;
     }
@@ -91,8 +91,7 @@ class UserSpecificTopicsMapping extends GenericMapping {
 
   async delete(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<boolean | null> {
     const where = {
-      id: userSpecificTopicsModel.id || 0,
-      userId: userSpecificTopicsModel.userId || 0,
+      id: userSpecificTopicsModel.id || 0
     };
     const instance = await UserSpecificTopics.findOne({ where });
     if (instance) {

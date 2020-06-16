@@ -17,6 +17,7 @@ export default class UserFeedbackModel extends GenericModel implements IUserFeed
 
   private _feedback: string = "";
   private _userId: number = 0;
+  private _alteringUserId: number = 0;
   private _userType: number = 0;
   private _type: number = 0;
   private _period: number = 0;
@@ -41,6 +42,13 @@ export default class UserFeedbackModel extends GenericModel implements IUserFeed
   }
   set userId(userId) {
     this._userId = userId;
+  }
+
+  get alteringUserId() {
+    return this._alteringUserId;
+  }
+  set alteringUserId(alteringUserId) {
+    this._alteringUserId = alteringUserId;
   }
 
   get userType() {
@@ -71,7 +79,7 @@ export default class UserFeedbackModel extends GenericModel implements IUserFeed
     this._feedback = model.feedback || "";
     this._period = model.period || 0;
     this._type = model.type || 0;
-	this._userType = model.userType || 0;
-	this._userId = model.userId || 0;
+    this._userType = model.userType || 0;
+    this._userId = model.userId || 0;
   }
 }

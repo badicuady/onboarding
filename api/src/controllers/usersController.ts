@@ -171,7 +171,9 @@ const userModelSchema = {
 const userMandatoryTopicsModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     mandatoryTopicsId: { type: "number" },
     done: { type: "boolean" },
   },
@@ -180,8 +182,9 @@ const userMandatoryTopicsModelSchema = {
 const userSpecificTopicsModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
-    id: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     specificTopicName: { type: "string" },
     specificTopicMaterials: { type: "string" },
     timespanId: { type: "number" },
@@ -194,7 +197,9 @@ const userSpecificTopicsModelSchema = {
 const userSpecificTopicsModelPatchSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     done: { type: "boolean" },
   },
 };
@@ -202,14 +207,18 @@ const userSpecificTopicsModelPatchSchema = {
 const userSpecificTopicsModelDeleteSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
   },
 };
 
 const userFeedbackModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     userType: { type: "number" },
     feedback: { type: "string" },
     period: { type: "number" },
@@ -220,8 +229,9 @@ const userFeedbackModelSchema = {
 const userObjectiveModelSchema = {
   type: "object",
   properties: {
-    userId: { type: "number" },
-    id: { type: "number" },
+	id: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     description: { type: "string" },
     deadline: { type: "string", format: "date" },
     responsible: { type: "string" },
@@ -232,9 +242,9 @@ const userObjectiveModelSchema = {
 const userReviewModelSchema = {
   type: "object",
   properties: {
-	userId: { type: "number" },
 	id: { type: "number" },
-    alteringUserId: { type: "number" },
+	userId: { type: "number" },
+	alteringUserId: { type: "number" },
     date: { type: "string", format: "date" },
     performance: { type: "string" },
     concerns: { type: "string" },
@@ -248,11 +258,13 @@ const userReviewModelSchema = {
 const userRequiredActionsModelSchema = {
   type: "object",
   properties: {
-    userReviewId: { type: "number" },
+	id: { type: "number" },
+    userId: { type: "number" },
     alteringUserId: { type: "number" },
     action: { type: "string" },
     date: { type: "string", format: "date" },
-    type: { type: "number" },
+	type: { type: "number" },
+	userReviewId: { type: "number" }
   },
 };
 
@@ -356,7 +368,7 @@ const UsersControllerRoutes: RouteOptions[] = [
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userMandatoryTopicsModel = new UserMandatoryTopicsModel(request.body);
-      const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
+	  const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
       reply.send(userMandatoryTopics.toJSON());
     },
   },
@@ -620,7 +632,7 @@ const UsersControllerRoutes: RouteOptions[] = [
     },
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
-      const userRequiredActions = await userController.getUserRequiredActions(request.query.userId);
+      const userRequiredActions = await userController.getUserRequiredActions(request.query.userRequiredActionsId);
       reply.send(userRequiredActions.map((e) => e.toJSON()));
     },
   },
@@ -641,13 +653,13 @@ const UsersControllerRoutes: RouteOptions[] = [
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userRequiredActionsModel = new UserRequiredActionsModel(request.body);
-      const [userRequiredActions] = await userController.addOrUpdateReviewUser(userRequiredActionsModel);
+      const [userRequiredActions] = await userController.addOrUpdateRequiredActionsUser(userRequiredActionsModel);
       reply.send(userRequiredActions.toJSON());
     },
   },
   {
     method: "DELETE",
-    url: "/api/user/requiredactions/:id",
+    url: "/api/user/review/requiredactions/:id",
     schema: {
       tags: ["user"],
       params: { id: { type: "number" } },

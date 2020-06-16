@@ -21,24 +21,24 @@ class UserFeedbackMapping extends GenericMapping {
     const modelAttributes: ModelAttributes = {
       feedback: {
         type: new DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: false,
       },
       userType: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       type: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       period: {
         type: DataTypes.INTEGER,
-        allowNull: false
-      }
+        allowNull: false,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     UserFeedback.init(modelAttributes, modelOptions);
@@ -51,7 +51,11 @@ class UserFeedbackMapping extends GenericMapping {
   associations(): void {
     UserFeedback.belongsTo(User, {
       foreignKey: { name: "userId", field: "userId", allowNull: false },
-      constraints: true
+      constraints: true,
+    });
+    UserFeedback.belongsTo(User, {
+      foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
+      constraints: true,
     });
   }
 
@@ -60,7 +64,7 @@ class UserFeedbackMapping extends GenericMapping {
   }
 
   async create(userFeedbackModel: IUserFeedbackModel): Promise<[UserFeedback, boolean]> {
-    const where = super.createWhere(userFeedbackModel, ["id", "userId"]);
+    const where = super.createWhere(userFeedbackModel, ["id", "userId", "alteringUserId"]);
     const [instance, wasCreated] = await super.genericCreate(UserFeedback, userFeedbackModel, where);
     return [<UserFeedback>instance, wasCreated];
   }

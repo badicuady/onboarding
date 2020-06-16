@@ -1,8 +1,8 @@
 import ActiveDirectory from "./activeDirectory";
 
-import { app, argv } from "../../config";
+import { app, argv, testUser } from "../../config";
 import { UserMapping } from "../../db";
-import UserModel, { IUserModel } from "../../models/users/userModel";
+import UserModel, { IUserModel, IActiveDirectoryUserModel } from "../../models/users/userModel";
 import Authentication from "./auth";
 import JwtService from "../services/jwtService";
 import JwtOptionsModel from "../../models/jwt/jwtOptionsModel";
@@ -25,7 +25,7 @@ class ActiveDirectoryAuthentication extends Authentication {
     "userPrincipalName",
     "mail",
     "manager",
-    "mailNickname"
+    "mailNickname",
   ];
 
   private _adClient!: ActiveDirectory;
@@ -35,31 +35,36 @@ class ActiveDirectoryAuthentication extends Authentication {
     this._adClient = new ActiveDirectory({
       url: app[argv.env].ad.AD_URL,
       base: app[argv.env].ad.AD_BASE,
-      idleTimeout: 1000
+      idleTimeout: 1000,
     });
   }
 
   async authenticate() {
     console.info(`Authenticating user: [${this.userName}]...`);
-    const userResource = await this._adClient.loginUser(this.userName, this.password);
-    console.info(`Authenticated resource: ${userResource.success}`);
+	let userModel:IUserModel | IActiveDirectoryUserModel = { ...testUser };
 
-    if (userResource.entry) {
-      const user = ActiveDirectory.createUserObj(userResource.entry);
-      const props = this.allowedAttributes.reduce(
-        (obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }),
-        {}
-      );
-      const userModel = { ...user, ...props };
-      const [userModelDb] = await this._saveUser(new UserModel(userModel).toPlainObject());
-      const plainUserModelDb = <IUserModel>userModelDb.toJSON();
-      return userModel
-        ? ActiveDirectoryAuthentication._jwtService.sign(
-            { ...userModel, id: plainUserModelDb.id },
-            ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject()
-          )
-        : null;
+    if (!app[argv.env].USE_TEST_USER) {
+      const userResource = await this._adClient.loginUser(this.userName, this.password);
+      console.info(`Authenticated resource: ${userResource.success}`);
+      if (userResource.entry) {
+        const user = ActiveDirectory.createUserObj(userResource.entry);
+        const props = this.allowedAttributes.reduce(
+          (obj, key) => ({ ...obj, [key]: userResource.entry ? userResource.entry.object[key] : null }),
+          {}
+        );
+        userModel = { ...user, ...props };
+      }
     }
+
+    const [userModelDb] = await this._saveUser(new UserModel(userModel).toPlainObject());
+    const plainUserModelDb = <IUserModel>userModelDb.toJSON();
+    return userModel
+      ? ActiveDirectoryAuthentication._jwtService.sign(
+          { ...userModel, id: plainUserModelDb.id },
+          ActiveDirectoryAuthentication._jwtOptionsModel.toPlainObject()
+        )
+      : null;
+
     return null;
   }
 

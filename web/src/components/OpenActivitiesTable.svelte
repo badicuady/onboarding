@@ -26,7 +26,7 @@
   });
 
   const addNewRow = e => {
-    dispatch("addNewRow", { original: e, inputs });
+    dispatch("addNewRow", { original: e, inputs: { ...inputs } });
     for (const ndx in inputs) {
       if (inputs.hasOwnProperty(ndx)) {
         inputs[ndx] = "";

@@ -334,11 +334,11 @@
 <Layout>
   <div slot="content-header" class="container">
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-6">
         <h1 class="m-0 text-dark">Onboarding Form</h1>
       </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
+      <div class="col-6">
+        <ol class="breadcrumb float-right">
           <li class="breadcrumb-item">
             <a href="##" on:click={config.preventEvent}>{modeRadical}</a>
           </li>

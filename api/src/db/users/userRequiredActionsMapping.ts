@@ -20,20 +20,20 @@ class UserRequiredActionsMapping extends GenericMapping {
     const modelAttributes: ModelAttributes = {
       action: {
         type: new DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: false,
       },
       date: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
       },
       type: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
       }
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     UserRequiredActions.init(modelAttributes, modelOptions);
@@ -46,11 +46,15 @@ class UserRequiredActionsMapping extends GenericMapping {
   associations(): void {
     UserRequiredActions.belongsTo(UserReview, {
       foreignKey: { name: "userRequiredActionsId", field: "userRequiredActionsId", allowNull: false },
-      constraints: true
+      constraints: true,
     });
     UserRequiredActions.belongsTo(User, {
       foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
-      constraints: true
+      constraints: true,
+    });
+    UserRequiredActions.belongsTo(User, {
+      foreignKey: { name: "userId", field: "userId", allowNull: false },
+      constraints: true,
     });
   }
 
@@ -59,15 +63,14 @@ class UserRequiredActionsMapping extends GenericMapping {
   }
 
   async create(userRequiredActionsModel: IUserRequiredActionsModel): Promise<[UserRequiredActions, boolean]> {
-	const where = super.createWhere(userRequiredActionsModel, ["id", "userId"]);
+    const where = super.createWhere(userRequiredActionsModel, ["id", "action", "alteringUserId", "userId", "type", "period", "userRequiredActionsId"]);
     const [instance, wasCreated] = await super.genericCreate(UserRequiredActions, userRequiredActionsModel, where);
     return [<UserRequiredActions>instance, wasCreated];
   }
 
   async delete(userRequiredActionsModel: IUserRequiredActionsModel): Promise<boolean | null> {
     const where = {
-      id: userRequiredActionsModel.id || 0,
-      userReviewId: userRequiredActionsModel.userReviewId || 0
+      id: userRequiredActionsModel.id || 0
     };
     const instance = await UserRequiredActions.findOne({ where });
     if (instance) {

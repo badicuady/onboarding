@@ -3,6 +3,7 @@ import { IGenericModel, GenericModel } from "..";
 export interface IUserSpecificTopics {
   id?: number;
   userId?: number;
+  alteringUserId?: number;
   specificTopicName?: string;
   specificTopicMaterials?: string;
   timespanId?: number;
@@ -17,6 +18,7 @@ export default class UserMandatoryTopicsModel extends GenericModel implements IU
   //private static _privateFields: WeakMap<any, any> = new WeakMap();
 
   private _userId?: number = 0;
+  private _alteringUserId?: number = 0;
   private _id?: number = 0;
   private _specificTopicName?: string = "";
   private _specificTopicMaterials?: string = "";
@@ -38,6 +40,13 @@ export default class UserMandatoryTopicsModel extends GenericModel implements IU
   }
   set userId(userId) {
     this._userId = userId;
+  }
+
+  get alteringUserId() {
+    return this._alteringUserId;
+  }
+  set alteringUserId(alteringUserId) {
+    this._alteringUserId = alteringUserId;
   }
 
   get id() {
@@ -94,7 +103,8 @@ export default class UserMandatoryTopicsModel extends GenericModel implements IU
       throw new Error(`The model is not valid: «${model}»`);
     }
 	this._userId = model.userId || 0;
-	this._id = model.id || 0;
+	this._alteringUserId = model.alteringUserId || 0;
+    this._id = model.id || 0;
     this._specificTopicName = model.specificTopicName || "";
     this._specificTopicMaterials = model.specificTopicMaterials || "";
     this._timespanId = model.timespanId || 0;
