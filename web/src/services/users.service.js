@@ -1,6 +1,38 @@
 import axios from "axios";
 import config from "../config";
 import AuthService from "./abstract.auth.service.js";
+import savingStore from "../services/saving.service.js";
+
+axios.interceptors.request.use(
+  (config) => {
+    // Do something before request is sent
+    savingStore.saving();
+    return config;
+  },
+  (error) => {
+    // Do something with request error
+    savingStore.error();
+    console.error(error);
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor
+axios.interceptors.response.use(
+  (response) => {
+    // Any status code that lie within the range of 2xx cause this function to trigger
+    // Do something with response data
+    savingStore.saved();
+    return response;
+  },
+  (error) => {
+    // Any status codes that falls outside the range of 2xx cause this function to trigger
+    // Do something with response error
+    savingStore.error();
+    console.error(error);
+    return Promise.reject(error);
+  }
+);
 
 class UsersService extends AuthService {
   constructor(authorization) {
@@ -17,9 +49,9 @@ class UsersService extends AuthService {
     }
   }
 
-  async updateUserMandatoryTopics(userId, mandatoryTopicsId, done) {
+  async updateUserMandatoryTopics(userId, alteringUserId, mandatoryTopicsId, done) {
     try {
-      const data = { userId, alteringUserId: userId, mandatoryTopicsId, done };
+      const data = { userId, alteringUserId, mandatoryTopicsId, done };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/mandatorytopics`;
       const response = await axios.post(url, data, this.config);
       return response;
@@ -39,7 +71,8 @@ class UsersService extends AuthService {
   }
 
   async insertUserSpecificTopics(
-    userId,
+	userId,
+	alteringUserId,
     specificTopicName,
     specificTopicMaterials,
     timespanId,
@@ -50,7 +83,7 @@ class UsersService extends AuthService {
     try {
       const data = {
         userId,
-        alteringUserId: userId,
+        alteringUserId,
         specificTopicName,
         specificTopicMaterials,
         timespanId,
@@ -66,11 +99,11 @@ class UsersService extends AuthService {
     }
   }
 
-  async updateUserSpecificTopics(userId, specificTopicId, done) {
+  async updateUserSpecificTopics(userId, alteringUserId, specificTopicId, done) {
     try {
       const data = {
         userId,
-        alteringUserId: userId,
+        alteringUserId,
         done,
       };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/specifictopics/${specificTopicId}`;
@@ -104,11 +137,11 @@ class UsersService extends AuthService {
     }
   }
 
-  async upsertUserFeedback(userId, period, type, userType, feedback) {
+  async upsertUserFeedback(userId, alteringUserId, period, type, userType, feedback) {
     try {
       const data = {
         userId,
-        alteringUserId: userId,
+        alteringUserId,
         userType,
         feedback,
         period,
@@ -132,11 +165,11 @@ class UsersService extends AuthService {
     }
   }
 
-  async insertUserObjectives(userId, description, deadline, responsible, type) {
+  async insertUserObjectives(userId, alteringUserId, description, deadline, responsible, type) {
     try {
       const data = {
         userId,
-        alteringUserId: userId,
+        alteringUserId,
         description,
         deadline,
         responsible,

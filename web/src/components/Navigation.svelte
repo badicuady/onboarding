@@ -1,8 +1,10 @@
 <script>
   import { goto } from "@sapper/app";
   import { CacheKeys, SessionService } from "../services";
+  import { onDestroy } from "svelte";
   import config from "../config";
   import ObjectCreator, { DefinitionType } from "../common/objectCreator.js";
+  import savingStore from "../services/saving.service.js";
 
   export let segment;
   export let user;
@@ -20,6 +22,16 @@
     await sessionService.update(userInfoObj);
     goto(config.loginSegment);
   };
+
+  let saveState = 0;
+  const unsubscribe = savingStore.subscribe(value => {
+    saveState = value;
+    if (saveState === 2) {
+      setTimeout(() => (saveState = 0), 3000);
+    }
+  });
+
+  onDestroy(unsubscribe);
 </script>
 
 {#if user && user.displayName && segment !== 'login'}
@@ -106,6 +118,17 @@
 
       <!-- Right navbar links -->
       <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
+        <li class="nav-item">
+          <span class="navbar-text text-secondary">
+            {#if saveState === 1}Communicating...{/if}
+            {#if saveState === 2}
+              <strong>DONE!</strong>
+            {/if}
+            {#if saveState === 3}
+              <strong class="text-danger">ERROR!</strong>
+            {/if}
+          </span>
+        </li>
         <li class="nav-item dropdown">
           <a
             href="##"
@@ -120,12 +143,18 @@
             class="dropdown-menu scroll-bar scroll-bar-200"
             aria-labelledby="navbarDropdown">
             {#if !user.isManager}
-              <a href="//ipsos.com?EmployeeGuideline" class="nav-link" target="_blank">
+              <a
+                href="//ipsos.com?EmployeeGuideline"
+                class="nav-link"
+                target="_blank">
                 Employee guideline
               </a>
             {/if}
-			{#if user.isManager}
-              <a href="//ipsos.com?ManagerToolkit" class="nav-link" target="_blank">
+            {#if user.isManager}
+              <a
+                href="//ipsos.com?ManagerToolkit"
+                class="nav-link"
+                target="_blank">
                 Manager toolkit
               </a>
             {/if}
@@ -181,7 +210,7 @@
               on:click={logout}>
               Log out
             </a>
-			<a
+            <a
               href="/contact"
               class="btn btn-primary btn-xs text-right my-2 float-right">
               Contact

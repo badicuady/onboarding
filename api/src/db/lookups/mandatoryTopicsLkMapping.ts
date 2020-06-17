@@ -18,6 +18,7 @@ interface IMandatoryTopicsLk {
   forSpecialist: boolean;
   timespanId: number;
   responsibleId: number;
+  link: string;
 }
 
 class MandatoryTopicsLk extends Model implements IMandatoryTopicsLk {
@@ -30,6 +31,7 @@ class MandatoryTopicsLk extends Model implements IMandatoryTopicsLk {
   forSpecialist!: boolean;
   timespanId!: number;
   responsibleId!: number;
+  link!: string;
 }
 
 class MandatoryTopicsLkMappings extends GenericMapping {
@@ -66,6 +68,10 @@ class MandatoryTopicsLkMappings extends GenericMapping {
         allowNull: false,
         defaultValue: false,
       },
+      link: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
@@ -101,10 +107,11 @@ class MandatoryTopicsLkMappings extends GenericMapping {
         "description",
         "tools",
         "group",
-        "timespanId",
-        "responsibleId",
         "forManager",
-        "forSpecialist",
+		"forSpecialist",
+		"timespanId",
+        "responsibleId",
+		"link"
       ],
     };
     const records: IMandatoryTopicsLk[][] = mandatoryTopicsLkMappingData;
@@ -116,10 +123,14 @@ class MandatoryTopicsLkMappings extends GenericMapping {
 
   async list(filter: MandatoryTopicsLkFilter): Promise<IMandatoryTopicsLk[]> {
     const where: any = {};
-    if (filter.forManager !== undefined && filter.forManager !== null && typeof(filter.forManager) === "boolean") {
+    if (filter.forManager !== undefined && filter.forManager !== null && typeof filter.forManager === "boolean") {
       where.forManager = filter.forManager;
     }
-    if (filter.forSpecialist !== undefined && filter.forSpecialist !== null && typeof(filter.forSpecialist) === "boolean") {
+    if (
+      filter.forSpecialist !== undefined &&
+      filter.forSpecialist !== null &&
+      typeof filter.forSpecialist === "boolean"
+    ) {
       where.forSpecialist = true;
     }
     return await MandatoryTopicsLk.findAll({

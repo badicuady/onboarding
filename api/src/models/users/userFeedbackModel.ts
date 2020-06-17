@@ -80,6 +80,7 @@ export default class UserFeedbackModel extends GenericModel implements IUserFeed
     this._period = model.period || 0;
     this._type = model.type || 0;
     this._userType = model.userType || 0;
-    this._userId = model.userId || 0;
+	this._userId = model.userId || 0;
+	this._alteringUserId = model.alteringUserId || 0;
   }
 }

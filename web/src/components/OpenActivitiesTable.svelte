@@ -1,5 +1,6 @@
 <script>
   import { onDestroy, createEventDispatcher } from "svelte";
+  import config from "../config";
   import { OpenTableItemType } from "../models/enums.js";
   import { CacheKeys, CacheService } from "../services";
 
@@ -188,7 +189,7 @@
   {#if showAddNew}
     <button
       type="button"
-      class="btn btn-primary btn-block btn-sm mt-3"
+      class="btn btn-block btn-sm mt-3 {config.buttonClassColor}"
       on:click={addNewRow}>
       Add new row
     </button>

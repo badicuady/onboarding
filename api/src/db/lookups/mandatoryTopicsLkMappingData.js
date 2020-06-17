@@ -9,6 +9,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 2,
+      link: "http://google.com",
     },
     {
       name: "locationTour",
@@ -19,6 +20,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "buddyIntroduction",
@@ -29,6 +31,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "companyPresentation",
@@ -39,6 +42,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "orientationProgram",
@@ -49,6 +53,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 3,
+      link: "",
     },
     {
       name: "discoverIpsos",
@@ -59,6 +64,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "socialResponsibility",
@@ -69,6 +75,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "workplace behavior",
@@ -79,6 +86,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "greenBook",
@@ -89,6 +97,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "keyContacts",
@@ -99,6 +108,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 4,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "specificProcedures",
@@ -111,6 +121,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: false,
       timespanId: 4,
       responsibleId: 2,
+      link: "",
     },
   ],
   [
@@ -123,6 +134,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 1,
+      link: "",
     },
     {
       name: "jobDescription",
@@ -133,16 +145,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 1,
       responsibleId: 2,
-    },
-    {
-      name: "internalRegulation",
-      description: "IIS Internal Regulation and Collective Labour Agreement",
-      tools: "Documents Presentation",
-      group: 2,
-      forManager: true,
-      forSpecialist: true,
-      timespanId: 1,
-      responsibleId: 4,
+      link: "",
     },
     {
       name: "presentProbationary",
@@ -153,6 +156,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 4,
       responsibleId: 6,
+      link: "",
     },
     {
       name: "qualitySecurity",
@@ -163,6 +167,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 4,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "securityAwareness",
@@ -173,6 +178,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "policiesProcedures",
@@ -183,6 +189,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 7,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "gdpr",
@@ -193,6 +200,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 7,
       responsibleId: 7,
+      link: "",
     },
   ],
   [
@@ -205,6 +213,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 5,
+      link: "",
     },
     {
       name: "iTime",
@@ -215,6 +224,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 2,
+      link: "",
     },
     {
       name: "iService",
@@ -225,6 +235,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 4,
       responsibleId: 8,
+      link: "",
     },
     {
       name: "iTalent",
@@ -235,6 +246,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 6,
       responsibleId: 9,
+      link: "",
     },
     {
       name: "itc",
@@ -245,28 +257,42 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: true,
       timespanId: 3,
       responsibleId: 3,
+      link: "",
     },
   ],
   [
     {
-      name: "itcFundamentals",
-      description: "ITC : Fundamentals Program (Communication / Time Management / Client Service)",
-      tools: "ITC Platfor",
+      name: "communicationSkills",
+      description: "Communication skills",
+      tools: "ITC Platform",
       group: 4,
       forManager: false,
       forSpecialist: true,
       timespanId: 6,
       responsibleId: 2,
+      link: "",
     },
     {
-      name: "clientService",
-      description: "In Class: Client Service",
-      tools: "Workshop",
+      name: "timeManagement",
+      description: "Time Management",
+      tools: "ITC Platform",
       group: 4,
       forManager: false,
       forSpecialist: true,
       timespanId: 6,
-      responsibleId: 10,
+      responsibleId: 2,
+      link: "",
+    },
+    {
+      name: "clientInteractionModel",
+      description: "Client interaction model overview ",
+      tools: "ITC Platform",
+      group: 4,
+      forManager: false,
+      forSpecialist: true,
+      timespanId: 6,
+      responsibleId: 2,
+      link: "",
     },
     {
       name: "growLeaders",
@@ -277,6 +303,7 @@ export const mandatoryTopicsLkMappingData = [
       forSpecialist: false,
       timespanId: 8,
       responsibleId: 2,
+      link: "",
     },
   ],
 ];

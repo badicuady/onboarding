@@ -38,7 +38,7 @@
         <tr>
           <th scope="row" style="width:{colWidths[0]}%">{rowndx + 1}</th>
           {#each row.data as cell, colndx (cell)}
-            <td style="width:{colWidths[colndx + 1]}%">{cell}</td>
+            <td style="width:{colWidths[colndx + 1]}%">{@html cell}</td>
           {/each}
           <td style="width:{colWidths[colWidths.length - 1]}%">
             <div class="custom-control custom-switch">

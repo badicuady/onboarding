@@ -14,6 +14,12 @@
 
   let usersService;
   let userModel;
+  let entryDate = new Date().toISOString().slice(0, 10);
+  $: endDate = new Date(
+    new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000
+  )
+    .toISOString()
+    .slice(0, 10);
 
   const readUserObjectives = async () => {
     if (usersService) {
@@ -45,6 +51,7 @@
       const firstKey = Object.keys(e.detail.inputs)[0];
       const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
       const userObjectivesInfo = await usersService.insertUserObjectives(
+        userModel.id,
         userModel.id,
         e.detail.inputs[`${radical}-0`],
         e.detail.inputs[`${radical}-1`],
@@ -299,17 +306,16 @@
   let partOneInfo = [
     {
       title: "Objectives",
-      headline: `The line manager should identify specific objectives for the employee for the first three months / four months.
-		  These will be statements of what should be achieved during the probationary period, 
-		  including indicators of success and timescales for achievement.`,
+      headline: `Your line manager has identified specific objectives for you for the first three months / four months.
+		These will be statements of what should be achieved during the probationary period, 
+		including indicators of success and timescales for achievement.`,
       info: objectives,
       uniqueId: "objectives"
     },
     {
       title: "Development Plan",
-      headline: `To support the employee in achieving these objectives, the line manager should identify 
-		any training and development needs and specify how and when these needs will be addressed 
-		during the probationary period.`,
+      headline: `To support you in achieving these objectives, your line manager has identified the 
+	  	training and development needs and has specified  how and when these needs will be addressed during your probationary period.`,
       info: developmentPlan,
       uniqueId: "development-plan"
     }
@@ -383,17 +389,13 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fas fa-text-width" />
+              <i class="fas fa-info mr-1 {config.iconsClassColor}" />
               Information
             </div>
           </div>
           <div class="card-body">
             <p>
-              This form should be completed during the employee's probationary
-              period. The line manager should ensure the employee is given a
-              copy of this document at each stage of their probationary period
-              and should retain the original to monitor progress against set
-              objectives at follow-up meetings.
+              This Form should be completed during your probationary period.
             </p>
             <form>
               <div class="container">
@@ -453,7 +455,7 @@
                           name="start-date"
                           type="date"
                           class="form-control"
-                          value={new Date().toISOString().slice(0, 10)} />
+                          bind:value={entryDate} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -462,13 +464,12 @@
                       </label>
                       <div class="col-9">
                         <input
+                          readonly
                           id="end-date"
                           name="end-date"
                           type="date"
                           class="form-control"
-                          value={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                            .toISOString()
-                            .slice(0, 10)} />
+                          bind:value={endDate} />
                       </div>
                     </div>
                     <div class="form-group row">
@@ -496,21 +497,21 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fas fa-text-width" />
+              <i class="fas fa-handshake mr-1 {config.iconsClassColor}" />
               Part One: Initial meeting
             </div>
           </div>
           <div class="card-body">
             <p>
-              This section should be completed by the line manager within 3 days
-              of the employee commencing their employment.
+              This section should be completed by your line manager within 3
+              days of your employment.
             </p>
 
             <div id="accordion-part-one">
               {#each partOneInfo as cardInfo, ndx (cardInfo)}
                 <div class="card">
-                  <div class="card-header bg-navy">
-                    <h4 class="card-title bg-navy">
+                  <div class="card-header {config.tabsBgClassColor}">
+                    <h4 class="card-title {config.tabsBgClassColor}">
                       <a
                         data-toggle="collapse"
                         data-target="#part-one-collapse-{cardInfo.uniqueId}"
@@ -544,7 +545,7 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fas fa-text-width" />
+              <i class="fas fa-puzzle-piece mr-1 {config.iconsClassColor}" />
               Part Two: Review
             </div>
           </div>
@@ -552,8 +553,8 @@
             <div id="accordion-part-two">
 
               <div class="card">
-                <div class="card-header bg-navy">
-                  <h4 class="card-title bg-navy">
+                <div class="card-header {config.tabsBgClassColor}">
+                  <h4 class="card-title {config.tabsBgClassColor}">
                     <a
                       data-toggle="collapse"
                       data-target="#part-one-collapse-first-review"
@@ -567,15 +568,6 @@
                   id="part-one-collapse-first-review"
                   class="panel-collapse collapse">
                   <div class="card-body table-responsive">
-                    <p>
-                      This is a gateway review which employee must pass through.
-                      In the event that there are major concerns at this time
-                      then HR advice should be sought, and options discussed.
-                      The line manager and HR should continue to monitor the
-                      situation. In all other circumstances the objectives
-                      should be reviewed and updated as necessary and feedback
-                      provided to the employee on their performance.
-                    </p>
                     <Review
                       reviewUniqueId="first-review"
                       reviewData={partTwoFirstReviewData}
@@ -588,8 +580,8 @@
               </div>
 
               <div class="card">
-                <div class="card-header bg-navy">
-                  <h4 class="card-title bg-navy">
+                <div class="card-header {config.tabsBgClassColor}">
+                  <h4 class="card-title {config.tabsBgClassColor}">
                     <a
                       data-toggle="collapse"
                       data-target="#part-one-collapse-second-review"
@@ -615,8 +607,8 @@
               </div>
 
               <div class="card">
-                <div class="card-header bg-navy">
-                  <h4 class="card-title bg-navy">
+                <div class="card-header {config.tabsBgClassColor}">
+                  <h4 class="card-title {config.tabsBgClassColor}">
                     <a
                       data-toggle="collapse"
                       data-target="#part-one-collapse-final-review"
@@ -631,11 +623,10 @@
                   class="panel-collapse collapse">
                   <div class="card-body table-responsive">
                     <p>
-                      This is the final review before an employee is provided
-                      with formal written confirmation they have successfully
-                      passed their probationary period. If the probation is
-                      successful, the objectives can be updated and transferred
-                      to the employee’s annual appraisal.
+                      This is your final review which concludes your
+                      probationary period. If the probation is successful, the
+                      objectives will be updated and transferred to your annual
+                      performance document.
                     </p>
                     <Review
                       reviewUniqueId="final-review"

@@ -36,6 +36,8 @@
   let localSpecificTopicsType2 = {};
   let localUserFeedback = {};
   let localTableCards = [];
+  let entryDate = new Date().toISOString().slice(0, 10);
+  $: endDate = new Date(new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const readUserMandatoryTopcis = async () => {
     if (usersService) {
@@ -122,6 +124,7 @@
     if (usersService) {
       const response = await usersService.updateUserMandatoryTopics(
         userModel.id,
+        userModel.id,
         +evt.target.dataset.id,
         !!evt.target.checked
       );
@@ -133,6 +136,7 @@
       const firstKey = Object.keys(e.detail.inputs)[0];
       const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
       const userSpecificTopicsInfo = await usersService.insertUserSpecificTopics(
+        userModel.id,
         userModel.id,
         e.detail.inputs[`${radical}-0`],
         e.detail.inputs[`${radical}-1`],
@@ -160,6 +164,7 @@
   const doneChangeSpecific = async (e, type) => {
     if (usersService && e.detail.id) {
       const userSpecificTopicsInfo = await usersService.updateUserSpecificTopics(
+        userModel.id,
         userModel.id,
         e.detail.id,
         !!e.detail.original.target.checked
@@ -201,6 +206,7 @@
       const feedback = (e.detail.original.target.value || "") + "";
       if (feedback.trim().length > 0) {
         const userFeedbackInfo = await usersService.upsertUserFeedback(
+          userModel.id,
           userModel.id,
           period,
           type,
@@ -247,7 +253,9 @@
         groups[mandatoryTopics[ndx].group].push({
           id: mandatoryTopics[ndx].id,
           data: [
-            mandatoryTopics[ndx].description,
+            mandatoryTopics[ndx].link
+              ? `<a href="${mandatoryTopics[ndx].link}"" target="_blank">${mandatoryTopics[ndx].description}</a>`
+              : mandatoryTopics[ndx].description,
             mandatoryTopics[ndx].tools,
             timespans.find(e => e.id === mandatoryTopics[ndx].timespanId)
               .description,
@@ -354,7 +362,7 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
-              <i class="fas fa-text-width" />
+              <i class="fas fa-info mr-1 {config.iconsClassColor}" />
               Information
             </div>
           </div>
@@ -396,7 +404,7 @@
                 </div>
                 <div class="form-group row">
                   <label for="manager" class="col-sm-2 col-form-label">
-                    Manager:
+                    Line Manager:
                   </label>
                   <div class="col-sm-10">
                     <input
@@ -436,7 +444,7 @@
                       type="date"
                       class="form-control"
                       id="entryDate"
-                      value={new Date().toISOString().slice(0, 10)} />
+                      bind:value={entryDate} />
                   </div>
                 </div>
                 <div class="form-group row">
@@ -445,12 +453,11 @@
                   </label>
                   <div class="col-sm-10">
                     <input
+                      readonly
                       type="date"
                       class="form-control"
                       id="endOfProbation"
-                      value={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                        .toISOString()
-                        .slice(0, 10)} />
+                      bind:value={endDate} />
                   </div>
                 </div>
                 <!-- /.card-body -->
@@ -463,6 +470,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
+              <i
+                class="fas fa-exclamation-triangle mr-1 {config.iconsClassColor}" />
               Mandatory topics for {modeRadical} positions
             </div>
           </div>
@@ -471,8 +480,8 @@
             <div id="accordion-{modeRadical}-mandatory">
               {#each localTableCards as tableInfo (tableInfo)}
                 <div class="card">
-                  <div class="card-header bg-navy">
-                    <h4 class="card-title bg-navy">
+                  <div class="card-header {config.tabsBgClassColor}">
+                    <h4 class="card-title {config.tabsBgClassColor}">
                       <a
                         data-toggle="collapse"
                         data-target="#{modeRadical}-collapse-{tableInfo.id}"
@@ -504,6 +513,7 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
+              <i class="fas fa-search-plus mr-1 {config.iconsClassColor}" />
               Specific topics for {modeRadical} positions
             </div>
           </div>
@@ -511,8 +521,8 @@
           <div class="card-body">
             <div id="accordion-{modeRadical}-specific">
               <div class="card">
-                <div class="card-header bg-navy">
-                  <h4 class="card-title bg-navy">
+                <div class="card-header {config.tabsBgClassColor}">
+                  <h4 class="card-title {config.tabsBgClassColor}">
                     <a
                       data-toggle="collapse"
                       data-target="#{modeRadical}-collapse-topics"
@@ -539,8 +549,8 @@
               </div>
 
               <div class="card">
-                <div class="card-header bg-navy">
-                  <h4 class="card-title bg-navy">
+                <div class="card-header {config.tabsBgClassColor}">
+                  <h4 class="card-title {config.tabsBgClassColor}">
                     <a
                       data-toggle="collapse"
                       data-target="#{modeRadical}-collapse-subjects"
@@ -573,6 +583,7 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">
+              <i class="fas fa-comments mr-1 {config.iconsClassColor}" />
               Feedback section for {modeRadical} positions
             </div>
           </div>
@@ -581,8 +592,8 @@
             <div id="accordion-{modeRadical}-feedback">
               {#each feedbackAll as feedback, ndx (feedback)}
                 <div class="card">
-                  <div class="card-header bg-navy">
-                    <h4 class="card-title bg-navy">
+                  <div class="card-header {config.tabsBgClassColor}">
+                    <h4 class="card-title {config.tabsBgClassColor}">
                       <a
                         data-toggle="collapse"
                         data-target="#{modeRadical}-collapse-month-{ndx}"

@@ -55,6 +55,9 @@ const config = {
     client_id: "onboarding-web-api-client",
   },
   defaultEmailDomain: "@ipsos.com",
+  tabsBgClassColor: "bg-info",
+  iconsClassColor: "text-indigo",
+  buttonClassColor: "btn-info",
   milliseconds,
   timeSpans: {
     sec: () => new Date(Date.now() + milliseconds.sec),

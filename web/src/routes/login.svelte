@@ -259,7 +259,7 @@
                       <div class="col-sm-12">
                         <button
                           type="button"
-                          class="btn btn-info btn-lg btn-block"
+                          class="btn btn-lg btn-block {config.buttonClassColor}"
                           on:click={login}>
                           Log in
                         </button>

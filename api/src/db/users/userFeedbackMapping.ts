@@ -64,7 +64,14 @@ class UserFeedbackMapping extends GenericMapping {
   }
 
   async create(userFeedbackModel: IUserFeedbackModel): Promise<[UserFeedback, boolean]> {
-    const where = super.createWhere(userFeedbackModel, ["id", "userId", "alteringUserId"]);
+    const where = super.createWhere(userFeedbackModel, [
+      "id",
+      "userId",
+      "alteringUserId",
+      "type",
+      "period",
+      "userType",
+    ]);
     const [instance, wasCreated] = await super.genericCreate(UserFeedback, userFeedbackModel, where);
     return [<UserFeedback>instance, wasCreated];
   }

@@ -34,12 +34,13 @@ const mandatoryTopicsLkModelSchema = {
     id: { type: "number" },
     name: { type: "string" },
     description: { type: "string" },
-	tools: { type: "string" },
-	group: { type: "number" },
+    tools: { type: "string" },
+    group: { type: "number" },
     forSpecialist: { type: "boolean" },
     forManager: { type: "boolean" },
     timespanId: { type: "number" },
     responsibleId: { type: "number" },
+    link: { type: "string" },
   },
 };
 

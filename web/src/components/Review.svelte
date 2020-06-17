@@ -73,7 +73,7 @@
 
   <div class="form-group">
     <label for="{reviewUniqueId}-summary" class="col-form-label">
-      Summarise the employee's performance and progress over the period:
+      Summaries performance and progress over the period:
     </label>
     <textarea
       id="{reviewUniqueId}-summary"
