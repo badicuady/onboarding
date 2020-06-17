@@ -8,6 +8,7 @@ class DictionariesService extends AuthService {
   }
 
   async getDepartments() {
+	if (!globalThis.window) { return; }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/departments`;
       const response = await axios.get(url, { ...this.config });
@@ -18,6 +19,7 @@ class DictionariesService extends AuthService {
   }
 
   async getMandatoryTopics(forSpecialist, forManager) {
+	if (!globalThis.window) { return; }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/mandatorytopics`;
       const response = await axios.get(url, { ...this.config, params: { forSpecialist, forManager } });
@@ -28,6 +30,7 @@ class DictionariesService extends AuthService {
   }
 
   async getTimespans() {
+	if (!globalThis.window) { return; }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/timespans`;
       const response = await axios.get(url, { ...this.config });
@@ -38,6 +41,7 @@ class DictionariesService extends AuthService {
   }
 
   async getResponsibles() {
+	if (!globalThis.window) { return; }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/responsibles`;
       const response = await axios.get(url, { ...this.config });

@@ -2,8 +2,10 @@
   import { onMount } from "svelte";
   import config from "../config";
   import Layout from "../components/Layout.svelte";
+  import loadingStore from "../services/loading.service.js";
 
   const init = () => {
+    loadingStore.setVisible();
     const ctx = document.getElementById("raport1").getContext("2d");
     const chart = new Chart(ctx, {
       // The type of chart we want to create
@@ -35,6 +37,11 @@
         responsive: true,
         tooltips: {
           mode: "index"
+        },
+        animation: {
+          onComplete(animation) {
+			loadingStore.setInvisible();
+          }
         }
       }
     });
