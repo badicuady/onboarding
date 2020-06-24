@@ -1,13 +1,17 @@
 <script>
   import { goto } from "@sapper/app";
-  import { CacheKeys, SessionService } from "../services";
-  import { onDestroy } from "svelte";
+  import { CacheService, CacheKeys, SessionService } from "../services";
+  import { onDestroy, createEventDispatcher } from "svelte";
   import config from "../config";
   import ObjectCreator, { DefinitionType } from "../common/objectCreator.js";
   import savingStore from "../services/saving.service.js";
 
   export let segment;
   export let user;
+  let saveState = 0;
+  let activeUser = { id: -1, name: "Self" };
+
+  const dispatch = createEventDispatcher();
 
   // do not delete: error Function called outside component initialization
   const sessionService = new SessionService();
@@ -23,15 +27,28 @@
     goto(config.loginSegment);
   };
 
-  let saveState = 0;
-  const unsubscribe = savingStore.subscribe(value => {
+  const userChanged = async (e, subordinate) => {
+    dispatch("userChanged", {
+      original: e,
+      subordinate
+    });
+  };
+
+  const savingSubscribe = savingStore.subscribe(value => {
     saveState = value;
     if (saveState === 2) {
       setTimeout(() => (saveState = 0), 3000);
     }
   });
 
-  onDestroy(unsubscribe);
+  const cacheSubscribe = CacheService.subscribe(cache => {
+	activeUser = cache.get(CacheKeys.ActiveUser) || { name: "Self" };
+  });
+
+  onDestroy(() => {
+    savingSubscribe();
+    cacheSubscribe();
+  });
 </script>
 
 {#if user && user.displayName && segment !== 'login'}
@@ -88,7 +105,7 @@
               </a>
             </li>
           {/if}
-          {#if user.subordinate.length}
+          {#if user.subordinate && user.subordinate.length}
             <li class="nav-item dropdown">
               <a
                 href="##"
@@ -102,11 +119,18 @@
               <div
                 class="dropdown-menu scroll-bar scroll-bar-200"
                 aria-labelledby="navbarDropdown">
+                <a
+                  class="dropdown-item"
+                  href="##"
+                  on:click={e => userChanged(e)}>
+                  Self
+                </a>
+                <div class="dropdown-divider" />
                 {#each user.subordinate as subordinate, rowndx}
                   <a
                     class="dropdown-item"
                     href="##"
-                    on:click={config.preventDefault}>
+                    on:click={e => userChanged(e, subordinate)}>
                     {subordinate}
                   </a>
                 {/each}
@@ -184,7 +208,7 @@
         <li class="nav-item">
           <span class="nav-link disabled">
             As
-            <strong class="text-danger">self</strong>
+            <strong class="text-danger">{activeUser.name}</strong>
           </span>
         </li>
         <!-- Notifications Dropdown Menu -->

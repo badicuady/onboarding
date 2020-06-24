@@ -10,6 +10,7 @@ import {
   UserReview,
   UserRequiredActions,
 } from "..";
+import { DepartmentLk } from "../lookups/departmentLkMapping";
 
 class User extends GenericDatabase implements IUser {
   id!: number;
@@ -17,6 +18,7 @@ class User extends GenericDatabase implements IUser {
   lastName!: string;
   role: UserRole = UserRole.Employee;
   userName!: string;
+  startDate!: Date | null;
 }
 
 class UserMapping extends GenericMapping {
@@ -42,6 +44,10 @@ class UserMapping extends GenericMapping {
       userName: {
         type: new DataTypes.STRING(50),
         allowNull: false,
+      },
+      startDate: {
+        type: new DataTypes.DATEONLY(),
+        allowNull: true,
       },
     };
 
@@ -110,15 +116,26 @@ class UserMapping extends GenericMapping {
       foreignKey: { name: "alteringUserId", field: "alteringUserId", allowNull: false },
       constraints: true,
     });
+
+    User.belongsTo(DepartmentLk, {
+      foreignKey: { name: "departmentId", field: "departmentId", allowNull: true },
+      constraints: true,
+    });
   }
 
-  async createOrUpdate(userModel: IUserModel) {
-    return await User.findOrCreate({
-      where: {
-        userName: userModel.userName || "",
-      },
-      defaults: userModel,
-    });
+  async createOrUpdate(userModel: IUserModel): Promise<[User, boolean]> {
+    const columns = [];
+    const possibleColumns = ["id", "userName"];
+    for (let i = 0; i < possibleColumns.length; ++i) {
+      const key = possibleColumns[i];
+      if (userModel[key]) {
+        columns.push(key);
+      }
+    }
+
+    const where = super.createWhere(userModel, columns);
+    const [instance, wasCreated] = await super.genericCreate(User, userModel, where);
+    return [<User>instance, wasCreated];
   }
 
   async list(model: IUserModel, offset: number, limit: number) {

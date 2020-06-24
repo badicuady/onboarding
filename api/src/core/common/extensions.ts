@@ -1,9 +1,9 @@
 import Flatted from "flatted";
-import { Utilities } from "./utilities";
-import { GenericModel, IGenericModel } from "../../models";
+import { Utilities, PlainSimpleObject, PlainGenericObject } from "./utilities";
+import { IGenericModel } from "../../models";
 
 class Extensions {
-  static toQueryUri(obj: { [ndx: string]: string }): string {
+  static toQueryUri(obj: PlainSimpleObject): string {
     return Object.entries(obj)
       .map(([key, val]) => `${key}=${encodeURIComponent(val)}`)
       .join("&");
@@ -36,7 +36,7 @@ class Extensions {
     return await Utilities.asyncForEach(array, callback);
   }
 
-  static updateObjectWithModel(dbModel: { [key: string]: any }, model: IGenericModel, safe: boolean = true): void {
+  static updateObjectWithModel(dbModel: PlainGenericObject, model: IGenericModel, safe: boolean = true): void {
     const keys = Object.keys(model.toPlainObject && model.toPlainObject());
     if (keys && keys.length > 0) {
       keys.forEach((key) => {
@@ -49,6 +49,15 @@ class Extensions {
         }
       });
     }
+  }
+
+  static filterObjectByKeyNameExclude(raw: PlainGenericObject, excluded: string[]): PlainGenericObject {
+    return Object.keys(raw)
+      .filter((key) => !excluded.includes(key))
+      .reduce((obj:PlainGenericObject, key:string) => {
+        obj[key] = raw[key];
+        return obj;
+      }, {});
   }
 }
 

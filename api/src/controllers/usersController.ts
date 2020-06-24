@@ -36,6 +36,7 @@ import {
   UserRequiredActions,
   UserRequiredActionsMapping,
 } from "../db";
+import ActiveDirectoryAuthentication from "../core/authentication/ad";
 
 class UsersController extends GenericController {
   constructor() {
@@ -161,19 +162,22 @@ const paramsIdSchema = {
 const userModelSchema = {
   type: "object",
   properties: {
+    id: { type: "number" },
     firstName: { type: "string" },
     lastName: { type: "string" },
     userName: { type: "string" },
     role: { type: "string" },
+    departmentId: { type: "number", minimum: 1 },
+    startDate: { type: "string", format: "date" },
   },
 };
 
 const userMandatoryTopicsModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     mandatoryTopicsId: { type: "number" },
     done: { type: "boolean" },
   },
@@ -182,9 +186,9 @@ const userMandatoryTopicsModelSchema = {
 const userSpecificTopicsModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     specificTopicName: { type: "string" },
     specificTopicMaterials: { type: "string" },
     timespanId: { type: "number" },
@@ -197,9 +201,9 @@ const userSpecificTopicsModelSchema = {
 const userSpecificTopicsModelPatchSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     done: { type: "boolean" },
   },
 };
@@ -207,18 +211,18 @@ const userSpecificTopicsModelPatchSchema = {
 const userSpecificTopicsModelDeleteSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
   },
 };
 
 const userFeedbackModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     userType: { type: "number" },
     feedback: { type: "string" },
     period: { type: "number" },
@@ -229,9 +233,9 @@ const userFeedbackModelSchema = {
 const userObjectiveModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     description: { type: "string" },
     deadline: { type: "string", format: "date" },
     responsible: { type: "string" },
@@ -242,9 +246,9 @@ const userObjectiveModelSchema = {
 const userReviewModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
-	userId: { type: "number" },
-	alteringUserId: { type: "number" },
+    id: { type: "number" },
+    userId: { type: "number" },
+    alteringUserId: { type: "number" },
     date: { type: "string", format: "date" },
     performance: { type: "string" },
     concerns: { type: "string" },
@@ -258,13 +262,13 @@ const userReviewModelSchema = {
 const userRequiredActionsModelSchema = {
   type: "object",
   properties: {
-	id: { type: "number" },
+    id: { type: "number" },
     userId: { type: "number" },
     alteringUserId: { type: "number" },
     action: { type: "string" },
     date: { type: "string", format: "date" },
-	type: { type: "number" },
-	userReviewId: { type: "number" }
+    type: { type: "number" },
+    userReviewId: { type: "number" },
   },
 };
 
@@ -306,7 +310,18 @@ const UsersControllerRoutes: RouteOptions[] = [
         request.query.offset,
         request.query.limit
       );
-      reply.send(users.map((e) => e.toJSON()));
+      if (users && users.length > 0) {
+        reply.send(users.map((e) => e.toJSON()));
+      }
+      if (!users || users.length === 0) {
+        const adAuth = new ActiveDirectoryAuthentication(
+          request.user.payload.userPrincipalName,
+          request.user.payload.password
+        );
+        const searchUser = await adAuth.searchUser(request.query.userName);
+        if (searchUser) reply.send([searchUser.toJSON()]);
+      }
+      reply.code(404).type("text/plain").send("Resource not found");
     },
   },
   // setUser
@@ -368,7 +383,7 @@ const UsersControllerRoutes: RouteOptions[] = [
     preHandler: GenericController.authentication,
     handler: async (request: FastifyRequestExt, reply: FastifyReply<ServerResponse>) => {
       const userMandatoryTopicsModel = new UserMandatoryTopicsModel(request.body);
-	  const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
+      const [userMandatoryTopics] = await userController.addOrUpdateMandatoryTopicsUser(userMandatoryTopicsModel);
       reply.send(userMandatoryTopics.toJSON());
     },
   },

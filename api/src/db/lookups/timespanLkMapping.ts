@@ -1,5 +1,5 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping, UserSpecificTopics } from "..";
+import { GenericMapping, UserSpecificTopics, GenericDatabase } from "..";
 import { MandatoryTopicsLk } from "./mandatoryTopicsLkMapping";
 
 interface ITimespanLk {
@@ -9,7 +9,7 @@ interface ITimespanLk {
   value: number;
 }
 
-class TimespanLk extends Model<any, any> implements ITimespanLk {
+class TimespanLk extends GenericDatabase implements ITimespanLk {
   id!: number;
   name!: string;
   description!: string;

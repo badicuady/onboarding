@@ -39,8 +39,37 @@ class UsersService extends AuthService {
     super(authorization);
   }
 
+  async getUsers(queryParams) {
+    if (!globalThis.window) {
+      return;
+    }
+    try {
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/users`;
+      const response = await axios.get(url, { ...this.config, params: queryParams });
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async updateUsers(userId, firstName, lastName, userName, role, departmentId, startDate) {
+    if (!globalThis.window) {
+      return;
+    }
+    try {
+      const data = { id: userId, firstName, lastName, userName, role, departmentId, startDate };
+      const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/users`;
+      const response = await axios.post(url, data, this.config);
+      return response;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   async getUserMandatoryTopics(userId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/mandatorytopics`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -51,7 +80,9 @@ class UsersService extends AuthService {
   }
 
   async updateUserMandatoryTopics(userId, alteringUserId, mandatoryTopicsId, done) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = { userId, alteringUserId, mandatoryTopicsId, done };
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/mandatorytopics`;
@@ -63,7 +94,9 @@ class UsersService extends AuthService {
   }
 
   async getUserSpecificTopics(userId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/specifictopics`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -74,8 +107,8 @@ class UsersService extends AuthService {
   }
 
   async insertUserSpecificTopics(
-	userId,
-	alteringUserId,
+    userId,
+    alteringUserId,
     specificTopicName,
     specificTopicMaterials,
     timespanId,
@@ -83,7 +116,9 @@ class UsersService extends AuthService {
     done,
     type
   ) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -104,7 +139,9 @@ class UsersService extends AuthService {
   }
 
   async updateUserSpecificTopics(userId, alteringUserId, specificTopicId, done) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -120,7 +157,9 @@ class UsersService extends AuthService {
   }
 
   async deleteUserSpecificTopics(userId, specificTopicId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId: userId,
@@ -134,7 +173,9 @@ class UsersService extends AuthService {
   }
 
   async getUserFeedback(userId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/feedback`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -145,7 +186,9 @@ class UsersService extends AuthService {
   }
 
   async upsertUserFeedback(userId, alteringUserId, period, type, userType, feedback) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -164,7 +207,9 @@ class UsersService extends AuthService {
   }
 
   async getUserObjectives(userId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/objectives`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -175,7 +220,9 @@ class UsersService extends AuthService {
   }
 
   async insertUserObjectives(userId, alteringUserId, description, deadline, responsible, type) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -194,7 +241,9 @@ class UsersService extends AuthService {
   }
 
   async deleteUserObjectives(userId, objectiveId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId: userId,
@@ -208,7 +257,9 @@ class UsersService extends AuthService {
   }
 
   async getUserReview(userId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review`;
       const response = await axios.get(url, { ...this.config, params: { userId } });
@@ -229,7 +280,9 @@ class UsersService extends AuthService {
     trainingsMet,
     period
   ) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -251,7 +304,9 @@ class UsersService extends AuthService {
   }
 
   async getUserRequiredActions(userRequiredActionsId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const url = `${config.apiBaseUrl}/${config.apiMethodPrefix}/user/review/requiredactions`;
       const response = await axios.get(url, { ...this.config, params: { userRequiredActionsId } });
@@ -262,7 +317,9 @@ class UsersService extends AuthService {
   }
 
   async upsertUserRequiredActions(userId, alteringUserId, action, date, type, userRequiredActionsId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId,
@@ -281,7 +338,9 @@ class UsersService extends AuthService {
   }
 
   async deleteUserRequiredActions(userId, userRequiredActionsId) {
-	if (!globalThis.window) { return; }
+    if (!globalThis.window) {
+      return;
+    }
     try {
       const data = {
         userId: userId,

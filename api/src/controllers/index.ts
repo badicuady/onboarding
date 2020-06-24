@@ -27,8 +27,8 @@ const addRoute = (route: RouteOptions) => {
   DepartmentsControllerRoutes,
   MandatoryTopicsRoutes,
   TimespansControllerRoutes,
-  ResponsiblesControllerRoutes
-].forEach(route => route.forEach(addRoute));
+  ResponsiblesControllerRoutes,
+].forEach((route) => route.forEach(addRoute));
 
 /**
  * Add decorator for request, needed to authentication

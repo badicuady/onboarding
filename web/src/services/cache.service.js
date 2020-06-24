@@ -99,4 +99,6 @@ export const CacheKeys = {
   MandatoryTopics: "mandatoryTopics",
   Timespans: "timespans",
   Responsibles: "responsibles",
+  StartDate: "startDate",
+  ActiveUser: "activeUser"
 };

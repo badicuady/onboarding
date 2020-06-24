@@ -1,3 +1,6 @@
+type PlainGenericObject = { [key: string]: any };
+type PlainSimpleObject = { [key: string]: string };
+
 class Utilities {
   static async asyncForEach(array: Array<any>, callback: Function): Promise<any> {
     const len: number = array.length;
@@ -7,4 +10,4 @@ class Utilities {
   }
 }
 
-export { Utilities };
+export { Utilities, PlainSimpleObject, PlainGenericObject };

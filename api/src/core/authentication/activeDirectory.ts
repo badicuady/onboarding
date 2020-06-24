@@ -1,15 +1,15 @@
 import tls from "tls";
 import ldap from "ldapjs";
 
-interface LDAPError extends Error {
+export interface LDAPError extends Error {
   lde_message: string;
 }
 
-type LDAPReconnectOptions = {
+export  type LDAPReconnectOptions = {
   failAfter: number;
 };
 
-type LDAPSettings = {
+export type LDAPSettings = {
   url: string;
   idleTimeout: number;
   tlsOptions: tls.TlsOptions;
@@ -19,7 +19,7 @@ type LDAPSettings = {
   reconnect: LDAPReconnectOptions;
 };
 
-type ActiveDirectoryConstructorInitializer = {
+export type ActiveDirectoryConstructorInitializer = {
   url?: string;
   suffix?: string;
   base?: string;
@@ -29,13 +29,20 @@ type ActiveDirectoryConstructorInitializer = {
   reconnect?: LDAPReconnectOptions;
 };
 
-type ActiveDirectoryUserModel = {
+export type ActiveDirectoryUserModel = {
   groups: string[];
   phone: string;
   name: string;
   mail: string;
   guid: string;
   dn: string;
+};
+
+export type ActiveDirectoryResponse = {
+  success: boolean;
+  entry?: ldap.SearchEntry;
+  message?: string;
+  error?: Error;
 };
 
 /** This class will authenticate a user to AD and return basic user information */
@@ -73,8 +80,8 @@ class ActiveDirectory {
       connectTimeout: initializer.idleTimeout || 3000,
       queueTimeout: initializer.idleTimeout || 3000,
       reconnect: initializer.reconnect || {
-        failAfter: 1
-      }
+        failAfter: 1,
+      },
     };
   }
 
@@ -106,10 +113,10 @@ class ActiveDirectory {
       // If only 1 OU ldapjs returns it as a string
       return memberOf
         .split(",")
-        .filter(item => item.indexOf("CN=") !== -1)
-        .map(item => item.split("CN=")[1]);
+        .filter((item) => item.indexOf("CN=") !== -1)
+        .map((item) => item.split("CN=")[1]);
     } else if (Array.isArray(memberOf)) {
-      return memberOf.map(group => group.split(",")[0].split("CN=")[1]);
+      return memberOf.map((group) => group.split(",")[0].split("CN=")[1]);
     }
 
     return [];
@@ -124,7 +131,7 @@ class ActiveDirectory {
     if (!Array.isArray(entry.attributes)) throw new Error("Attributes must be an array");
 
     if (entry.attributes) {
-      const objectGUID = entry.attributes.find(attribute => attribute.json.type === "objectGUID");
+      const objectGUID = entry.attributes.find((attribute) => attribute.json.type === "objectGUID");
 
       if (objectGUID) {
         const binaryGUID = objectGUID.buffers[0];
@@ -133,10 +140,10 @@ class ActiveDirectory {
           [5, 4],
           [7, 6],
           [8, 9],
-          [10, 11, 12, 13, 14, 15]
+          [10, 11, 12, 13, 14, 15],
         ];
-        const guidArray = guidFormat.map(part => {
-          const stringPart = part.map(byte => {
+        const guidArray = guidFormat.map((part) => {
+          const stringPart = part.map((byte) => {
             // If less than 16 add a 0 to the end
             const byteString =
               binaryGUID[byte] < 16 ? `0${binaryGUID[byte].toString(16)}` : binaryGUID[byte].toString(16);
@@ -164,7 +171,7 @@ class ActiveDirectory {
       name: <string>entry.object.name || "",
       mail: <string>entry.object.mail || "",
       guid: ActiveDirectory.resolveGUID(entry),
-      dn: entry.objectName || ""
+      dn: entry.objectName || "",
     };
   }
 
@@ -254,7 +261,7 @@ class ActiveDirectory {
           return;
         }
 
-        res.on("searchEntry", entry => {
+        res.on("searchEntry", (entry) => {
           accumulator.push(entry);
         });
 
@@ -262,7 +269,7 @@ class ActiveDirectory {
           resolve(accumulator);
         });
 
-        res.on("error", error => {
+        res.on("error", (error) => {
           reject(error);
         });
       });
@@ -292,7 +299,7 @@ class ActiveDirectory {
         const client = ldap.createClient(this.ldapjsSettings);
 
         // Return errors
-        client.on("error", error => {
+        client.on("error", (error) => {
           client.unbind();
           reject({ success: false, message: `Error resolving ${action}`, error });
         });
@@ -302,14 +309,14 @@ class ActiveDirectory {
           .then(() => {
             // Search AD for user
             this._search(client, customBase, search)
-              .then(records => {
+              .then((records) => {
                 resolve({ success: true, ...onSuccess(records) });
               })
-              .catch(err => {
+              .catch((err) => {
                 reject({ success: false, message: ActiveDirectory.resolveBindError(err), error: err });
               });
           })
-          .catch(err => {
+          .catch((err) => {
             reject({ success: false, message: ActiveDirectory.resolveBindError(err), error: err });
           });
       } catch (err) {
@@ -332,13 +339,44 @@ class ActiveDirectory {
     password: string,
     customBase?: string,
     customSearch?: object
-  ): Promise<{ success: boolean; entry?: ldap.SearchEntry; message?: string; error?: Error }> {
+  ): Promise<ActiveDirectoryResponse> {
+    return this.searchUser(username, password, username, customBase, customSearch);
+    /*
     const usernameType = ActiveDirectory.detectLogonType(username);
     const searchUser = usernameType === "sAMAccountName" ? ActiveDirectory.cleanSama(username) : username;
     const search = {
       ...this.searchOptions,
       filter: `(${usernameType}=${searchUser})`,
       ...customSearch // Overrides any other search options
+    };
+    const resultObject = (records: ldap.SearchEntry[]) => ({ entry: records[0] });
+	return this._query(username, password, "account", customBase, search, resultObject);
+	*/
+  }
+
+  /**
+   * Attempts to search one user to AD using their UPN.
+   * If the ldap client has an error a user friendly message is in message and the full error is in error.
+   * @param {string} username This must be the UPN
+   * @param {string} password The user's password
+   * @param {string} searchUser The user to be searched
+   * @param {string} customBase Override the default class base, if not passed the class base is used.
+   * @param {object} customSearch A custom search string, e.g. (userPrincipalName=test@domain.local)
+   * @returns {Promise<any>} Promise resolves as an obj { success: true, entry: {} || undefined } || { success: false, message: 'error', error: 'ldapjs error' }
+   */
+  searchUser(
+    username: string,
+    password: string,
+    searchUser: string,
+    customBase?: string,
+    customSearch?: object
+  ): Promise<ActiveDirectoryResponse> {
+    const usernameType = ActiveDirectory.detectLogonType(searchUser);
+    searchUser = usernameType === "sAMAccountName" ? ActiveDirectory.cleanSama(searchUser) : searchUser;
+    const search = {
+      ...this.searchOptions,
+      filter: `(${usernameType}=${searchUser})`,
+      ...customSearch, // Overrides any other search options
     };
     const resultObject = (records: ldap.SearchEntry[]) => ({ entry: records[0] });
     return this._query(username, password, "account", customBase, search, resultObject);
@@ -364,20 +402,20 @@ class ActiveDirectory {
     const customSearch = {
       ...this.searchOptions,
       filter: `(objectCategory=group)`,
-      attributes
+      attributes,
     };
 
     const getDetails = (records: ldap.SearchEntry[]) =>
-      records.map(entry => ({
+      records.map((entry) => ({
         name: entry.object.name,
         dn: entry.object.dn,
         guid: ActiveDirectory.resolveGUID(entry),
         description: entry.object.description,
         created: ActiveDirectory.convertToDate(<string>entry.object.whenCreated),
-        changed: ActiveDirectory.convertToDate(<string>entry.object.whenChanged)
+        changed: ActiveDirectory.convertToDate(<string>entry.object.whenChanged),
       }));
     const resultObject = (records: ldap.SearchEntry[]) => ({
-      groups: detailed ? getDetails(records) : records.map(entry => entry.object.name)
+      groups: detailed ? getDetails(records) : records.map((entry) => entry.object.name),
     });
     return this._query(username, password, "groups", customBase, customSearch, resultObject);
   }
@@ -402,10 +440,10 @@ class ActiveDirectory {
     }
     const customSearch = {
       ...this.searchOptions,
-      filter: `(&(objectClass=user)(objectCategory=person))`
+      filter: `(&(objectClass=user)(objectCategory=person))`,
     };
     const resultObject = (records: ldap.SearchEntry[]) => ({
-      users: formatted ? records.map(entry => ActiveDirectory.createUserObj(entry)) : records
+      users: formatted ? records.map((entry) => ActiveDirectory.createUserObj(entry)) : records,
     });
     return this._query(username, password, "users", customBase, customSearch, resultObject);
   }

@@ -50,12 +50,12 @@
       .reduce((all, e) => ({ ...all, [e[0]]: e[1] }), {}).CN;
 
   const adjustUser = user => {
-    if (user && user.manager) {
+    if (user && user.manager && user.id && +user.id > 0) {
       user.manager = user.manager
         .split(",")
         .map(e => e.split("="))
         .reduce((all, e) => ({ ...all, [e[0]]: e[1] }), {}).CN;
-      user.isManager = (user.directReports || "").length > 0;
+	  user.isManager = (user.directReports || "").length > 0;
       if (typeof user.directReports === "string") {
         user.subordinate = [parseUser(user.directReports)];
       }
@@ -65,7 +65,8 @@
       user.isHr =
         user.groups.findIndex(
           e => config.hrGroupName.localeCompare(e, "kf") === 0
-        ) >= 0;
+		) >= 0;
+	  user.alteringUserId = user.id;
     }
     return user;
   };

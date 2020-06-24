@@ -7,9 +7,12 @@ class AdminService extends AuthService {
     super(authorization);
   }
 
-  async info() {
+  async info(queryParams) {
     try {
-      const response = await axios.get(`${config.apiBaseUrl}/${config.apiUserInfoResource}`, this.config);
+      const response = await axios.get(`${config.apiBaseUrl}/${config.apiUserInfoResource}`, {
+        ...this.config,
+        params: queryParams || {},
+      });
       return response;
     } catch (error) {
       console.error(error);

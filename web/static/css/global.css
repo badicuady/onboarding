@@ -2,6 +2,22 @@
   width: 100%;
 }
 
+.text-ipsos-purple {
+  color: #10afaa;
+}
+
+.bg-ipsos-blue {
+  background-color: #3947a5;
+}
+
+.bg-ipsos-blue * {
+  color: #ffffff;
+}
+
+.bg-ipsos-blue a:hover {
+	color: #ffffff;
+  }
+
 /*===============General================*/
 .cursor-pointer {
   cursor: pointer;

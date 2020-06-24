@@ -1,6 +1,6 @@
 import { Model, DataTypes, ModelAttributes, InitOptions, BulkCreateOptions, SyncOptions } from "sequelize";
 import { mandatoryTopicsLkMappingData } from "./mandatoryTopicsLkMappingData";
-import { GenericMapping, UserMandatoryTopics, TimespanLk } from "..";
+import { GenericMapping, UserMandatoryTopics, TimespanLk, GenericDatabase } from "..";
 import { ResponsibleLk } from "./responsibleLkMapping";
 
 export type MandatoryTopicsLkFilter = {
@@ -21,7 +21,7 @@ interface IMandatoryTopicsLk {
   link: string;
 }
 
-class MandatoryTopicsLk extends Model implements IMandatoryTopicsLk {
+class MandatoryTopicsLk extends GenericDatabase implements IMandatoryTopicsLk {
   id!: number;
   name!: string;
   description!: string;

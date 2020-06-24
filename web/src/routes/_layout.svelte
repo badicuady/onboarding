@@ -112,6 +112,30 @@
     await updateCaches();
   };
 
+  const userChanged = async e => {
+    if (services[StateInfo.Services.Users]) {
+      const usersService = services[StateInfo.Services.Users];
+      let activeUser = null;
+      if (e.detail.subordinate) {
+        const userInfo = await usersService.getUsers({
+          userName:
+            e.detail.subordinate.replace(" ", ".") + config.defaultEmailDomain
+        });
+		userModel.id = userInfo.data[0].id;
+        activeUser = { id: userModel.id, name: `${userInfo.data[0].firstName} ${userInfo.data[0].lastName}` };
+      } else {
+		userModel.id = userModel.alteringUserId;
+		activeUser = { id: userModel.alteringUserId, name: "Self" };
+      }
+      CacheService.setOrUpdateValue(
+        CacheKeys.ActiveUser,
+        activeUser,
+        new Date(Date.now() + 3600 * 1000)
+      );
+      await sessionService.update({ [CacheKeys.UserInfo]: userModel });
+    }
+  };
+
   const sessionSubscribe = sessionService.subscribe(async session => {
     if (session[CacheKeys.UserInfo]) {
       user = session[CacheKeys.UserInfo];
@@ -142,7 +166,7 @@
 
 <Loading />
 
-<Navigation {segment} bind:user={userModel} />
+<Navigation {segment} bind:user={userModel} on:userChanged={userChanged} />
 
 <slot />
 

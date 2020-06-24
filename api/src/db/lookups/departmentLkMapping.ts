@@ -1,12 +1,13 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping } from "..";
+import { GenericMapping, GenericDatabase } from "..";
+import { User } from "../users/userMapping";
 
 interface IDepartmentLk {
   id?: number;
   name: string;
 }
 
-class DepartmentLk extends Model<any, any> implements IDepartmentLk {
+class DepartmentLk extends GenericDatabase implements IDepartmentLk {
   id!: number;
   name!: string;
 }
@@ -23,22 +24,27 @@ class DepartmentLkMapping extends GenericMapping {
         allowNull: false,
         autoIncrementIdentity: true,
         primaryKey: true,
-        unique: true
+        unique: true,
       },
       name: {
         type: new DataTypes.STRING(100),
-        allowNull: false
-      }
+        allowNull: false,
+      },
     };
 
     const modelOptions: InitOptions<Model> = {
-      sequelize: this._sequelize
+      sequelize: this._sequelize,
     };
 
     DepartmentLk.init(modelAttributes, modelOptions);
   }
 
-  associations(): void {}
+  associations(): void {
+    DepartmentLk.hasMany(User, {
+      foreignKey: { name: "departmentId", field: "departmentId", allowNull: true },
+      constraints: true,
+    });
+  }
 
   async sync(options?: SyncOptions) {
     return await DepartmentLk.sync(options);
@@ -46,7 +52,7 @@ class DepartmentLkMapping extends GenericMapping {
 
   async prepareData(): Promise<IDepartmentLk[]> {
     const options: BulkCreateOptions = {
-		updateOnDuplicate: ["name"]
+      updateOnDuplicate: ["name"],
     };
     const records: IDepartmentLk[] = [
       { name: "Global Scripting (EU)" },
@@ -74,7 +80,7 @@ class DepartmentLkMapping extends GenericMapping {
       { name: "NCBS" },
       { name: "Vendor Management" },
       { name: "Global" },
-      { name: "Communication" }
+      { name: "Communication" },
     ];
     records.forEach((e, ndx) => (e.id = ndx + 1));
     return await DepartmentLk.bulkCreate(records, options);

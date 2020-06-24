@@ -14,12 +14,13 @@
 
   let usersService;
   let userModel;
-  let entryDate = new Date().toISOString().slice(0, 10);
-  $: endDate = new Date(
-    new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000
-  )
-    .toISOString()
-    .slice(0, 10);
+  let activeUserId;
+  let entryDate = null;
+  $: endDate = entryDate
+    ? new Date(new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10)
+    : null;
 
   const readUserObjectives = async () => {
     if (usersService) {
@@ -52,7 +53,7 @@
       const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
       const userObjectivesInfo = await usersService.insertUserObjectives(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         e.detail.inputs[`${radical}-0`],
         e.detail.inputs[`${radical}-1`],
         e.detail.inputs[`${radical}-2`],
@@ -102,7 +103,7 @@
       const first = userReviewInfo.data.filter(e => e.period === 1);
       const firstActions = await populateUserRequiredAction(
         partTwoFirstReviewData,
-        first[0].id
+        first.length > 0 ? first[0].id : -1
       );
       partTwoFirstReviewData = [...firstActions];
       partTwoFirstReviewInputs = Object.keys(first[0]).reduce((all, key) => {
@@ -114,7 +115,7 @@
       const second = userReviewInfo.data.filter(e => e.period === 2);
       const secondActions = await populateUserRequiredAction(
         partTwoSecondReviewData,
-        second[0].id
+        second.length > 0 ? second[0].id : -1
       );
       partTwoSecondReviewData = [...secondActions];
       partTwoSecondReviewInputs = Object.keys(second[0]).reduce((all, key) => {
@@ -126,7 +127,7 @@
       const final = userReviewInfo.data.filter(e => e.period === 3);
       const finalActions = await populateUserRequiredAction(
         partTwoFinalReviewData,
-        final[0].id
+        final.length > 0 ? final[0].id : -1
       );
       partTwoFinalReviewData = [...finalActions];
       partTwoFinalReviewInputs = Object.keys(final[0]).reduce((all, key) => {
@@ -141,7 +142,7 @@
     if (usersService) {
       const userObjectivesInfo = await usersService.upsertUserReview(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         e.detail.inputs[`${e.detail.uniqueId}-date`],
         e.detail.inputs[`${e.detail.uniqueId}-performance`],
         e.detail.inputs[`${e.detail.uniqueId}-concerns`],
@@ -154,6 +155,7 @@
   };
 
   const populateUserRequiredAction = async (reviewData, userReviewId) => {
+    if (userReviewId <= 0) return reviewData;
     const actions = await readUserRequiredAction(userReviewId);
     for (let ndx = 0; ndx < actions.length; ++ndx) {
       reviewData[+actions[ndx].type - 1].actions.data.push({
@@ -183,7 +185,7 @@
     if (usersService) {
       const userRequiredActionInfo = await usersService.upsertUserRequiredActions(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         e.detail.inputs[`${radical}-0`],
         e.detail.inputs[`${radical}-1`],
         +e.detail.type,
@@ -252,7 +254,44 @@
     }
   };
 
+  const readUser = async () => {
+    if (usersService) {
+      const userInfo = await usersService.getUsers({
+        userName: userModel.mailNickname
+      });
+      if (userInfo && userInfo.data.length > 0) {
+        entryDate = userInfo.data[0].startDate;
+        CacheService.setOrUpdateValue(
+          CacheKeys.StartDate,
+          entryDate,
+          new Date(Date.now() + 3600 * 1000)
+        );
+      }
+    }
+  };
+
+  const updateUser = async () => {
+    CacheService.setOrUpdateValue(
+      CacheKeys.StartDate,
+      entryDate,
+      new Date(Date.now() + 3600 * 1000)
+    );
+    if (userModel && usersService) {
+      const user = await usersService.updateUsers(
+        userModel.id,
+        userModel.givenName,
+        userModel.displayName.replace(userModel.givenName, "").trim(),
+        userModel.mailNickname,
+        4,
+        undefined,
+        entryDate
+      );
+    }
+  };
+
   const readInfo = async () => {
+    activeUserId = userModel ? userModel.id : -1;
+    await readUser();
     await readUserObjectives();
     await readUserReviews();
   };
@@ -260,7 +299,7 @@
   const updateObjectUserSpecificTopics = (repository, fromData) => ({
     ...repository,
     data: [
-      ...repository.data,
+      ...(repository.data || []),
       ...Array.from(fromData || []).map(e => ({
         cells: [e.action, e.date],
         id: e.id
@@ -268,9 +307,13 @@
     ]
   });
 
-  const cacheSubscribe = CacheService.subscribe(cache => {
-    if (!userModel) {
-      userModel = cache.get(CacheKeys.UserInfo) || {};
+  const cacheSubscribe = CacheService.subscribe(async cache => {
+    userModel = cache.get(CacheKeys.UserInfo) || {};
+    if (!entryDate) {
+      entryDate = cache.get(CacheKeys.StartDate);
+    }
+    if (userModel && userModel.id !== activeUserId) {
+      await readInfo();
     }
   });
 
@@ -455,7 +498,8 @@
                           name="start-date"
                           type="date"
                           class="form-control"
-                          bind:value={entryDate} />
+                          bind:value={entryDate}
+                          on:change={updateUser} />
                       </div>
                     </div>
                     <div class="form-group row">

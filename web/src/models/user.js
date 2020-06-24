@@ -26,6 +26,8 @@ const addProperties = _this => {
 	manager: { configurable: true, enumerable: true, writable: true, value: "" },
 	isManager: { configurable: true, enumerable: true, writable: true, value: false },
 	isHr: { configurable: true, enumerable: true, writable: true, value: false },
+	id: { configurable: true, enumerable: true, writable: true, value: false },
+	alteringUserId: { configurable: true, enumerable: true, writable: true, value: false },
 	mailNickname: { configurable: true, enumerable: true, writable: true, value: "" },
     employeeDirectoryLink: {
       configurable: true,

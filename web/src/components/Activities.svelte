@@ -25,6 +25,7 @@
 
   let usersService;
   let userModel;
+  let activeUserId;
   let departments = [];
   let mandatoryTopics = [];
   let timespans = [];
@@ -36,8 +37,49 @@
   let localSpecificTopicsType2 = {};
   let localUserFeedback = {};
   let localTableCards = [];
-  let entryDate = new Date().toISOString().slice(0, 10);
-  $: endDate = new Date(new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  let department = null;
+  let entryDate = null;
+  $: endDate = entryDate
+    ? new Date(new Date(entryDate).getTime() + 3 * 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10)
+    : null;
+
+  const readUser = async () => {
+    if (usersService) {
+      const userInfo = await usersService.getUsers({
+        userName: userModel.mailNickname
+      });
+      if (userInfo && userInfo.data.length > 0) {
+        department = userInfo.data[0].departmentId;
+        entryDate = userInfo.data[0].startDate;
+        CacheService.setOrUpdateValue(
+          CacheKeys.StartDate,
+          entryDate,
+          new Date(Date.now() + 3600 * 1000)
+        );
+      }
+    }
+  };
+
+  const updateUser = async () => {
+    CacheService.setOrUpdateValue(
+      CacheKeys.StartDate,
+      entryDate,
+      new Date(Date.now() + 3600 * 1000)
+    );
+    if (userModel && usersService) {
+      const user = await usersService.updateUsers(
+        userModel.id,
+        userModel.givenName,
+        userModel.displayName.replace(userModel.givenName, "").trim(),
+        userModel.mailNickname,
+        4,
+        department,
+        entryDate
+      );
+    }
+  };
 
   const readUserMandatoryTopcis = async () => {
     if (usersService) {
@@ -50,7 +92,7 @@
             all.add(+e.mandatoryTopicsId);
           }
           return all;
-        }, userMandatoryTopics || new Set());
+        }, new Set());
         StateService.updateMandatoryTopics(userMandatoryTopics);
       }
     }
@@ -59,13 +101,13 @@
   const updateObjectUserSpecificTopics = (repository, fromData) => ({
     ...repository,
     data: [
-      ...repository.data,
+      ...(repository.data || []),
       ...Array.from(fromData || []).map(e => ({
         cells: [
           e.specificTopicName,
           e.specificTopicMaterials,
-          timespans.find(n => n.id === e.timespanId).description,
-          responsibles.find(n => n.id === e.responsibleId).description
+          (timespans.find(n => n.id === e.timespanId) || {}).description,
+          (responsibles.find(n => n.id === e.responsibleId) || {}).description
         ],
         done: e.done,
         id: e.id
@@ -87,8 +129,10 @@
           }
           list.add(e);
           return all;
-        }, userSpecificTopics || new Set());
+        }, new Map());
         StateService.updateSpecificTopics(userSpecificTopics);
+        localSpecificTopicsType1.data = [];
+        localSpecificTopicsType2.data = [];
         localSpecificTopicsType1 = updateObjectUserSpecificTopics(
           localSpecificTopicsType1,
           userSpecificTopics.get(1)
@@ -114,7 +158,12 @@
           tmpUserFeedbackInfo[`feedback-${period}-${type}-${userType}`] =
             data[ndx].feedback;
         }
-        localUserFeedback = { ...tmpUserFeedbackInfo };
+        for (const ndx in localUserFeedback) {
+          if (localUserFeedback.hasOwnProperty(ndx)) {
+            localUserFeedback[ndx] = "";
+          }
+        }
+        localUserFeedback = { ...localUserFeedback, ...tmpUserFeedbackInfo };
       }
     }
   };
@@ -124,7 +173,7 @@
     if (usersService) {
       const response = await usersService.updateUserMandatoryTopics(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         +evt.target.dataset.id,
         !!evt.target.checked
       );
@@ -137,7 +186,7 @@
       const radical = firstKey.substring(0, firstKey.lastIndexOf("-"));
       const userSpecificTopicsInfo = await usersService.insertUserSpecificTopics(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         e.detail.inputs[`${radical}-0`],
         e.detail.inputs[`${radical}-1`],
         +e.detail.inputs[`${radical}-2`],
@@ -165,7 +214,7 @@
     if (usersService && e.detail.id) {
       const userSpecificTopicsInfo = await usersService.updateUserSpecificTopics(
         userModel.id,
-        userModel.id,
+        userModel.alteringUserId,
         e.detail.id,
         !!e.detail.original.target.checked
       );
@@ -207,7 +256,7 @@
       if (feedback.trim().length > 0) {
         const userFeedbackInfo = await usersService.upsertUserFeedback(
           userModel.id,
-          userModel.id,
+          userModel.alteringUserId,
           period,
           type,
           userType,
@@ -276,15 +325,16 @@
   };
 
   const readInfo = async () => {
+    activeUserId = userModel ? userModel.id : -1;
+    await readUser();
     await readUserMandatoryTopcis();
     await readUserSpecificTopics();
     await readUserFeedback();
   };
 
-  const cacheSubscribe = CacheService.subscribe(cache => {
-    if (!userModel) {
-      userModel = cache.get(CacheKeys.UserInfo) || {};
-    }
+  const cacheSubscribe = CacheService.subscribe(async cache => {
+    userModel = cache.get(CacheKeys.UserInfo) || {};
+
     if (!departments || departments.length === 0) {
       departments = cache.get(CacheKeys.Departments) || [];
     }
@@ -296,6 +346,9 @@
     }
     if (!responsibles || responsibles.length === 0) {
       responsibles = cache.get(CacheKeys.Responsibles) || [];
+    }
+    if (!entryDate) {
+      entryDate = cache.get(CacheKeys.StartDate);
     }
 
     if (
@@ -313,6 +366,10 @@
       localTableCards.length === 0
     ) {
       mapMandatoryTopicsLk();
+    }
+
+    if (userModel && userModel.id !== activeUserId) {
+      await readInfo();
     }
   });
 
@@ -425,7 +482,9 @@
                       class="form-control"
                       id="department"
                       name="department"
-                      placeholder="department">
+                      placeholder="department"
+                      bind:value={department}
+                      on:change={updateUser}>
                       <option value="-1" disabled selected>
                         Select department
                       </option>
@@ -444,7 +503,8 @@
                       type="date"
                       class="form-control"
                       id="entryDate"
-                      bind:value={entryDate} />
+                      bind:value={entryDate}
+                      on:change={updateUser} />
                   </div>
                 </div>
                 <div class="form-group row">

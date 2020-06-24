@@ -13,6 +13,8 @@ export interface IUser {
   lastName?: string;
   role?: UserRole;
   userName?: string;
+  departmentId?: number | null;
+  startDate?: Date | null;
 }
 
 export interface IUserModel extends IGenericModel, IUser {}
@@ -26,12 +28,13 @@ export interface IActiveDirectoryUserModel extends IGenericModel {
 export default class UserModel extends GenericModel implements IUserModel {
   //private static _privateFields: WeakMap<any, any> = new WeakMap();
 
+  private _id?: number;
   private _firstName: string = "";
   private _lastName: string = "";
   private _userName: string = "";
-  private _domain: string | null = "";
-  private _password: string | null = "";
   private _role: UserRole = UserRole.Employee;
+  private _departmentId?: number | null = null;
+  private _startDate?: Date | null = null;
 
   constructor(userModel: IUserModel | IActiveDirectoryUserModel) {
     super();
@@ -40,9 +43,16 @@ export default class UserModel extends GenericModel implements IUserModel {
       this._setupActiveDirectoryModel(<IActiveDirectoryUserModel>userModel);
     }
 
-    if (userModel && (<IUserModel>userModel).firstName) {
+    if (userModel && ((<IUserModel>userModel).firstName || (<IUserModel>userModel).userName)) {
       this.setup(<IUserModel>userModel);
     }
+  }
+
+  get id() {
+    return this._id;
+  }
+  set id(id) {
+    this._id = id;
   }
 
   get firstName() {
@@ -66,20 +76,6 @@ export default class UserModel extends GenericModel implements IUserModel {
     this._userName = userName;
   }
 
-  get domain() {
-    return this._domain;
-  }
-  set domain(domain) {
-    this._domain = domain;
-  }
-
-  get password() {
-    return this._password;
-  }
-  set password(password) {
-    this._password = password;
-  }
-
   get role() {
     return this._role;
   }
@@ -87,22 +83,39 @@ export default class UserModel extends GenericModel implements IUserModel {
     this._role = role;
   }
 
+  get departmentId() {
+    return this._departmentId;
+  }
+  set departmentId(departmentId) {
+    this._departmentId = departmentId;
+  }
+
+  get startDate() {
+    return this._startDate;
+  }
+  set startDate(startDate) {
+    this._startDate = startDate;
+  }
+
   _setupActiveDirectoryModel(model: IActiveDirectoryUserModel) {
     this._firstName = model.givenName || "";
     this._lastName = model.name?.replace(model?.givenName || "", "").trim() || "";
     this._userName = model.mailNickname || "";
-    this._domain = null;
-    this._password = null;
     this._role = UserRole.Employee;
+    this._departmentId = null;
+    this._startDate = null;
   }
 
   setup(model: IUserModel) {
     if (!this.validate(model)) {
       throw new Error(`The model is not valid: «${model}»`);
-    }
+	}
+	this._id = model.id;
     this._firstName = model.firstName || "";
     this._lastName = model.lastName || "";
     this._userName = model.userName || "";
     this._role = model.role || UserRole.Employee;
+    this._departmentId = model.departmentId || null;
+    this._startDate = model.startDate || null;
   }
 }

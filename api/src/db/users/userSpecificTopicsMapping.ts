@@ -1,9 +1,9 @@
 import Extensions from "../../core/common/extensions";
 import { Model, DataTypes, ModelAttributes, InitOptions, SyncOptions } from "sequelize";
-import { GenericMapping, TimespanLk, ResponsibleLk, User } from "..";
+import { GenericMapping, TimespanLk, ResponsibleLk, User, GenericDatabase } from "..";
 import { IUserSpecificTopicsModel, IUserSpecificTopics } from "../../models";
 
-class UserSpecificTopics extends Model implements IUserSpecificTopics {
+class UserSpecificTopics extends GenericDatabase implements IUserSpecificTopics {
   id!: number;
   specificTopicName!: string;
   specificTopicMaterials!: string;
@@ -79,7 +79,16 @@ class UserSpecificTopicsMapping extends GenericMapping {
   }
 
   async update(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<UserSpecificTopics | null> {
-    const where = super.createWhere(userSpecificTopicsModel, ["id", "userId"]);
+    const where = super.createWhere(userSpecificTopicsModel, [
+      "id",
+      "userId",
+      "specificTopicName",
+      "specificTopicMaterials",
+      "done",
+      "type",
+      "timespanId",
+      "responsibleId",
+    ]);
     const instance = await UserSpecificTopics.findOne({ where });
     if (instance) {
       Extensions.updateObjectWithModel(instance, userSpecificTopicsModel);
@@ -91,7 +100,7 @@ class UserSpecificTopicsMapping extends GenericMapping {
 
   async delete(userSpecificTopicsModel: IUserSpecificTopicsModel): Promise<boolean | null> {
     const where = {
-      id: userSpecificTopicsModel.id || 0
+      id: userSpecificTopicsModel.id || 0,
     };
     const instance = await UserSpecificTopics.findOne({ where });
     if (instance) {

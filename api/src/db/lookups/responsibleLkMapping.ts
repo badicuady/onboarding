@@ -1,5 +1,5 @@
 import { Model, BulkCreateOptions, SyncOptions, ModelAttributes, DataTypes, InitOptions } from "sequelize";
-import { GenericMapping, UserSpecificTopics } from "..";
+import { GenericMapping, UserSpecificTopics, GenericDatabase } from "..";
 import { MandatoryTopicsLk } from "./mandatoryTopicsLkMapping";
 
 interface IResponsibleLk {
@@ -8,7 +8,7 @@ interface IResponsibleLk {
   description: string;
 }
 
-class ResponsibleLk extends Model<any, any> implements IResponsibleLk {
+class ResponsibleLk extends GenericDatabase implements IResponsibleLk {
   id!: number;
   name!: string;
   description!: string;
