@@ -44,15 +44,19 @@
         .toISOString()
         .slice(0, 10)
     : null;
+  let activeUser = { id: -1, name: "Self" };
 
   const readUser = async () => {
     if (usersService) {
       const userInfo = await usersService.getUsers({
-        userName: userModel.mailNickname
+        userName:
+          userModel.id === userModel.alteringUserId
+            ? userModel.mail
+            : activeUser.name.replace(" ", ".") + config.defaultEmailDomain
       });
       if (userInfo && userInfo.data.length > 0) {
-        department = userInfo.data[0].departmentId;
-        entryDate = userInfo.data[0].startDate;
+        department = userInfo.data[0].departmentId || "-1";
+        entryDate = userInfo.data[0].startDate || "";
         CacheService.setOrUpdateValue(
           CacheKeys.StartDate,
           entryDate,
@@ -334,6 +338,7 @@
 
   const cacheSubscribe = CacheService.subscribe(async cache => {
     userModel = cache.get(CacheKeys.UserInfo) || {};
+    activeUser = cache.get(CacheKeys.ActiveUser) || { id: -1, name: "Self" };
 
     if (!departments || departments.length === 0) {
       departments = cache.get(CacheKeys.Departments) || [];
@@ -485,7 +490,7 @@
                       placeholder="department"
                       bind:value={department}
                       on:change={updateUser}>
-                      <option value="-1" disabled selected>
+                      <option value="-1" selected>
                         Select department
                       </option>
                       {#each departments as department}

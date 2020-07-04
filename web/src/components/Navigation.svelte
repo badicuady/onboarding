@@ -42,7 +42,7 @@
   });
 
   const cacheSubscribe = CacheService.subscribe(cache => {
-	activeUser = cache.get(CacheKeys.ActiveUser) || { name: "Self" };
+	activeUser = cache.get(CacheKeys.ActiveUser) || { id: -1, name: "Self" };
   });
 
   onDestroy(() => {

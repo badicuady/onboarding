@@ -21,6 +21,45 @@
         .toISOString()
         .slice(0, 10)
     : null;
+  let activeUser = { id: -1, name: "Self" };
+
+  const readUser = async () => {
+    if (usersService) {
+      const userInfo = await usersService.getUsers({
+        userName:
+          activeUser.id <= -1
+            ? userModel.mail
+            : activeUser.name.replace(" ", ".") + config.defaultEmailDomain
+      });
+      if (userInfo && userInfo.data.length > 0) {
+        entryDate = userInfo.data[0].startDate || '';
+        CacheService.setOrUpdateValue(
+          CacheKeys.StartDate,
+          entryDate,
+          new Date(Date.now() + 3600 * 1000)
+        );
+      }
+    }
+  };
+
+  const updateUser = async () => {
+    CacheService.setOrUpdateValue(
+      CacheKeys.StartDate,
+      entryDate,
+      new Date(Date.now() + 3600 * 1000)
+    );
+    if (userModel && usersService) {
+      const user = await usersService.updateUsers(
+        userModel.id,
+        userModel.givenName,
+        userModel.displayName.replace(userModel.givenName, "").trim(),
+        userModel.mailNickname,
+        4,
+        undefined,
+        entryDate
+      );
+    }
+  };
 
   const readUserObjectives = async () => {
     if (usersService) {
@@ -254,41 +293,6 @@
     }
   };
 
-  const readUser = async () => {
-    if (usersService) {
-      const userInfo = await usersService.getUsers({
-        userName: userModel.mailNickname
-      });
-      if (userInfo && userInfo.data.length > 0) {
-        entryDate = userInfo.data[0].startDate;
-        CacheService.setOrUpdateValue(
-          CacheKeys.StartDate,
-          entryDate,
-          new Date(Date.now() + 3600 * 1000)
-        );
-      }
-    }
-  };
-
-  const updateUser = async () => {
-    CacheService.setOrUpdateValue(
-      CacheKeys.StartDate,
-      entryDate,
-      new Date(Date.now() + 3600 * 1000)
-    );
-    if (userModel && usersService) {
-      const user = await usersService.updateUsers(
-        userModel.id,
-        userModel.givenName,
-        userModel.displayName.replace(userModel.givenName, "").trim(),
-        userModel.mailNickname,
-        4,
-        undefined,
-        entryDate
-      );
-    }
-  };
-
   const readInfo = async () => {
     activeUserId = userModel ? userModel.id : -1;
     await readUser();
@@ -309,6 +313,7 @@
 
   const cacheSubscribe = CacheService.subscribe(async cache => {
     userModel = cache.get(CacheKeys.UserInfo) || {};
+    activeUser = cache.get(CacheKeys.ActiveUser) || { id: -1, name: "Self" };
     if (!entryDate) {
       entryDate = cache.get(CacheKeys.StartDate);
     }

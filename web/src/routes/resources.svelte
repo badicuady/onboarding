@@ -1,7 +1,33 @@
 <script>
   import config from "../config";
+  import { CacheService, CacheKeys } from "../services";
   import Layout from "../components/Layout.svelte";
   import { resources } from "../services/activities.service";
+
+  let userModel;
+  let activeUser;
+  let neededKey = "type1";
+  let resourcesByType = resources.reduce((acc, el) => {
+    const key = `type${el.type}`;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(el);
+    return acc;
+  }, {});
+
+  $: neededKey =
+    activeUser && activeUser.id > 0 && userModel.alteringUserId !== activeUser.id
+      ? "type3"
+      : userModel.isManager
+      ? "type2"
+      : "type1";
+  $: localResources = resourcesByType[neededKey];
+
+  const cacheSubscribe = CacheService.subscribe(async cache => {
+    userModel = cache.get(CacheKeys.UserInfo) || {};
+	activeUser = cache.get(CacheKeys.ActiveUser) || { id: -1, name: "Self" };
+  });
 </script>
 
 <Layout>
@@ -33,16 +59,18 @@
           </div>
           <div class="card-body">
             <div class="list-group">
-              {#each resources as resource, ndx (resource)}
+              {#each localResources as resource, ndx (resource)}
                 <a
                   href={resource.link}
                   target="_blank"
                   class="list-group-item list-group-item-action flex-column
                   align-items-start">
                   <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1 font-weight-bold">{resource.title}&nbsp;{ndx}</h5>
+                    <h5 class="mb-1 font-weight-bold">{resource.title}</h5>
                   </div>
-                  <p class="mb-1">{resource.description}</p>
+                  <p class="mb-1">
+                    {@html resource.description}
+                  </p>
                 </a>
               {/each}
             </div>

@@ -2,6 +2,9 @@
   import config from "../config";
   import Layout from "../components/Layout.svelte";
   import { contacts } from "../services/activities.service";
+
+  $: contacts1 = contacts.slice(0, Math.ceil(contacts.length / 2))
+  $: contacts2 = contacts.slice(Math.ceil(contacts.length / 2), contacts.length)
 </script>
 
 <Layout>
@@ -34,7 +37,7 @@
           <div class="card-body row">
             <div class="col-12 col-lg-6 pr-lg-3">
               <ul class="list-unstyled">
-                {#each contacts as contact, ndx (contact)}
+                {#each contacts1 as contact, ndx (contact)}
                   <li
                     class={(ndx < contacts.length - 1 ? 'mb-5 ' : '') + 'media'}>
                     <img
@@ -56,7 +59,7 @@
             </div>
             <div class="col-12 mt-5 col-lg-6 pl-lg-3 mt-lg-0">
               <ul class="list-unstyled">
-                {#each contacts as contact, ndx (contact)}
+                {#each contacts2 as contact, ndx (contact)}
                   <li
                     class={(ndx < contacts.length - 1 ? 'mb-5 ' : '') + 'media'}>
                     <img
